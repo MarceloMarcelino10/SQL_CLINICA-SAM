@@ -77,7 +77,7 @@ public class Vivienda implements Serializable {
         boolean encontrado = false;
     	if (Clinica.getInstance().loggedUser.getRangoUser() != 4) { //Solo doctores y secretarios
             if (misPersonas.isEmpty()) {
-            	encontrado =  true;
+            	encontrado =  false;
             } else {
                 for (Persona persona : misPersonas) {
                     if (persona.getCedula().equalsIgnoreCase(afiliado)) {

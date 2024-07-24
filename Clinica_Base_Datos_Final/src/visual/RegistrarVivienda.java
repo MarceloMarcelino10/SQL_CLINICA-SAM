@@ -190,6 +190,7 @@ public class RegistrarVivienda extends JDialog {
 				        }
 				    }
 				});
+				//scrollPane.setViewportView(table);
 			}
 			{
 				panelFamiliares = new JPanel();

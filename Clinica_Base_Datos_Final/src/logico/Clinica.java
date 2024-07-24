@@ -321,6 +321,7 @@ public class Clinica implements Serializable  {//u
 				login = true;
 			}
 		}
+		System.out.println(loggedUser.getRangoUser());
 		return login;
 	}
 	
@@ -836,90 +837,14 @@ public class Clinica implements Serializable  {//u
         
     	// Ver metodos de carga:
     	
-    	//cargarDatosPersonaSQL();
     	cargarDatosViviendaSQL();
     	cargarDatosEnfermedadSQL();
     	cargarDatosDoctorSQL();
     	cargarDatosPacienteSQL();
+    	cargarDatosPersonaSQL();
     } 
 	
 	// METODOS SQL (CARGA DE DATOS):
-    
-    //PERSONAS:
-
-    public void cargarDatosPersonaSQL() throws ParseException {
-        String query = "SELECT p.id_persona, p.cedula, p.nombre, p.apellido, p.sexo, p.fecha_nacimiento, " +
-                       "c.userName, c.passwordUser, r.rango " +
-                       "FROM PERSONA p " +
-                       "JOIN CREDENCIAL c ON p.id_persona = c.id_persona " +
-                       "JOIN RANGO_PERSONA r ON c.id_persona = r.id_rango_persona";
-
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                String codigo = rs.getString("id_persona");
-                String cedula = rs.getString("cedula");
-                String nombre = rs.getString("nombre");
-                String apellido = rs.getString("apellido");
-                String sexo = rs.getString("sexo");
-                String fec_nacimSQL = rs.getString("fecha_nacimiento");
-                String user = rs.getString("userName");
-                String password = rs.getString("passwordUser");
-                String rango = rs.getString("rango");
-
-                Date fec_nacim = null;
-
-                try {
-                    if (fec_nacimSQL != null && !fec_nacimSQL.isEmpty()) {
-                        fec_nacim = sdf.parse(fec_nacimSQL);
-                    }
-                } catch (ParseException e) {
-                    System.out.println("Error parsing date: " + fec_nacimSQL);
-                }
-
-                // Imprimir los datos
-                System.out.println("Codigo: " + codigo);
-                System.out.println("Cedula: " + cedula);
-                System.out.println("Nombre: " + nombre);
-                System.out.println("Apellido: " + apellido);
-                System.out.println("Sexo: " + sexo);
-                System.out.println("Fecha de Nacimiento: " + (fec_nacim != null ? sdf.format(fec_nacim) : "Fecha inv�lida o no disponible"));
-                System.out.println("User: " + user);
-                System.out.println("Password: " + password);
-                System.out.println("Rango: " + rango);
-                System.out.println();
-
-                Persona persona = new Persona(codigo, cedula, nombre, apellido, fec_nacim, sexo, user, password, obtenerRango(rango));
-                clinica.getInstance().insertarPersona(persona);
-                
-                
-                
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    private int obtenerRango(String rango) {
-	    // EN EL PROGRMA DE JAVA: 4 ADMIN, 3 SECRETARIO, 2 DOCTOR, 1 PACIENTE, 0 PERSONA
-        switch (rango) {
-            case "Administrador":
-                return 4;
-            case "Secretario":
-                return 3;
-            case "Doctor":
-                return 2;
-            case "Paciente":
-                return 1;
-            default: // Persona
-                return 5;
-        }
-    }
     
     //DOCTORES:
     
@@ -970,8 +895,9 @@ public class Clinica implements Serializable  {//u
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    	
     }
+    
+    // PACIENTES:
     
     public void cargarDatosPacienteSQL() {
     	
@@ -1033,13 +959,80 @@ public class Clinica implements Serializable  {//u
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    	
     }
     
+    // PERSONAS:
     
-    public void cargarDatosPersona() {
-    	
-    	
+    public void cargarDatosPersonaSQL() throws ParseException {
+        
+    	String query = "SELECT * " +
+        		"FROM PERSONA AS p " +
+        		"INNER JOIN CREDENCIAL AS c ON p.id_persona = c.id_persona " +
+        		"INNER JOIN RANGO_PERSONA AS rp ON c.id_rango_persona = rp.id_rango_persona " +
+        		"WHERE rp.rango NOT IN ('Paciente', 'Doctor') ";
+        
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String codigo = rs.getString("id_persona");
+                String cedula = rs.getString("cedula");
+                String nombre = rs.getString("nombre");
+                String apellido = rs.getString("apellido");
+                String sexo = rs.getString("sexo");
+                String fec_nacimSQL = rs.getString("fecha_nacimiento");
+                String user = rs.getString("userName");
+                String password = rs.getString("passwordUser");
+                String rango = rs.getString("rango");
+
+                Date fec_nacim = null;
+
+                try {
+                    if (fec_nacimSQL != null && !fec_nacimSQL.isEmpty()) {
+                        fec_nacim = sdf.parse(fec_nacimSQL);
+                    }
+                } catch (ParseException e) {
+                    System.out.println("Error parsing date: " + fec_nacimSQL);
+                }
+
+                // Imprimir los datos
+                System.out.println("Codigo: " + codigo);
+                System.out.println("Cedula: " + cedula);
+                System.out.println("Nombre: " + nombre);
+                System.out.println("Apellido: " + apellido);
+                System.out.println("Sexo: " + sexo);
+                System.out.println("Fecha de Nacimiento: " + (fec_nacim != null ? sdf.format(fec_nacim) : "Fecha inv�lida o no disponible"));
+                System.out.println("User: " + user);
+                System.out.println("Password: " + password);
+                System.out.println("Rango: " + rango);
+                System.out.println();
+
+                Persona persona = new Persona(codigo, cedula, nombre, apellido, fec_nacim, sexo, user, password, obtenerRango(rango));
+                clinica.getInstance().insertarPersona(persona);  
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private int obtenerRango(String rango) {
+	    // EN EL PROGRMA DE JAVA: 4 ADMIN, 3 SECRETARIO, 2 DOCTOR, 1 PACIENTE, 0 PERSONA
+        switch (rango) {
+            case "Administrador":
+                return 4;
+            case "Secretario":
+                return 3;
+            case "Doctor":
+                return 2;
+            case "Persona":
+                return 1;
+            default: // Paciente
+                return 5;
+        }
     }
 
     //ENFERMEDADES:
@@ -1091,16 +1084,13 @@ public class Clinica implements Serializable  {//u
                 String direccion = rs.getString("direccion");
                 
                 Vivienda vivienda = new Vivienda(codigo_vivienda, direccion);
-               Clinica.getInstance().insertarVivienda(vivienda);
+                Clinica.getInstance().insertarVivienda(vivienda);
             }
             
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-    
-    
-    
 }
 
 	
