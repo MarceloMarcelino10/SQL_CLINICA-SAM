@@ -371,10 +371,10 @@ public class RegistrarNewUser extends JDialog {
 									UIManager.put("OptionPane.okButtonText", "Continuar");				   
 							        JOptionPane.showMessageDialog(null, "Necesitas agragar una vivienda!", "Agragar Vivienda", JOptionPane.INFORMATION_MESSAGE);
 							        
-									RegistrarVivienda regVivienda = new RegistrarVivienda(aux);
+									RegistrarVivienda regVivienda = new RegistrarVivienda();
 									regVivienda.setModal(true);
 									regVivienda.setVisible(true);
-									((Paciente)aux).setMiVivienda(regVivienda.getViviendaSeleccionada());
+									//((Paciente)aux).setMiVivienda(regVivienda.getViviendaSeleccionada());
 								}
 								JOptionPane.showMessageDialog(null, "Usuario registrado con �xito", "Registrar Persona", JOptionPane.INFORMATION_MESSAGE);
 								Clinica.getInstance().insertarPersona(aux);
@@ -431,10 +431,10 @@ public class RegistrarNewUser extends JDialog {
 													JOptionPane.INFORMATION_MESSAGE, null, opciones, opciones[0]);
 							       
 							        if(respuesta == JOptionPane.YES_NO_OPTION) {
-							        	RegistrarVivienda regVivienda = new RegistrarVivienda(((Paciente)aux));
+							        	RegistrarVivienda regVivienda = new RegistrarVivienda();
 										regVivienda.setModal(true);
 										regVivienda.setVisible(true);
-										((Paciente)aux).setMiVivienda(regVivienda.getViviendaSeleccionada());
+										//((Paciente)aux).setMiVivienda(regVivienda.getViviendaSeleccionada());
 							        }	
 								}
 							    JOptionPane.showMessageDialog(null, "Usuario modificado con exito", "Modificar Persona", JOptionPane.INFORMATION_MESSAGE);

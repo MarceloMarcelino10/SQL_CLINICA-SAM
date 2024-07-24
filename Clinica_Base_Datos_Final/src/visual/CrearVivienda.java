@@ -117,7 +117,7 @@ public class CrearVivienda extends JDialog {
 							v.setDireccion(direccion);
 							Clinica.getInstance().actualizarVivienda(v);
 						}
-						ListarVivienda.loadViviendas();
+					//	ListarVivienda.loadViviendas();
 						dispose();
 					}
 				});
@@ -139,7 +139,7 @@ public class CrearVivienda extends JDialog {
 		}
 		cargarDatos();
 		usuarioLogged();
-		ListarVivienda.loadViviendas();
+		//ListarVivienda.loadViviendas();
 	}
 	
 	private void cargarDatos() {
