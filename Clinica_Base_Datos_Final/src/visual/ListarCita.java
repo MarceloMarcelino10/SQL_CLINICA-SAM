@@ -62,7 +62,7 @@ public class ListarCita extends JFrame {
 		JScrollPane scrollPaneListarCita = new JScrollPane();
 		panelListarCita.add(scrollPaneListarCita, BorderLayout.CENTER);
 		
-		String headers[] = {"Codigo", "Paciente", "Doctor", "Dia"};
+		String headers[] = {"Codigo", "Paciente", "Doctor", "Fecha y hora", "Atendido por"};
 		tableListarCita = new JTable();
 		model = new DefaultTableModel();
 		model.setColumnIdentifiers(headers);

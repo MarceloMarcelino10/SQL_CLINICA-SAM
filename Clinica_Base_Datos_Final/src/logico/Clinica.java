@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -842,6 +843,7 @@ public class Clinica implements Serializable  {//u
     	cargarDatosDoctorSQL();
     	cargarDatosPacienteSQL();
     	cargarDatosPersonaSQL();
+    	cargarDatosCitaSQL();
     } 
 	
 	// METODOS SQL (CARGA DE DATOS):
@@ -1038,8 +1040,8 @@ public class Clinica implements Serializable  {//u
     //ENFERMEDADES:
     
     public void cargarDatosEnfermedadSQL() {
-        String query = "SELECT e.id_enfermedad, e.nombre, e.sintomas, e.tratamiento, e.id_gravedad_enfermedad " + 
-        			   "FROM ENFERMEDAD e";
+        String query = "SELECT e.* " + 
+        			   "FROM ENFERMEDAD AS e ";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
@@ -1071,7 +1073,7 @@ public class Clinica implements Serializable  {//u
 
     public void cargarDatosViviendaSQL() {
     	
-        String query = "SELECT * " +
+        String query = "SELECT v.* " +
         			   "FROM VIVIENDA AS v " +
         			   "LEFT JOIN PACIENTE AS p ON v.id_vivienda = p.id_vivienda ";
 
@@ -1091,6 +1093,56 @@ public class Clinica implements Serializable  {//u
             e.printStackTrace();
         }
     }
+    
+    // CITAS:
+    
+    public void cargarDatosCitaSQL() {
+        String query = "SELECT c.id_cita, c.fecha_cita, c.hora_cita, c.fecha_cita_creacion, c.completada, " +
+        			   "c.id_doctor, c.id_persona, c.id_creador_cita, d.id_persona AS id_doctor_persona " +
+        			   "FROM CITA AS c " +
+        			   "INNER JOIN DOCTOR AS d ON c.id_doctor = d.id_doctor ";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String codigo = rs.getString("id_cita");
+                String codigo_doctor = rs.getString("id_doctor_persona");
+                String codigo_persona = rs.getString("id_persona");
+                String codigo_creador_cita = rs.getString("id_creador_cita");
+                Boolean esRealizada = rs.getBoolean("completada");
+
+                Date fechaCita = rs.getDate("fecha_cita");
+                Time horaCita = rs.getTime("hora_cita");
+                Date fechaCreacion = rs.getDate("fecha_cita_creacion");
+
+                Persona persona = Clinica.getInstance().buscarPersonaById(codigo_persona);
+                Doctor doctor = (Doctor) Clinica.getInstance().buscarPersonaById(codigo_doctor);
+
+                Cita cita = new Cita(codigo, persona, doctor, fechaCita, horaCita);
+                cita.setFechacreacion(fechaCreacion);
+                cita.setRealizada(esRealizada);
+
+                Clinica.getInstance().insertarCita(cita);
+
+                System.out.println("Codigo: " + codigo);
+                System.out.println("FechaC: " + fechaCita);
+                System.out.println("HoraC: " + horaCita);
+                System.out.println("FechaCrea: " + fechaCreacion);
+                System.out.println();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    // CONSULTAS:
+    
+    
+    
+    
 }
 
 	

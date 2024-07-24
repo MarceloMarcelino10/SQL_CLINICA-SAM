@@ -1,9 +1,14 @@
 package logico;
+import java.io.Serializable;
 import java.sql.Time;
 import java.util.Date;
 
-public class Cita {
+public class Cita implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private String codigo;
 	private Persona miPersona;
 	private Doctor miDoctor;
@@ -18,7 +23,7 @@ public class Cita {
 		this.miDoctor = miDoctor;
 		this.fechaCita = fechaCita;
 		this.horaCita = horaCita;
-		this.realizada = false;//inicialmente en false porque la cita aun el paciente no ha ido
+		this.realizada = false; //inicialmente en false porque la cita aun el paciente no ha ido
 		this.fechacreacion = new Date();
 	}
 	public Date getFechacreacion() {
