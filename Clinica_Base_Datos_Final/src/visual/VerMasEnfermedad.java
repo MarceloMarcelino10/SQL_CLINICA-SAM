@@ -12,8 +12,8 @@ public class VerMasEnfermedad extends JDialog {
     private final JPanel contentPanel = new JPanel();
 
     public VerMasEnfermedad(String sintomas, String tratamiento) {
-    	setIconImage(Toolkit.getDefaultToolkit().getImage(VerMasEnfermedad.class.getResource("/imagenes/fotoTituloDeVentana.png")));
-    	setTitle("Detalles sintomas");
+        setIconImage(Toolkit.getDefaultToolkit().getImage(VerMasEnfermedad.class.getResource("/imagenes/fotoTituloDeVentana.png")));
+        setTitle("Detalles sintomas");
         setBounds(100, 100, 511, 385);
         getContentPane().setLayout(new BorderLayout());
         contentPanel.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -37,6 +37,7 @@ public class VerMasEnfermedad extends JDialog {
         JTextArea textAreaSintomas = new JTextArea(sintomas);
         textAreaSintomas.setLineWrap(true);
         textAreaSintomas.setWrapStyleWord(true);
+        textAreaSintomas.setEditable(false); // No editable
         scrollPane.setViewportView(textAreaSintomas);
 
         JPanel panel_2 = new JPanel();
@@ -51,6 +52,7 @@ public class VerMasEnfermedad extends JDialog {
         JTextArea textAreaTratamiento = new JTextArea(tratamiento);
         textAreaTratamiento.setLineWrap(true);
         textAreaTratamiento.setWrapStyleWord(true);
+        textAreaTratamiento.setEditable(false); // No editable
         scrollPane_1.setViewportView(textAreaTratamiento);
 
         JLabel lblNewLabel = new JLabel(">Sintomas<");
@@ -70,9 +72,9 @@ public class VerMasEnfermedad extends JDialog {
         JButton cancelButton = new JButton("Salir");
         cancelButton.setIcon(new ImageIcon(VerMasEnfermedad.class.getResource("/imagenes/salir16.png")));
         cancelButton.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent e) {
-        		dispose();//
-        	}
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
         });
         cancelButton.setActionCommand("Cancel");
         buttonPane.add(cancelButton);
@@ -88,4 +90,3 @@ public class VerMasEnfermedad extends JDialog {
         }
     }
 }
-
