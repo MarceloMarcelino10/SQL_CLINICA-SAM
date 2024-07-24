@@ -75,7 +75,7 @@ public class Vivienda implements Serializable {
 
     public boolean buscarAfiliado(String afiliado) {
         boolean encontrado = false;
-    	if (Clinica.getInstance().loggedUser.getRangoUser() != 4) { //Solo doctores y secretarios
+    	//if (Clinica.getInstance().loggedUser.getRangoUser() != 4) { //Solo doctores y secretarios
             if (misPersonas.isEmpty()) {
             	encontrado =  false;
             } else {
@@ -85,7 +85,7 @@ public class Vivienda implements Serializable {
                     }
                 }
             }
-        }
+       // }
 
         return encontrado;
     }

@@ -453,11 +453,13 @@ public class PrincipalVisual extends JFrame {
 	                enablePanelAndButtons(panel_Cita);
 	                enablePanelAndButtons(panel_Historia);
 	                enablePanelAndButtons(panel_Reporte);
+	                enablePanelAndButtons(panel_Vivienda);
 	            } else if (Clinica.getInstance().loggedUser.getRangoUser() == 2) { // Doctor
 	                enablePanelAndButtons(panel_Persona);
 	                enablePanelAndButtons(panel_Cita);
 	                enablePanelAndButtons(panel_Consulta);
 	                enablePanelAndButtons(panel_Historia);
+	                enablePanelAndButtons(panel_Vivienda);
 	            } else { // Paciente
 	                enablePanelAndButtons(panel_Historia);
 	            }

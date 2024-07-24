@@ -190,7 +190,7 @@ public class RegistrarVivienda extends JDialog {
 				        }
 				    }
 				});
-				//scrollPane.setViewportView(table);
+				scrollPane.setViewportView(table);
 			}
 			{
 				panelFamiliares = new JPanel();
@@ -230,7 +230,7 @@ public class RegistrarVivienda extends JDialog {
 					            	
 					                if (Clinica.getInstance().existePersonaEnVivienda(miPersona)) {
 
-					                    String[] opciones = {"S�", "No"};
+					                    String[] opciones = {"Si", "No"};
 					                    int respuesta = JOptionPane.showOptionDialog(
 					                            null, "La persona ya est� registrada en una vivienda. �Desea moverse a otra?",
 					                            "Confirmar", JOptionPane.YES_NO_OPTION,
@@ -292,10 +292,16 @@ public class RegistrarVivienda extends JDialog {
 	
 
 	private void usuarioLogged() {
-		 if (Clinica.getInstance().loggedUser != null && Clinica.getInstance().loggedUser.getRangoUser() != 4) {
-		        txtDireccion.setEditable(false);   
+		
+		int rango = Clinica.getInstance().loggedUser.getRangoUser();
+		Persona user = Clinica.getInstance().loggedUser;
+		
+		 if (user != null && rango == 3 || user != null && rango == 2) {
+		        btnBuscar.setEnabled(true);
+		        
 		 } else {
-			 	txtDireccion.setEditable(true);   
+			 	txtDireccion.setEditable(false);
+			 	btnBuscar.setEnabled(false);
 		 }
 	}
 
@@ -321,6 +327,7 @@ public class RegistrarVivienda extends JDialog {
         btnRegistrar.setText("Registrar");
         txtDireccion.setEditable(false);
         DefaultListModel<String> listModel = new DefaultListModel<>();
+        listModel.clear();
         listFamiliares.setModel(listModel);
     }
 	
