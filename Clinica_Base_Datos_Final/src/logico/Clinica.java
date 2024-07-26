@@ -455,21 +455,24 @@ public class Clinica implements Serializable  {//u
 	//METODOS PARA CONTAR ELEMNTOS DE LAS CLASES:
 	
 	public int getNumCitasPendientesPorDoctor(Doctor doctor) {
-	    if (doctor == null || misConsultas == null) {
+	    
+		if (doctor == null || misCitas == null) {
 	        return 0;
 	    }
 
 	    int count = 0;
-	    for (Consulta consulta : misConsultas) {
-	        if (consulta.getMiCita() != null 
-	                && consulta.getMiCita().getMiDoctor() != null 
-	                && consulta.getMiCita().getMiDoctor().equals(doctor) 
-	                && !consulta.getMiCita().isRealizada()) { // No realizada
+	    
+	    for (Cita cita : misCitas) {
+	        if (cita.getMiDoctor() != null 
+	                && cita.getMiDoctor().equals(doctor) 
+	                && !cita.isRealizada()) { // No realizada
 	            count++;
 	        }
 	    }
+	    
 	    return count;
 	}
+
 	
 	public ArrayList<Cita> getCitasPendientesPorDoctor(Doctor doctor) {
 		ArrayList<Cita> citasPendientes = new ArrayList<>();

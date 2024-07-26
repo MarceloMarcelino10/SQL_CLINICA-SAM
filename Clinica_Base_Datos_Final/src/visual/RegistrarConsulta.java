@@ -355,9 +355,10 @@ public class RegistrarConsulta extends JDialog {
 	private void loadCampos() {
 		
 		if (Clinica.getInstance() != null && selected != null) {
-	        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm aa");
+	        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+	        SimpleDateFormat shf = new SimpleDateFormat("hh:mm aa");
 	        txtCodigo.setText(String.valueOf(Clinica.getInstance().getCodConsulta()));
-	        txtFecha.setText(sdf.format(selected.getFechaCita()));
+	        txtFecha.setText(sdf.format(selected.getFechaCita()) + " " + shf.format(selected.getHoraCita()) );
 	        System.out.println(txtFecha.getText());
 	        txtDoctorLoggeado.setText(Clinica.getInstance().loggedUser.getNombre() + " " + Clinica.getInstance().loggedUser.getApellidos());
 	    }
