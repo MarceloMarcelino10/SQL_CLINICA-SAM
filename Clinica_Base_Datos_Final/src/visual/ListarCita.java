@@ -1,86 +1,130 @@
 package visual;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
+import java.awt.FlowLayout;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
-
-import logico.Cita;
-import logico.Clinica;
-
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import java.awt.Toolkit;
-import java.awt.Color;
+import logico.Cita;
+import logico.Clinica;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.JOptionPane;
 
-public class ListarCita extends JFrame {
+public class ListarCita extends JDialog {
 
-	private JPanel contentPane;
-	private JTable tableListarCita;
-	private static DefaultTableModel model;
-	private static Object[] rows;
+    private static final long serialVersionUID = 1L;
+    private final JPanel contentPanel = new JPanel();
+    private JTable table;
+    private DefaultTableModel model;
+    private Object[] row;
+    private JButton btnModificar;
+    private JButton btnEliminar;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					ListarCita frame = new ListarCita();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+    public static void main(String[] args) {
+        try {
+            ListarCita dialog = new ListarCita();
+            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            dialog.setVisible(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	/**
-	 * Create the frame.u
-	 */
-	public ListarCita() {
-		setTitle("Lista de Citas");
-		setIconImage(Toolkit.getDefaultToolkit().getImage(ListarCita.class.getResource("/imagenes/fotoTituloDeVentana.png")));
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 765, 541);
-		setLocationRelativeTo(null);
-		contentPane = new JPanel();
-		contentPane.setBackground(new Color(0, 128, 255));
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
-		contentPane.setLayout(null);
-		
-		JPanel panelListarCita = new JPanel();
-		panelListarCita.setBounds(12, 13, 723, 468);
-		contentPane.add(panelListarCita);
-		panelListarCita.setLayout(new BorderLayout(0, 0));
-		
-		JScrollPane scrollPaneListarCita = new JScrollPane();
-		panelListarCita.add(scrollPaneListarCita, BorderLayout.CENTER);
-		
-		String headers[] = {"Codigo", "Paciente", "Doctor", "Fecha y hora", "Atendido por"};
-		tableListarCita = new JTable();
-		model = new DefaultTableModel();
-		model.setColumnIdentifiers(headers);
-		tableListarCita.setModel(model);
-		scrollPaneListarCita.setViewportView(tableListarCita);
-		loadCitas();
-	}
+    public ListarCita() {
+        setBounds(100, 100, 800, 400); // Tamaño adecuado para que todo se vea correctamente
+        setResizable(false); // No permitir redimensionar
+        setLocationRelativeTo(null); // Centrar el diálogo en la pantalla
+        getContentPane().setLayout(new BorderLayout());
+        contentPanel.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        getContentPane().add(contentPanel, BorderLayout.CENTER);
+        contentPanel.setLayout(new BorderLayout(0, 0));
+        {
+            JScrollPane scrollPane = new JScrollPane();
+            contentPanel.add(scrollPane, BorderLayout.CENTER);
+            {
+                String[] header = {"Codigo", "Paciente", "Doctor", "Fecha/Hora", "Atendido por", "Completado"};
+                model = new DefaultTableModel();
+                model.setColumnIdentifiers(header);
+                table = new JTable();
+                table.setModel(model);
+                table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); // Desactivar el ajuste automático de tamaño
+                // Establecer tamaños de columnas
+                table.getColumnModel().getColumn(0).setPreferredWidth(100);
+                table.getColumnModel().getColumn(1).setPreferredWidth(150);
+                table.getColumnModel().getColumn(2).setPreferredWidth(150);
+                table.getColumnModel().getColumn(3).setPreferredWidth(200);
+                table.getColumnModel().getColumn(4).setPreferredWidth(150);
+                table.getColumnModel().getColumn(5).setPreferredWidth(100);
+                scrollPane.setViewportView(table);
+            }
+        }
+        {
+            JPanel buttonPane = new JPanel();
+            buttonPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+            getContentPane().add(buttonPane, BorderLayout.SOUTH);
+            {
+                btnEliminar = new JButton("Eliminar");
+                btnEliminar.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        int selectedRow = table.getSelectedRow();
+                        if (selectedRow >= 0) {
+                            String codigoCita = (String) table.getValueAt(selectedRow, 0);
+                            int confirm = JOptionPane.showConfirmDialog(null, "¿Está seguro de que desea eliminar esta cita?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+                            if (confirm == JOptionPane.YES_OPTION) {
+                                Cita citaAEliminar = Clinica.getInstance().buscarCitaById(codigoCita);
+                                Clinica.getInstance().eliminarCita(citaAEliminar);
+                                loadCitas();
+                                JOptionPane.showMessageDialog(null, "Cita eliminada exitosamente", "Eliminar Cita", JOptionPane.INFORMATION_MESSAGE);
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Por favor, seleccione una cita para eliminar.", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                });
+                buttonPane.add(btnEliminar);
+            }
+            {
+                btnModificar = new JButton("Modificar");
+                btnModificar.setActionCommand("OK");
+                buttonPane.add(btnModificar);
+                getRootPane().setDefaultButton(btnModificar);
+            }
+            {
+                JButton cancelButton = new JButton("Cancelar");
+                cancelButton.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        dispose();
+                    }
+                });
+                cancelButton.setActionCommand("Cancel");
+                buttonPane.add(cancelButton);
+            }
+        }
+        loadCitas();
+    }
 
-	private void loadCitas() {
-		model.setRowCount(0);
-		rows = new Object[model.getColumnCount()];
-		for (Cita cita : Clinica.getInstance().getMisCitas()) {
-			rows[0] = cita.getCodigo();
-			rows[1] = cita.getMiPersona().getNombre()+cita.getMiPersona().getApellidos();
-			rows[2] = cita.getMiDoctor().getNombre()+cita.getMiDoctor().getApellidos();
-			rows[3] = cita.getFechaCita();
-			rows[4] = cita.getHoraCita();
-			model.addRow(rows);
-		}
-	}
+    private void loadCitas() {
+        model.setRowCount(0);
+        List<Cita> citas = Clinica.getInstance().getMisCitas();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm a");
+
+        for (Cita cita : citas) {
+            row = new Object[6];
+            row[0] = cita.getCodigo();
+            row[1] = cita.getMiPersona().getNombre() + " " + cita.getMiPersona().getApellidos();
+            row[2] = cita.getMiDoctor().getNombre() + " " + cita.getMiDoctor().getApellidos();
+            row[3] = dateFormat.format(cita.getFechaCita()) + " " + new SimpleDateFormat("hh:mm a").format(cita.getHoraCita());
+            row[4] = cita.isRealizada() ? "Sí" : "No"; // Método para obtener el nombre de la persona que agendó la cita
+            row[5] = cita.isRealizada() ? "Sí" : "No";
+            model.addRow(row);
+        }
+    }
 }

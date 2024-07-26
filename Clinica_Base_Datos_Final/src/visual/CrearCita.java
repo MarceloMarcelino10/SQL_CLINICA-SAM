@@ -1,212 +1,292 @@
 package visual;
-//d
+
 import java.awt.BorderLayout;
-
-import java.awt.FlowLayout;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.UIManager;
-import java.awt.Color;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.JComboBox;
-import javax.swing.JSpinner;
-import javax.swing.JTable;
-import javax.swing.SpinnerDateModel;
+import java.sql.Time;
 import java.util.Date;
 import java.util.Calendar;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerDateModel;
 import com.toedter.calendar.JDateChooser;
-
 import logico.Cita;
 import logico.Clinica;
 import logico.Doctor;
+import logico.Paciente;
 import logico.Persona;
-
-import javax.swing.JScrollPane;
-import javax.swing.JList;
+import logico.Vivienda;
 import javax.swing.JOptionPane;
-
 import java.awt.Toolkit;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.sql.Time;
-
-import javax.swing.ImageIcon;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import javax.swing.ScrollPaneConstants;
-//hola:..
+import java.awt.event.ActionListener;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.GroupLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JList;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import javax.swing.DefaultComboBoxModel;
+
 public class CrearCita extends JDialog {
 
-	private final JPanel panelPrincipal = new JPanel();
-	private JTextField txtCodigoCita;
-	private JTable tableDocDispo;
-	private JTable tablePacienteReg;
-	private Doctor selectedDoctor;
-	private Persona selectedPaciente;
- 
+    private final JPanel panelPrincipal = new JPanel();
+    private JTextField txtCodigoCita;
+    private JComboBox<Doctor> comboBoxDoctor;
+    private JComboBox<Persona> comboBoxPersona;
+    private JComboBox<String> comboBoxTipoSangre;
+    private JComboBox<Vivienda> comboBoxVivienda;
+    private Doctor selectedDoctor;
+    private Persona selectedPersona;
+    private Vivienda selectedVivienda;
+    private JDateChooser dateChooser;
+    private JSpinner spnHoraCita;
 
-	/**
-	 * Launch the application.u
-	 */
-	public static void main(String[] args) {
-		try {
-			CrearCita dialog = new CrearCita();
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			dialog.setModal(true);
-			dialog.setVisible(true);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    public static void main(String[] args) {
+        try {
+            CrearCita dialog = new CrearCita();
+            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            dialog.setModal(true);
+            dialog.setVisible(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	/**
-	 * Create the dialog.
-	 */
-	public CrearCita() {
-		setIconImage(Toolkit.getDefaultToolkit().getImage(CrearCita.class.getResource("/imagenes/fotoTituloDeVentana.png")));
-		setTitle("Crear cita");
-		setBounds(100, 100, 999, 686);
-		setLocationRelativeTo(null);
-		getContentPane().setLayout(new BorderLayout());
-		panelPrincipal.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		getContentPane().add(panelPrincipal, BorderLayout.CENTER);
-		panelPrincipal.setLayout(null);
-		
-		JPanel panelInfoGeneral = new JPanel();
-		panelInfoGeneral.setBorder(new TitledBorder(null, "Informacion general: ", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panelInfoGeneral.setBounds(12, 13, 431, 225);
-		panelPrincipal.add(panelInfoGeneral);
-		panelInfoGeneral.setLayout(null);
-		
-		JLabel lblCodigoCita = new JLabel("C\u00F3digo de cita:");
-		lblCodigoCita.setBounds(12, 44, 93, 16);
-		panelInfoGeneral.add(lblCodigoCita);
-		
-		txtCodigoCita = new JTextField();
-		txtCodigoCita.setEditable(false);
-		txtCodigoCita.setBounds(117, 39, 116, 22);
-		txtCodigoCita.setText("Cta-" + Clinica.getCodCita());
-		panelInfoGeneral.add(txtCodigoCita);
-		txtCodigoCita.setColumns(10);
-		
-		JLabel lblFecha = new JLabel("D\u00EDa de la cita:");
-		lblFecha.setBounds(12, 104, 93, 16);
-		panelInfoGeneral.add(lblFecha);
-		
-		JDateChooser dateChooser = new JDateChooser();
-		dateChooser.setBounds(117, 100, 116, 22);
-		panelInfoGeneral.add(dateChooser);
-		
-		JLabel lblHoraCita = new JLabel("Hora de la cita:");
-		lblHoraCita.setBounds(12, 164, 93, 16);
-		panelInfoGeneral.add(lblHoraCita);
-		
-		JSpinner spnHoraCita = new JSpinner();
-		spnHoraCita.setModel(new SpinnerDateModel(new Date(1701748800000L), null, null, Calendar.HOUR));
-		JSpinner.DateEditor de_spnHoraCita = new JSpinner.DateEditor(spnHoraCita, "HH:mm");
+    public CrearCita() {
+        setIconImage(Toolkit.getDefaultToolkit().getImage(CrearCita.class.getResource("/imagenes/fotoTituloDeVentana.png")));
+        setTitle("Crear cita");
+        setBounds(100, 100, 600, 400);
+        setLocationRelativeTo(null);
+        getContentPane().setLayout(new BorderLayout());
+        panelPrincipal.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        getContentPane().add(panelPrincipal, BorderLayout.CENTER);
+
+        JLabel lblCodigoCita = new JLabel("Código de cita:");
+        txtCodigoCita = new JTextField();
+        txtCodigoCita.setEditable(false);
+        txtCodigoCita.setText("" + Clinica.getCodCita());
+        txtCodigoCita.setColumns(10);
+
+        JLabel lblFecha = new JLabel("Día de la cita:");
+        dateChooser = new JDateChooser();
+        dateChooser.setPreferredSize(new java.awt.Dimension(150, 22));
+
+        JLabel lblHoraCita = new JLabel("Hora de la cita:");
+        spnHoraCita = new JSpinner();
+        spnHoraCita.setModel(new SpinnerDateModel(new Date(), null, null, Calendar.HOUR_OF_DAY));
+        JSpinner.DateEditor de_spnHoraCita = new JSpinner.DateEditor(spnHoraCita, "HH:mm");
         spnHoraCita.setEditor(de_spnHoraCita);
-		spnHoraCita.setBounds(117, 161, 116, 22);
-		panelInfoGeneral.add(spnHoraCita);
-		
-		JPanel panelListarDoctores = new JPanel();
-		panelListarDoctores.setBorder(new TitledBorder(null, "Doctores disponibles: ", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panelListarDoctores.setBounds(460, 13, 509, 578);
-		panelPrincipal.add(panelListarDoctores);
-		panelListarDoctores.setLayout(new BorderLayout(0, 0));
-		
-		JScrollPane scrollPaneDispDoc = new JScrollPane();
-		panelListarDoctores.add(scrollPaneDispDoc);
-		
-		tableDocDispo = new JTable();
-		tableDocDispo.addMouseListener(new MouseAdapter() {
-		    @Override
-		    public void mouseClicked(MouseEvent e) {
-				int DocSelectedColum= tableDocDispo.getSelectedRow();
-		        if (DocSelectedColum >= 0) {
-		           selectedDoctor = (Doctor) Clinica.getInstance().buscarPersonaById(tableDocDispo.getValueAt(DocSelectedColum, 0).toString());
-		        } else {
-		        	JOptionPane.showMessageDialog(null, "Seleccion Invalida", "Error", JOptionPane.ERROR_MESSAGE);
-		        }
-		    }
-		});
-		tableDocDispo.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		
-		
-		ListarPersona listarDocDispo = new ListarPersona();
-		String modo  = "Doctor";
-		JTable tableDefault  = listarDocDispo.getTable(modo);
-		tableDocDispo = tableDefault;
-		panelListarDoctores.add(scrollPaneDispDoc, BorderLayout.CENTER);
-		
-		scrollPaneDispDoc.setViewportView(tableDocDispo);
-		JPanel panelListarPersona = new JPanel();
-		panelListarPersona.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Personas registradas:", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		panelListarPersona.setBounds(12, 251, 431, 340);
-		panelPrincipal.add(panelListarPersona);
-		panelListarPersona.setLayout(new BorderLayout(0,0));
-		
-		JScrollPane scrollPanePaciReg = new JScrollPane();
-		scrollPanePaciReg.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		panelListarPersona.add(scrollPanePaciReg, BorderLayout.CENTER);
-		
-		tablePacienteReg = new JTable();
-		tablePacienteReg.addMouseListener(new MouseAdapter() {
-		    @Override
-		    public void mouseClicked(MouseEvent e) {
-				int PacienteSelectedColum= tablePacienteReg.getSelectedRow();
-		        if (PacienteSelectedColum >= 0) {
-		           selectedPaciente = Clinica.getInstance().buscarPersonaById(tablePacienteReg.getValueAt(PacienteSelectedColum, 0).toString());
-		           dispose();
-		        } else {
-		        	JOptionPane.showMessageDialog(null, "Seleccion Invalida", "Error", JOptionPane.ERROR_MESSAGE);
-		        }
-		    }
-		});
-		ListarPersona listarPacReg = new ListarPersona();
-		String paciente = "Persona";
-		JTable tablaPacienteDefault = listarPacReg.getTable(paciente);
-		tablePacienteReg = tablaPacienteDefault;
-		scrollPanePaciReg.setViewportView(tablePacienteReg);
-		
-		{
-			JPanel buttonPane = new JPanel();
-			buttonPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-			getContentPane().add(buttonPane, BorderLayout.SOUTH);
-			{
-				JButton crearCitabtn = new JButton("Crear cita");
-				crearCitabtn.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						if (selectedPaciente != null && selectedDoctor != null ) {
-							String codigo = txtCodigoCita.getText();
-							Cita cita = new Cita(codigo, selectedPaciente, selectedDoctor, dateChooser.getDate(), (Time) spnHoraCita.getValue());
-							Clinica.getInstance().insertarCita(cita);
-							JOptionPane.showMessageDialog(null, "Operacion satisfactoria", "Registro", JOptionPane.INFORMATION_MESSAGE);
-						}
-					}
-				});
-				crearCitabtn.setIcon(new ImageIcon(CrearCita.class.getResource("/imagenes/agregarOcrearboton.png")));
-				crearCitabtn.setActionCommand("OK");
-				buttonPane.add(crearCitabtn);
-				getRootPane().setDefaultButton(crearCitabtn);
-			}
-			{
-				JButton cancelarBtn = new JButton("Cancelar");
-				cancelarBtn.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						dispose();
-					}
-				});
-				cancelarBtn.setIcon(new ImageIcon(CrearCita.class.getResource("/imagenes/cancelarboton16x16.png")));
-				cancelarBtn.setActionCommand("Cancel");
-				buttonPane.add(cancelarBtn);
-			}
-		}
-	}
+
+        JLabel lblDoctor = new JLabel("Doctor:");
+        comboBoxDoctor = new JComboBox<>();
+        comboBoxDoctor.setModel(new DefaultComboBoxModel(new String[] {"<Seleccionar>"}));
+        for (Persona persona : Clinica.getInstance().getMisPersonas()) {
+            if (persona instanceof Doctor) {
+                comboBoxDoctor.addItem((Doctor) persona);
+            }
+        }
+        comboBoxDoctor.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Doctor) {
+                    Doctor doctor = (Doctor) value;
+                    setText(doctor.getNombre() + " " + doctor.getApellidos());
+                }
+                return this;
+            }
+        });
+        comboBoxDoctor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectedDoctor = (Doctor) comboBoxDoctor.getSelectedItem();
+            }
+        });
+
+        JLabel lblPersona = new JLabel("Persona:");
+        comboBoxPersona = new JComboBox<>();
+        comboBoxPersona.setModel(new DefaultComboBoxModel(new String[] {"<Seleccionar>"}));
+        for (Persona persona : Clinica.getInstance().getMisPersonas()) {
+            if (!(persona instanceof Paciente)) {
+                comboBoxPersona.addItem(persona);
+            }
+        }
+        comboBoxPersona.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Persona) {
+                    Persona persona = (Persona) value;
+                    setText(persona.getNombre() + " " + persona.getApellidos());
+                }
+                return this;
+            }
+        });
+        comboBoxPersona.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectedPersona = (Persona) comboBoxPersona.getSelectedItem();
+            }
+        });
+
+        JLabel lblTipoSangre = new JLabel("Tipo de Sangre:");
+        comboBoxTipoSangre = new JComboBox<>(new String[] {"<Seleccionar>", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"});
+
+        JLabel lblVivienda = new JLabel("Vivienda:");
+        comboBoxVivienda = new JComboBox<>();
+        comboBoxVivienda.setModel(new DefaultComboBoxModel(new String[] {"<Seleccionar>"}));
+        for (Vivienda vivienda : Clinica.getInstance().getMisViviendas()) {
+            comboBoxVivienda.addItem(vivienda);
+        }
+        comboBoxVivienda.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Vivienda) {
+                    Vivienda vivienda = (Vivienda) value;
+                    setText(vivienda.getDireccion());
+                }
+                return this;
+            }
+        });
+        comboBoxVivienda.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectedVivienda = (Vivienda) comboBoxVivienda.getSelectedItem();
+            }
+        });
+
+        GroupLayout layout = new GroupLayout(panelPrincipal);
+        panelPrincipal.setLayout(layout);
+        layout.setAutoCreateGaps(true);
+        layout.setAutoCreateContainerGaps(true);
+        layout.setHorizontalGroup(layout.createSequentialGroup()
+            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addComponent(lblCodigoCita)
+                .addComponent(lblFecha)
+                .addComponent(lblHoraCita)
+                .addComponent(lblDoctor)
+                .addComponent(lblPersona)
+                .addComponent(lblTipoSangre)
+                .addComponent(lblVivienda))
+            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addComponent(txtCodigoCita)
+                .addComponent(dateChooser, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                .addComponent(spnHoraCita)
+                .addComponent(comboBoxDoctor)
+                .addComponent(comboBoxPersona)
+                .addComponent(comboBoxTipoSangre)
+                .addComponent(comboBoxVivienda))
+        );
+        layout.setVerticalGroup(layout.createSequentialGroup()
+            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                .addComponent(lblCodigoCita)
+                .addComponent(txtCodigoCita))
+            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                .addComponent(lblFecha)
+                .addComponent(dateChooser, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                .addComponent(lblHoraCita)
+                .addComponent(spnHoraCita))
+            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                .addComponent(lblDoctor)
+                .addComponent(comboBoxDoctor))
+            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                .addComponent(lblPersona)
+                .addComponent(comboBoxPersona))
+            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                .addComponent(lblTipoSangre)
+                .addComponent(comboBoxTipoSangre))
+            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                .addComponent(lblVivienda)
+                .addComponent(comboBoxVivienda))
+        );
+
+        JPanel buttonPane = new JPanel();
+        buttonPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        getContentPane().add(buttonPane, BorderLayout.SOUTH);
+
+        JButton crearCitabtn = new JButton("Crear cita");
+        crearCitabtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                registrarCita();
+            }
+        });
+        crearCitabtn.setIcon(new ImageIcon(CrearCita.class.getResource("/imagenes/agregarOcrearboton.png")));
+        crearCitabtn.setActionCommand("OK");
+        buttonPane.add(crearCitabtn);
+        getRootPane().setDefaultButton(crearCitabtn);
+
+        JButton cancelarBtn = new JButton("Cancelar");
+        cancelarBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+        cancelarBtn.setIcon(new ImageIcon(CrearCita.class.getResource("/imagenes/cancelarboton16x16.png")));
+        cancelarBtn.setActionCommand("Cancel");
+        buttonPane.add(cancelarBtn);
+    }
+
+    private void registrarCita() {
+        Date fecha = dateChooser.getDate();
+        Date hora = (Date) spnHoraCita.getValue();
+        String tipoSangre = (String) comboBoxTipoSangre.getSelectedItem();
+
+        if (selectedPersona != null && selectedDoctor != null && fecha != null && hora != null && tipoSangre != null && selectedVivienda != null) {
+            String codigo = txtCodigoCita.getText();
+
+            // Convertir Persona a Paciente
+            Paciente nuevoPaciente = new Paciente(
+                selectedPersona.getCodigo(), 
+                selectedPersona.getCedula(), 
+                selectedPersona.getNombre(), 
+                selectedPersona.getApellidos(), 
+                selectedPersona.getFechaNacimiento(), 
+                selectedPersona.getGenero(), 
+                selectedPersona.getUser(), 
+                selectedPersona.getPassword(), 
+                1, selectedVivienda, tipoSangre);
+
+            // Actualizar la lista de personas en Clinica
+            Clinica.getInstance().eliminarPersona(selectedPersona);
+            Clinica.getInstance().insertarPersona(nuevoPaciente);
+
+            // Combinar fecha y hora
+            Calendar fechaHora = Calendar.getInstance();
+            fechaHora.setTime(fecha);
+            Calendar horaCita = Calendar.getInstance();
+            horaCita.setTime(hora);
+            fechaHora.set(Calendar.HOUR_OF_DAY, horaCita.get(Calendar.HOUR_OF_DAY));
+            fechaHora.set(Calendar.MINUTE, horaCita.get(Calendar.MINUTE));
+
+            Cita cita = new Cita(codigo, nuevoPaciente, selectedDoctor, fechaHora.getTime(), new Time(fechaHora.getTimeInMillis()));
+            Clinica.getInstance().insertarCita(cita);
+            JOptionPane.showMessageDialog(null, "Operación satisfactoria", "Registro", JOptionPane.INFORMATION_MESSAGE);
+
+            // Limpiar campos después de registrar la cita
+            limpiarCampos();
+        } else {
+            JOptionPane.showMessageDialog(null, "Por favor complete todos los campos", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void limpiarCampos() {
+        txtCodigoCita.setText("" + Clinica.getCodCita());
+        dateChooser.setDate(null);
+        spnHoraCita.setValue(new Date());
+        comboBoxDoctor.setSelectedIndex(0);
+        comboBoxPersona.setSelectedIndex(0);
+        comboBoxTipoSangre.setSelectedIndex(0);
+        comboBoxVivienda.setSelectedIndex(0);
+        selectedDoctor = null;
+        selectedPersona = null;
+        selectedVivienda = null;
+    }
 }
