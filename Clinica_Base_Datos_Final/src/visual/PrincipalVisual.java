@@ -255,7 +255,7 @@ public class PrincipalVisual extends JFrame {
 		btnRegistrarConsulta = new JButton("Registrar");
 		btnRegistrarConsulta.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				CrearConsulta creaconsu = new CrearConsulta();
+				RegistrarConsulta creaconsu = new RegistrarConsulta();
 				creaconsu.setModal(true);
 				creaconsu.setVisible(true);
 			}
@@ -460,6 +460,7 @@ public class PrincipalVisual extends JFrame {
 	                enablePanelAndButtons(panel_Consulta);
 	                enablePanelAndButtons(panel_Historia);
 	                enablePanelAndButtons(panel_Vivienda);
+	                enablePanelAndButtons(panel_Enfermedad);
 	            } else { // Paciente
 	                enablePanelAndButtons(panel_Historia);
 	            }

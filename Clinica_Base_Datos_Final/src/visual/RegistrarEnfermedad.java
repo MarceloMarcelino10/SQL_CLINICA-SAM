@@ -177,12 +177,12 @@ public class RegistrarEnfermedad extends JDialog {
 				        String tratamiento = txtAreaTratamiento.getText();
 				        
 				        if (nombre.isEmpty() || sintomas.isEmpty() || gravedad.equals("<Seleccionar>") || tratamiento.isEmpty()) {
-				            JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos.", "Campos vacíos", JOptionPane.ERROR_MESSAGE);
+				            JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos.", "Campos vacios", JOptionPane.ERROR_MESSAGE);
 				        } else {
 				        	
 				            tempenfer = new Enfermedad(codigo, nombre, sintomas, tratamiento, Integer.parseInt(gravedad.substring(0, 1)));
 				            Clinica.getInstance().insertarEnfermedad(tempenfer);
-				            JOptionPane.showMessageDialog(null, "Operación Satisfactoria", "Registro Enfermedad", JOptionPane.INFORMATION_MESSAGE);
+				            JOptionPane.showMessageDialog(null, "Operacion Satisfactoria", "Registro Enfermedad", JOptionPane.INFORMATION_MESSAGE);
 				            clean();
 				        }
 				        
@@ -218,4 +218,4 @@ public class RegistrarEnfermedad extends JDialog {
 		txtCodigoEnfermedad.setText("Ebv-#"+Clinica.getCodEnfermedad());
 
 	}
-}////////
+}

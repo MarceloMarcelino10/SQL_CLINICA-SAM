@@ -322,7 +322,9 @@ public class Clinica implements Serializable  {//u
 				login = true;
 			}
 		}
-		System.out.println(loggedUser.getRangoUser());
+		if (login) {
+		System.out.println(loggedUser.getRangoUser());			
+		}
 		return login;
 	}
 	
@@ -450,6 +452,36 @@ public class Clinica implements Serializable  {//u
 	    eliminarVivienda(vivienda);
 	}
 	
+	//METODOS PARA CONTAR ELEMNTOS DE LAS CLASES:
+	
+	public int getNumCitasPendientesPorDoctor(Doctor doctor) {
+	    if (doctor == null || misConsultas == null) {
+	        return 0;
+	    }
+
+	    int count = 0;
+	    for (Consulta consulta : misConsultas) {
+	        if (consulta.getMiCita() != null 
+	                && consulta.getMiCita().getMiDoctor() != null 
+	                && consulta.getMiCita().getMiDoctor().equals(doctor) 
+	                && !consulta.getMiCita().isRealizada()) { // No realizada
+	            count++;
+	        }
+	    }
+	    return count;
+	}
+	
+	public ArrayList<Cita> getCitasPendientesPorDoctor(Doctor doctor) {
+		ArrayList<Cita> citasPendientes = new ArrayList<>();
+	    for (Cita cita : misCitas) {
+	        if (cita.getMiDoctor().equals(doctor) && !cita.isRealizada()) {
+	            citasPendientes.add(cita);
+	        }
+	    }
+	    return citasPendientes;
+	}
+
+
 	//SETTERS AND GETTERS ESTATICOS (Probando guardar los valores esticaos)
 	
 	public static int getCodPersona() {
@@ -844,6 +876,7 @@ public class Clinica implements Serializable  {//u
     	cargarDatosPacienteSQL();
     	cargarDatosPersonaSQL();
     	cargarDatosCitaSQL();
+    	cargarDatosConsultaSQL();
     } 
 	
 	// METODOS SQL (CARGA DE DATOS):
@@ -1140,6 +1173,67 @@ public class Clinica implements Serializable  {//u
     
     // CONSULTAS:
     
+    public void cargarDatosConsultaSQL() {
+    	
+    	String queryConsulta = "SELECT c.id_consulta, c.fecha_consulta, c.id_historial_clinico, c.id_doctor, c.diagnostico, " +
+			    			   "c.id_cita_solicitada, d.id_persona AS id_doctor_persona " +
+			    			   "FROM CONSULTA AS c " +
+			    			   "INNER JOIN DOCTOR AS d ON c.id_doctor = d.id_doctor " +
+			    			   "INNER JOIN PERSONA AS p ON p.id_persona = d.id_persona ";
+    	
+    	String queryEnfermedad = "SELECT ec.id_enfermedad " +
+                			   	 "FROM ENFERMEDAD_CONSULTA AS ec " +
+                				 "WHERE ec.id_consulta = ?"; // "?", Es un parametro
+    	
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta);
+        	 PreparedStatement stmtEnfermedades = conn.prepareStatement(queryEnfermedad);
+             ResultSet rsConsulta = stmtConsulta.executeQuery()) {
+        	
+        	while (rsConsulta.next()) {
+        		
+        		String codigo = rsConsulta.getString("id_consulta");
+            	Date fechaConsulta = rsConsulta.getDate("fecha_consulta");
+                String id_historial_clinico = rsConsulta.getString("id_historial_clinico");
+                String id_doctor = rsConsulta.getString("id_doctor_persona");
+                String id_cita_solicitada = rsConsulta.getString("id_cita_solicitada");
+                String diagnostico = rsConsulta.getString("diagnostico") != null ? rsConsulta.getString("diagnostico") : "No tiene";
+
+                
+                Doctor doctor = (Doctor) Clinica.getInstance().buscarPersonaById(id_doctor);
+                Cita cita = Clinica.getInstance().buscarCitaById(id_cita_solicitada);
+                
+                Consulta consulta = new Consulta(codigo, cita);
+                consulta.setDiagnostico(diagnostico);
+                consulta.setFechaConsulta(fechaConsulta);
+
+                stmtEnfermedades.setString(1, codigo);; // "?" cambia el parametro, segun el codigo
+                
+                try (ResultSet rsEnfermedades = stmtEnfermedades.executeQuery()) {
+                    while (rsEnfermedades.next()) {
+                        String id_enfermedad = rsEnfermedades.getString("id_enfermedad");
+                        Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(id_enfermedad);
+                        if (enfermedad != null) {
+                            consulta.insertarEnfermedad(enfermedad);
+                        }
+                    }
+                }
+                
+                Clinica.getInstance().insertarConsulta(consulta);
+            	
+                System.out.println("Consulta ID: " + codigo);
+                System.out.println("Fecha Consulta: " + fechaConsulta);
+                System.out.println("Historial Clínico ID: " + id_historial_clinico);
+                System.out.println("Doctor ID: " + id_doctor);
+                System.out.println("Cita Solicitada ID: " + id_cita_solicitada);
+                System.out.println("Enfermedades: " + consulta.getMisEnfermedades().size());
+                System.out.println();
+        	}
+        	
+        } catch (SQLException e) {
+        	e.printStackTrace();
+        }	
+    }
     
     
     

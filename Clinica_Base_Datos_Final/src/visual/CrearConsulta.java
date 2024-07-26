@@ -31,6 +31,7 @@ import javax.swing.ListSelectionModel;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.awt.event.ActionEvent;
 import javax.swing.JTable;
 import java.awt.Toolkit;
@@ -81,7 +82,7 @@ public class CrearConsulta extends JDialog {
 			JPanel panelDatosConsulta = new JPanel();
 			panelDatosConsulta.setBackground(new Color(255, 255, 255));
 			panelDatosConsulta.setBorder(new TitledBorder(null, "Datos Generales: ", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-			panelDatosConsulta.setBounds(12, 13, 364, 213);
+			panelDatosConsulta.setBounds(24, 22, 364, 213);
 			panelPrincipal.add(panelDatosConsulta);
 			panelDatosConsulta.setLayout(null);
 			
@@ -112,7 +113,7 @@ public class CrearConsulta extends JDialog {
 			JPanel panelDiagnostico = new JPanel();
 			panelDiagnostico.setBackground(new Color(255, 255, 255));
 			panelDiagnostico.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Diagn\u00F3stico:", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-			panelDiagnostico.setBounds(408, 13, 364, 411);
+			panelDiagnostico.setBounds(412, 22, 364, 411);
 			panelPrincipal.add(panelDiagnostico);
 			panelDiagnostico.setLayout(new BorderLayout(0, 0));
 			
@@ -140,7 +141,7 @@ public class CrearConsulta extends JDialog {
 		JPanel panelCitasPendientes = new JPanel();
 		panelCitasPendientes.setBackground(new Color(255, 255, 255));
 		panelCitasPendientes.setBorder(new TitledBorder(null, "Citas pendientes: ", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panelCitasPendientes.setBounds(12, 239, 364, 185);
+		panelCitasPendientes.setBounds(24, 257, 364, 185);
 		panelPrincipal.add(panelCitasPendientes);
 		panelCitasPendientes.setLayout(new BorderLayout(0, 0));
 		
@@ -161,22 +162,6 @@ public class CrearConsulta extends JDialog {
 		});
 		model = new DefaultTableModel();
 		scrollPanePendCita.setViewportView(tableListarPendCita);
-		
-		Button btnAgregarEnfermedad = new Button("Agregar enfermedad");
-		btnAgregarEnfermedad.setBounds(525, 430, 130, 24);
-		panelPrincipal.add(btnAgregarEnfermedad);
-		btnAgregarEnfermedad.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				RegistrarEnfermedad aux = new RegistrarEnfermedad();
-				dispose();
-				aux.setVisible(true);
-				DefaultListModel<String> listModel = new DefaultListModel<>();
-		        for (Enfermedad enfermedades : Clinica.getInstance().getMisEnfermedades()) {
-		            listModel.addElement(enfermedades.getCodigo() + ":" + enfermedades.getNombre() + enfermedades.getGravedad());
-		        }
-		        loadEnfermedades();
-			}
-		});
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setBackground(new Color(255, 255, 255));
@@ -210,16 +195,23 @@ public class CrearConsulta extends JDialog {
 			}
 		}
 	}
-
+	
 	protected void loadEnfermedades() {
-		model.setRowCount(0);
-		rows = new Object[model.getColumnCount()];
-		for (Enfermedad enfermedad : Clinica.getInstance().getMisEnfermedades()) {
-			rows[0] = enfermedad.getCodigo();
-			rows[1] = enfermedad.getNombre();
-			rows[2] = enfermedad.getGravedad();
-			model.addRow(rows);
-		}
-		
+	  
+	    ArrayList<Enfermedad> enfermedades = Clinica.getInstance().getMisEnfermedades();
+	    if (enfermedades != null && !enfermedades.isEmpty()) {
+	        model.setRowCount(0);
+	        rows = new Object[model.getColumnCount()];
+	        for (Enfermedad enfermedad : enfermedades) {
+	            rows[0] = enfermedad.getCodigo();
+	            rows[1] = enfermedad.getNombre();
+	            rows[2] = enfermedad.getGravedad();
+	            model.addRow(rows);
+	        }
+	        
+	    } else {
+	        System.out.println("No hay enfermedades disponibles.");
+	    }
 	}
+
 }

@@ -1,22 +1,30 @@
 package logico;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 
 import javax.print.attribute.standard.DateTimeAtProcessing;
 
-public class Consulta {
+public class Consulta implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private String codigo;
 	private ArrayList<Enfermedad> misEnfermedades;
 	private Date fechaConsulta;
 	private Cita miCita;
+	private String diagnostico;
+	
 	public Consulta(String codigo, Cita miCita) {
 		super();
 		this.codigo = codigo;
 		this.misEnfermedades = new ArrayList<Enfermedad>();
 		this.fechaConsulta = new Date();
 		this.miCita = miCita;
+		this.diagnostico = diagnostico;
 	}
 	
 	public String getCodigo() {
@@ -49,6 +57,14 @@ public class Consulta {
 	
 	public void setMiCita(Cita miCita) {
 		this.miCita = miCita;
+	}
+
+	public String getDiagnostico() {
+		return diagnostico;
+	}
+
+	public void setDiagnostico(String diagnostico) {
+		this.diagnostico = diagnostico;
 	}
 	
 	//METODO PARA INSERTAR:
