@@ -83,7 +83,7 @@ public class RegistrarEnfermedad extends JDialog {
 		panel.add(panel_1);
 		
 		txtCodigoEnfermedad = new JTextField();
-		txtCodigoEnfermedad.setText("Ebv-#"+Clinica.getCodEnfermedad());
+		txtCodigoEnfermedad.setText(""+Clinica.getCodEnfermedad());
 		txtCodigoEnfermedad.setEditable(false);
 		txtCodigoEnfermedad.setColumns(10);
 		txtCodigoEnfermedad.setBounds(82, 26, 172, 20);
@@ -215,7 +215,7 @@ public class RegistrarEnfermedad extends JDialog {
 	    txtAreaSintomas.setText("");
 	    txtAreaTratamiento.setText("");
 	    cbxGravedad.setSelectedIndex(0);
-		txtCodigoEnfermedad.setText("Ebv-#"+Clinica.getCodEnfermedad());
+		txtCodigoEnfermedad.setText(""+Clinica.getCodEnfermedad());
 
 	}
 }

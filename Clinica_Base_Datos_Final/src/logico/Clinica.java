@@ -1226,7 +1226,7 @@ public class Clinica implements Serializable  {//u
             	
                 System.out.println("Consulta ID: " + codigo);
                 System.out.println("Fecha Consulta: " + fechaConsulta);
-                System.out.println("Historial Clínico ID: " + id_historial_clinico);
+                System.out.println("Historial Clï¿½nico ID: " + id_historial_clinico);
                 System.out.println("Doctor ID: " + id_doctor);
                 System.out.println("Cita Solicitada ID: " + id_cita_solicitada);
                 System.out.println("Enfermedades: " + consulta.getMisEnfermedades().size());

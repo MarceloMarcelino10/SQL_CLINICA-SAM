@@ -12,6 +12,7 @@ public class Vivienda implements Serializable {
 	private String codigo;
 	private ArrayList<Persona> misPersonas;
 	private String direccion;
+	
 	public Vivienda(String codigo, String direccion) {
 		super();
 		this.codigo = codigo;
@@ -22,18 +23,23 @@ public class Vivienda implements Serializable {
 	public String getCodigo() {
 		return codigo;
 	}
+	
 	public void setCodigo(String codigo) {
 		this.codigo = codigo;
 	}
+	
 	public ArrayList<Persona> getMisPersonas() {
 		return misPersonas;
 	}
+	
 	public void setMisPersonas(ArrayList<Persona> misPersonas) {
 		this.misPersonas = misPersonas;
 	}
+	
 	public String getDireccion() {
 		return direccion;
 	}
+	
 	public void setDireccion(String direccion) {
 		this.direccion = direccion;
 	}
@@ -54,7 +60,7 @@ public class Vivienda implements Serializable {
     
     public void actualizarPersona(Persona persona) {
         int index = buscarPersonaByIndex(persona.getCodigo());
-            misPersonas.set(index, persona);
+        misPersonas.set(index, persona);
     }
 
     private int buscarPersonaByIndex(String codigo) {
@@ -75,19 +81,20 @@ public class Vivienda implements Serializable {
 
     public boolean buscarAfiliado(String afiliado) {
         boolean encontrado = false;
-    	//if (Clinica.getInstance().loggedUser.getRangoUser() != 4) { //Solo doctores y secretarios
-            if (misPersonas.isEmpty()) {
-            	encontrado =  false;
-            } else {
-                for (Persona persona : misPersonas) {
-                    if (persona.getCedula().equalsIgnoreCase(afiliado)) {
-                    	encontrado =  true;
-                    }
+        if (misPersonas.isEmpty()) {
+            encontrado = false;
+        } else {
+            for (Persona persona : misPersonas) {
+                if (persona.getCedula().equalsIgnoreCase(afiliado)) {
+                    encontrado = true;
                 }
             }
-       // }
-
+        }
         return encontrado;
     }
 
-}//
+    @Override
+    public String toString() {
+        return direccion;
+    }
+}

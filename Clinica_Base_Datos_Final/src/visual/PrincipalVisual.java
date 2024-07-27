@@ -264,6 +264,14 @@ public class PrincipalVisual extends JFrame {
 		panel_Consulta.add(btnRegistrarConsulta);
 		
 		btnListarConsulta = new JButton("Listar");
+		btnListarConsulta.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ListarConsulta crealist = new ListarConsulta();
+				crealist.setModal(true);
+				crealist.setVisible(true);
+				
+			}
+		});
 		btnListarConsulta.setBounds(100, 169, 89, 23);
 		panel_Consulta.add(btnListarConsulta);
 		

@@ -121,7 +121,7 @@ public class RegistrarNewUser extends JDialog {
 		txtCodigo = new JTextField();
 		txtCodigo.setEditable(false);
 		txtCodigo.setBounds(64, 20, 142, 20);
-		txtCodigo.setText("Pers-" + Clinica.getInstance().codPersona);
+		txtCodigo.setText("" + Clinica.getInstance().codPersona);
 		panelDatosGenerales.add(txtCodigo);
 		txtCodigo.setColumns(10);
 		
@@ -346,7 +346,7 @@ public class RegistrarNewUser extends JDialog {
 							
 							if (Clinica.getInstance().existUserName(userName)) {
 			                    
-								JOptionPane.showMessageDialog(null, "�Error! El nombre de usuario ya est� en uso.", "Error", JOptionPane.ERROR_MESSAGE);
+								JOptionPane.showMessageDialog(null, " El nombre de usuario ya esta en uso.", "Error", JOptionPane.ERROR_MESSAGE);
 								
 			                } else {
 								
@@ -376,7 +376,7 @@ public class RegistrarNewUser extends JDialog {
 									regVivienda.setVisible(true);
 									//((Paciente)aux).setMiVivienda(regVivienda.getViviendaSeleccionada());
 								}
-								JOptionPane.showMessageDialog(null, "Usuario registrado con �xito", "Registrar Persona", JOptionPane.INFORMATION_MESSAGE);
+								JOptionPane.showMessageDialog(null, "Usuario registrado con Exito", "Registrar Persona", JOptionPane.INFORMATION_MESSAGE);
 								Clinica.getInstance().insertarPersona(aux);
 								clean();
 			                }
@@ -396,7 +396,7 @@ public class RegistrarNewUser extends JDialog {
 							
 					       if (!Objects.equals(userName, userNameAntiguo) && Clinica.getInstance().existUserName(userName)) {
 					    	   
-					    	   JOptionPane.showMessageDialog(null, "�Error! El nombre de usuario ya est� en uso.", "Error", JOptionPane.ERROR_MESSAGE);
+					    	   JOptionPane.showMessageDialog(null, " El nombre de usuario ya esta en uso.", "Error", JOptionPane.ERROR_MESSAGE);
 					    	   
 					       } else {
 					    	   
@@ -489,7 +489,7 @@ public class RegistrarNewUser extends JDialog {
 	}
 	
 	private void clean() {
-		txtCodigo.setText("Pers-" + Clinica.getInstance().codPersona);
+		txtCodigo.setText("" + Clinica.getInstance().codPersona);
         txtCedula.setText("");
         txtNombre.setText("");
         txtApellido.setText("");

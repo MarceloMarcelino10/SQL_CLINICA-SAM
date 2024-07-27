@@ -19,7 +19,6 @@ import logico.Clinica;
 import logico.Doctor;
 import logico.Paciente;
 import logico.Persona;
-import logico.Vivienda;
 import javax.swing.JOptionPane;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -38,11 +37,8 @@ public class CrearCita extends JDialog {
     private JTextField txtCodigoCita;
     private JComboBox<Doctor> comboBoxDoctor;
     private JComboBox<Persona> comboBoxPersona;
-    private JComboBox<String> comboBoxTipoSangre;
-    private JComboBox<Vivienda> comboBoxVivienda;
     private Doctor selectedDoctor;
     private Persona selectedPersona;
-    private Vivienda selectedVivienda;
     private JDateChooser dateChooser;
     private JSpinner spnHoraCita;
 
@@ -60,7 +56,7 @@ public class CrearCita extends JDialog {
     public CrearCita() {
         setIconImage(Toolkit.getDefaultToolkit().getImage(CrearCita.class.getResource("/imagenes/fotoTituloDeVentana.png")));
         setTitle("Crear cita");
-        setBounds(100, 100, 600, 400);
+        setBounds(100, 100, 450, 300); // Reduce el tamaño de la ventana
         setLocationRelativeTo(null);
         getContentPane().setLayout(new BorderLayout());
         panelPrincipal.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -84,7 +80,6 @@ public class CrearCita extends JDialog {
 
         JLabel lblDoctor = new JLabel("Doctor:");
         comboBoxDoctor = new JComboBox<>();
-        comboBoxDoctor.setModel(new DefaultComboBoxModel(new String[] {"<Seleccionar>"}));
         for (Persona persona : Clinica.getInstance().getMisPersonas()) {
             if (persona instanceof Doctor) {
                 comboBoxDoctor.addItem((Doctor) persona);
@@ -110,9 +105,8 @@ public class CrearCita extends JDialog {
 
         JLabel lblPersona = new JLabel("Persona:");
         comboBoxPersona = new JComboBox<>();
-        comboBoxPersona.setModel(new DefaultComboBoxModel(new String[] {"<Seleccionar>"}));
         for (Persona persona : Clinica.getInstance().getMisPersonas()) {
-            if (!(persona instanceof Paciente)) {
+            if (!(persona instanceof Paciente || persona instanceof Doctor)) {
                 comboBoxPersona.addItem(persona);
             }
         }
@@ -134,33 +128,6 @@ public class CrearCita extends JDialog {
             }
         });
 
-        JLabel lblTipoSangre = new JLabel("Tipo de Sangre:");
-        comboBoxTipoSangre = new JComboBox<>(new String[] {"<Seleccionar>", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"});
-
-        JLabel lblVivienda = new JLabel("Vivienda:");
-        comboBoxVivienda = new JComboBox<>();
-        comboBoxVivienda.setModel(new DefaultComboBoxModel(new String[] {"<Seleccionar>"}));
-        for (Vivienda vivienda : Clinica.getInstance().getMisViviendas()) {
-            comboBoxVivienda.addItem(vivienda);
-        }
-        comboBoxVivienda.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (value instanceof Vivienda) {
-                    Vivienda vivienda = (Vivienda) value;
-                    setText(vivienda.getDireccion());
-                }
-                return this;
-            }
-        });
-        comboBoxVivienda.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                selectedVivienda = (Vivienda) comboBoxVivienda.getSelectedItem();
-            }
-        });
-
         GroupLayout layout = new GroupLayout(panelPrincipal);
         panelPrincipal.setLayout(layout);
         layout.setAutoCreateGaps(true);
@@ -171,17 +138,13 @@ public class CrearCita extends JDialog {
                 .addComponent(lblFecha)
                 .addComponent(lblHoraCita)
                 .addComponent(lblDoctor)
-                .addComponent(lblPersona)
-                .addComponent(lblTipoSangre)
-                .addComponent(lblVivienda))
+                .addComponent(lblPersona))
             .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                 .addComponent(txtCodigoCita)
                 .addComponent(dateChooser, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                 .addComponent(spnHoraCita)
                 .addComponent(comboBoxDoctor)
-                .addComponent(comboBoxPersona)
-                .addComponent(comboBoxTipoSangre)
-                .addComponent(comboBoxVivienda))
+                .addComponent(comboBoxPersona))
         );
         layout.setVerticalGroup(layout.createSequentialGroup()
             .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
@@ -199,12 +162,6 @@ public class CrearCita extends JDialog {
             .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                 .addComponent(lblPersona)
                 .addComponent(comboBoxPersona))
-            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                .addComponent(lblTipoSangre)
-                .addComponent(comboBoxTipoSangre))
-            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                .addComponent(lblVivienda)
-                .addComponent(comboBoxVivienda))
         );
 
         JPanel buttonPane = new JPanel();
@@ -237,9 +194,8 @@ public class CrearCita extends JDialog {
     private void registrarCita() {
         Date fecha = dateChooser.getDate();
         Date hora = (Date) spnHoraCita.getValue();
-        String tipoSangre = (String) comboBoxTipoSangre.getSelectedItem();
 
-        if (selectedPersona != null && selectedDoctor != null && fecha != null && hora != null && tipoSangre != null && selectedVivienda != null) {
+        if (selectedPersona != null && selectedDoctor != null && fecha != null && hora != null) {
             String codigo = txtCodigoCita.getText();
 
             // Convertir Persona a Paciente
@@ -252,7 +208,7 @@ public class CrearCita extends JDialog {
                 selectedPersona.getGenero(), 
                 selectedPersona.getUser(), 
                 selectedPersona.getPassword(), 
-                1, selectedVivienda, tipoSangre);
+                1, null, null);
 
             // Actualizar la lista de personas en Clinica
             Clinica.getInstance().eliminarPersona(selectedPersona);
@@ -270,6 +226,9 @@ public class CrearCita extends JDialog {
             Clinica.getInstance().insertarCita(cita);
             JOptionPane.showMessageDialog(null, "Operación satisfactoria", "Registro", JOptionPane.INFORMATION_MESSAGE);
 
+            // Eliminar persona del comboBox
+            comboBoxPersona.removeItem(selectedPersona);
+
             // Limpiar campos después de registrar la cita
             limpiarCampos();
         } else {
@@ -283,10 +242,7 @@ public class CrearCita extends JDialog {
         spnHoraCita.setValue(new Date());
         comboBoxDoctor.setSelectedIndex(0);
         comboBoxPersona.setSelectedIndex(0);
-        comboBoxTipoSangre.setSelectedIndex(0);
-        comboBoxVivienda.setSelectedIndex(0);
         selectedDoctor = null;
         selectedPersona = null;
-        selectedVivienda = null;
     }
 }
