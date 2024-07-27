@@ -850,6 +850,22 @@ public class Clinica implements Serializable  {//u
 		}
 		return enfermedad;
 	}
+	
+	public Consulta buscarConsultaById(String codigo) {
+		
+		Consulta consulta = null;
+		boolean encontrado = false;
+		int i = 0;
+		
+		while(i<misConsultas.size()&&!encontrado) {
+			if(misConsultas.get(i).getCodigo().equalsIgnoreCase(codigo)){
+				consulta = misConsultas.get(i);
+				encontrado = true;
+			}
+			i++;
+		}
+		return consulta;
+	}
 
 	public Cita buscarCitaById(String codCita) {
 		Cita cita = null;

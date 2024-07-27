@@ -23,6 +23,10 @@ import logico.Clinica;
 import logico.Consulta;
 import logico.Doctor;
 import java.awt.SystemColor;
+import javax.swing.UIManager;
+import java.awt.Color;
+import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 
 public class ListarConsulta extends JDialog {
 
@@ -45,10 +49,11 @@ public class ListarConsulta extends JDialog {
     }
 
     public ListarConsulta() {
+    	setTitle("Listar Consultas\r\n");
         setBounds(100, 100, 600, 400);
         setLocationRelativeTo(null); // Centrar la ventana en la pantalla
         getContentPane().setLayout(new BorderLayout());
-        contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        contentPanel.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         getContentPane().add(contentPanel, BorderLayout.CENTER);
         contentPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -65,12 +70,14 @@ public class ListarConsulta extends JDialog {
             panel.setLayout(new BorderLayout(0, 0));
             {
                 JScrollPane scrollPane = new JScrollPane();
+                scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
                 panel.add(scrollPane, BorderLayout.CENTER);
                 {
-                    String[] header = {"Codigo", "Fecha", "Consultado", "Diagnostico"};
+                    String[] header = {"Codigo", "Fecha Consulta", "Consultado por", "Diagnostico"};
                     model = new DefaultTableModel();
                     model.setColumnIdentifiers(header);
                     table = new JTable();
+                    table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                     table.setModel(model);
                     scrollPane.setViewportView(table);
                 }
@@ -79,11 +86,11 @@ public class ListarConsulta extends JDialog {
         {
             JPanel buttonPane = new JPanel();
             buttonPane.setBackground(SystemColor.textHighlight);
-            buttonPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            buttonPane.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
             buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
             getContentPane().add(buttonPane, BorderLayout.SOUTH);
             {
-                btnVerMas = new JButton("Ver MÃ¡s");
+                btnVerMas = new JButton("Ver mas");
                 btnVerMas.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         verMas();
@@ -115,10 +122,11 @@ public class ListarConsulta extends JDialog {
 
     private void loadTableData() {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat shf = new SimpleDateFormat("hh:mm aa");
         row = new Object[4];
         for (Consulta consulta : Clinica.getInstance().getMisConsultas()) {
             row[0] = consulta.getCodigo();
-            row[1] = sdf.format(consulta.getFechaConsulta());
+            row[1] = sdf.format(consulta.getFechaConsulta()) + " " + shf.format(consulta.getMiCita().getHoraCita()) ;
             if (consulta.getMiCita() != null && consulta.getMiCita().getMiDoctor() != null) {
                 Doctor doctor = consulta.getMiCita().getMiDoctor();
                 row[2] = doctor.getNombre() + " " + doctor.getApellidos();
@@ -134,7 +142,7 @@ public class ListarConsulta extends JDialog {
         int selectedRow = table.getSelectedRow();
         if (selectedRow >= 0) {
             String codigo = (String) model.getValueAt(selectedRow, 0);
-            Consulta consulta = buscarConsultaPorCodigo(codigo);
+            Consulta consulta = Clinica.getInstance().buscarConsultaById(codigo);
             if (consulta != null) {
                 Clinica.getInstance().eliminarConsulta(consulta);
                 model.removeRow(selectedRow);
@@ -145,28 +153,67 @@ public class ListarConsulta extends JDialog {
         }
     }
 
+  /*  private void verMas() {
+       
+    	int selectedRow = table.getSelectedRow();
+        if (selectedRow >= 0) {
+        	
+            String diagnostico = (String) model.getValueAt(selectedRow, 3);
+            
+            JTextArea textArea = new JTextArea(diagnostico);
+            textArea.setLineWrap(true);
+            textArea.setWrapStyleWord(true);
+            textArea.setEditable(false);      
+            
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            scrollPane.setPreferredSize(new java.awt.Dimension(300, 200));
+
+            JOptionPane.showMessageDialog(null, scrollPane, "Diagnóstico", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+        	
+            JOptionPane.showMessageDialog(null, "Por favor seleccione una consulta", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+   */
+    
     private void verMas() {
-        int selectedRow = table.getSelectedRow();
+      
+    	int selectedRow = table.getSelectedRow();
         if (selectedRow >= 0) {
             String diagnostico = (String) model.getValueAt(selectedRow, 3);
+
+            JDialog dialog = new JDialog(this, "Diagnóstico", true);
+            dialog.setSize(400, 300);
+            dialog.setLocationRelativeTo(this);
+            dialog.setLayout(new BorderLayout());
+
             JTextArea textArea = new JTextArea(diagnostico);
             textArea.setLineWrap(true);
             textArea.setWrapStyleWord(true);
             textArea.setEditable(false);
+
             JScrollPane scrollPane = new JScrollPane(textArea);
-            scrollPane.setPreferredSize(new java.awt.Dimension(300, 200));
-            JOptionPane.showMessageDialog(null, scrollPane, "Diagnostico", JOptionPane.INFORMATION_MESSAGE);
+            scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            dialog.add(scrollPane, BorderLayout.CENTER);
+
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton btnVolver = new JButton("Volver");
+            btnVolver.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    dialog.dispose();
+                }
+            });
+            buttonPanel.add(btnVolver);
+            
+            dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+            dialog.setVisible(true);
+            
         } else {
+        	
             JOptionPane.showMessageDialog(null, "Por favor seleccione una consulta", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private Consulta buscarConsultaPorCodigo(String codigo) {
-        for (Consulta consulta : Clinica.getInstance().getMisConsultas()) {
-            if (consulta.getCodigo().equals(codigo)) {
-                return consulta;
-            }
-        }
-        return null;
-    }
+    
 }
