@@ -29,7 +29,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JList;
 import java.awt.Component;
 import java.awt.FlowLayout;
-import javax.swing.DefaultComboBoxModel;
 
 public class CrearCita extends JDialog {
 
@@ -56,7 +55,7 @@ public class CrearCita extends JDialog {
     public CrearCita() {
         setIconImage(Toolkit.getDefaultToolkit().getImage(CrearCita.class.getResource("/imagenes/fotoTituloDeVentana.png")));
         setTitle("Crear cita");
-        setBounds(100, 100, 450, 300); // Reduce el tamaño de la ventana
+        setBounds(100, 100, 450, 300);
         setLocationRelativeTo(null);
         getContentPane().setLayout(new BorderLayout());
         panelPrincipal.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -65,7 +64,7 @@ public class CrearCita extends JDialog {
         JLabel lblCodigoCita = new JLabel("Código de cita:");
         txtCodigoCita = new JTextField();
         txtCodigoCita.setEditable(false);
-        txtCodigoCita.setText("" + Clinica.getCodCita());
+        txtCodigoCita.setText(String.valueOf(Clinica.getCodCita()));
         txtCodigoCita.setColumns(10);
 
         JLabel lblFecha = new JLabel("Día de la cita:");
@@ -191,6 +190,19 @@ public class CrearCita extends JDialog {
         buttonPane.add(cancelarBtn);
     }
 
+    public CrearCita(Cita cita) {
+        this();
+        cargarDatosCita(cita);
+    }
+
+    private void cargarDatosCita(Cita cita) {
+        txtCodigoCita.setText(cita.getCodigo());
+        dateChooser.setDate(cita.getFechaCita());
+        spnHoraCita.setValue(cita.getHoraCita());
+        comboBoxDoctor.setSelectedItem(cita.getMiDoctor());
+        comboBoxPersona.setSelectedItem(cita.getMiPersona());
+    }
+
     private void registrarCita() {
         Date fecha = dateChooser.getDate();
         Date hora = (Date) spnHoraCita.getValue();
@@ -222,12 +234,20 @@ public class CrearCita extends JDialog {
             fechaHora.set(Calendar.HOUR_OF_DAY, horaCita.get(Calendar.HOUR_OF_DAY));
             fechaHora.set(Calendar.MINUTE, horaCita.get(Calendar.MINUTE));
 
-            Cita cita = new Cita(codigo, nuevoPaciente, selectedDoctor, fechaHora.getTime(), new Time(fechaHora.getTimeInMillis()));
-            Clinica.getInstance().insertarCita(cita);
-            JOptionPane.showMessageDialog(null, "Operación satisfactoria", "Registro", JOptionPane.INFORMATION_MESSAGE);
-
-            // Eliminar persona del comboBox
-            comboBoxPersona.removeItem(selectedPersona);
+            Cita cita = Clinica.getInstance().buscarCitaById(codigo);
+            if (cita == null) {
+                cita = new Cita(codigo, nuevoPaciente, selectedDoctor, fechaHora.getTime(), new Time(fechaHora.getTimeInMillis()));
+                Clinica.getInstance().insertarCita(cita);
+                Clinica.setCodCita(Clinica.getCodCita() + 1); // Incrementar el código de cita después de insertar una nueva cita
+                JOptionPane.showMessageDialog(null, "Operación satisfactoria", "Registro", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                cita.setFechaCita(fechaHora.getTime());
+                cita.setHoraCita(new Time(fechaHora.getTimeInMillis()));
+                cita.setMiPersona(nuevoPaciente);
+                cita.setMiDoctor(selectedDoctor);
+                Clinica.getInstance().actualizarCita(cita);
+                JOptionPane.showMessageDialog(null, "Cita modificada con éxito", "Modificación", JOptionPane.INFORMATION_MESSAGE);
+            }
 
             // Limpiar campos después de registrar la cita
             limpiarCampos();
@@ -237,7 +257,7 @@ public class CrearCita extends JDialog {
     }
 
     private void limpiarCampos() {
-        txtCodigoCita.setText("" + Clinica.getCodCita());
+        txtCodigoCita.setText(String.valueOf(Clinica.getCodCita()));
         dateChooser.setDate(null);
         spnHoraCita.setValue(new Date());
         comboBoxDoctor.setSelectedIndex(0);

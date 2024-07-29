@@ -168,7 +168,7 @@ public class ListarConsulta extends JDialog {
             JScrollPane scrollPane = new JScrollPane(textArea);
             scrollPane.setPreferredSize(new java.awt.Dimension(300, 200));
 
-            JOptionPane.showMessageDialog(null, scrollPane, "Diagnóstico", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, scrollPane, "DiagnÃ³stico", JOptionPane.INFORMATION_MESSAGE);
         } else {
         	
             JOptionPane.showMessageDialog(null, "Por favor seleccione una consulta", "Error", JOptionPane.ERROR_MESSAGE);
@@ -182,7 +182,7 @@ public class ListarConsulta extends JDialog {
         if (selectedRow >= 0) {
             String diagnostico = (String) model.getValueAt(selectedRow, 3);
 
-            JDialog dialog = new JDialog(this, "Diagnóstico", true);
+            JDialog dialog = new JDialog(this, "DiagnÃ³stico", true);
             dialog.setSize(400, 300);
             dialog.setLocationRelativeTo(this);
             dialog.setLayout(new BorderLayout());

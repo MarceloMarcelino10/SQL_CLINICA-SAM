@@ -286,13 +286,13 @@ public class RegistrarConsulta extends JDialog {
 			                                            ((Paciente) selected.getMiPersona()).setMiVivienda(selectedVivienda);
 			                                        }
 
-			                                        selected.setRealizada(true); // La cita ahora est· realizada
+			                                        selected.setRealizada(true); // La cita ahora est√° realizada
 			                                        Clinica.getInstance().insertarConsulta(nuevaConsulta);
 
 			                                        loadCita();
 			                                        clear();
 
-			                                        JOptionPane.showMessageDialog(null, "Consulta registrada con Èxito.", "…xito", JOptionPane.INFORMATION_MESSAGE);
+			                                        JOptionPane.showMessageDialog(null, "Consulta registrada con √©xito.", "√âxito", JOptionPane.INFORMATION_MESSAGE);
 
 			                                    } catch (Exception ex) {
 			                                        JOptionPane.showMessageDialog(null, "Error al registrar la consulta: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -400,7 +400,7 @@ public class RegistrarConsulta extends JDialog {
 	                    enfermedadesLista.add(enfermedad);
 	                    actualizarEnfermedadesConsultadas();
 	                } else {
-	                    JOptionPane.showMessageDialog(null, "La enfermedad ya esta° en la lista.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+	                    JOptionPane.showMessageDialog(null, "La enfermedad ya esta¬° en la lista.", "Advertencia", JOptionPane.WARNING_MESSAGE);
 	                }
 	            }
 	        }
@@ -422,7 +422,7 @@ public class RegistrarConsulta extends JDialog {
 	                    enfermedadesLista.remove(enfermedad);
 	                    actualizarEnfermedadesConsultadas();
 	                } else {
-	                    JOptionPane.showMessageDialog(null, "La enfermedad no est√° en la lista.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+	                    JOptionPane.showMessageDialog(null, "La enfermedad no est√É¬° en la lista.", "Advertencia", JOptionPane.WARNING_MESSAGE);
 	                }
 	            }
 	        }

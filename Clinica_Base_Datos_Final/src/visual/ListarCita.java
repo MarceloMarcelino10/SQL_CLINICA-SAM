@@ -38,9 +38,9 @@ public class ListarCita extends JDialog {
     }
 
     public ListarCita() {
-        setBounds(100, 100, 800, 400); // Tamaño adecuado para que todo se vea correctamente
-        setResizable(false); // No permitir redimensionar
-        setLocationRelativeTo(null); // Centrar el diálogo en la pantalla
+        setBounds(100, 100, 800, 400);
+        setResizable(false);
+        setLocationRelativeTo(null);
         getContentPane().setLayout(new BorderLayout());
         contentPanel.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -54,8 +54,7 @@ public class ListarCita extends JDialog {
                 model.setColumnIdentifiers(header);
                 table = new JTable();
                 table.setModel(model);
-                table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); // Desactivar el ajuste automático de tamaño
-                // Establecer tamaños de columnas
+                table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
                 table.getColumnModel().getColumn(0).setPreferredWidth(100);
                 table.getColumnModel().getColumn(1).setPreferredWidth(150);
                 table.getColumnModel().getColumn(2).setPreferredWidth(150);
@@ -93,7 +92,23 @@ public class ListarCita extends JDialog {
             }
             {
                 btnModificar = new JButton("Modificar");
-                btnModificar.setActionCommand("OK");
+                btnModificar.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        int selectedRow = table.getSelectedRow();
+                        if (selectedRow >= 0) {
+                            String codigo = (String) model.getValueAt(selectedRow, 0);
+                            Cita cita = Clinica.getInstance().buscarCitaById(codigo);
+                            if (cita != null) {
+                                CrearCita dialog = new CrearCita(cita);
+                                dialog.setModal(true);
+                                dialog.setVisible(true);
+                                loadCitas(); // Refresh the table after modification
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Por favor seleccione una cita para modificar", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                });
                 buttonPane.add(btnModificar);
                 getRootPane().setDefaultButton(btnModificar);
             }
@@ -122,7 +137,7 @@ public class ListarCita extends JDialog {
             row[1] = cita.getMiPersona().getNombre() + " " + cita.getMiPersona().getApellidos();
             row[2] = cita.getMiDoctor().getNombre() + " " + cita.getMiDoctor().getApellidos();
             row[3] = dateFormat.format(cita.getFechaCita()) + " " + new SimpleDateFormat("hh:mm a").format(cita.getHoraCita());
-            row[4] = cita.isRealizada() ? "Sí" : "No"; // Método para obtener el nombre de la persona que agendó la cita
+            row[4] = cita.isRealizada() ? "Sí" : "No";
             row[5] = cita.isRealizada() ? "Sí" : "No";
             model.addRow(row);
         }
