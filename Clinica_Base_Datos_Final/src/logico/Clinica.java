@@ -35,6 +35,7 @@ public class Clinica implements Serializable  {//u
 	private ArrayList<Cita> misCitas;
 	private ArrayList<Vacuna> misVacunas;
 	private ArrayList<Consulta> misConsultas;
+	private ArrayList<HistoriaClinica> misHistoriasClinicas;
 	private static Clinica clinica = null;
 	public static int codPersona = 1;
 	public static int codCita= 1;
@@ -42,6 +43,7 @@ public class Clinica implements Serializable  {//u
 	public static int codEnfermedad = 1;
 	public static int codConsulta = 1;
 	public static int codVivienda = 1;
+	public static int codHistoriaClinica = 1;
 	public static Persona loggedUser;
 	private ArrayList<Integer> valoresEstaticos = new ArrayList<>();
 	
@@ -53,6 +55,7 @@ public class Clinica implements Serializable  {//u
 		this.misCitas =  new ArrayList<Cita>();
 		this.misVacunas =  new ArrayList<Vacuna>();
 		this.misConsultas =  new ArrayList<Consulta>();
+		this.misHistoriasClinicas = new ArrayList<HistoriaClinica>();
 	}
 	
 	public static Clinica getInstance() {
@@ -109,6 +112,14 @@ public class Clinica implements Serializable  {//u
 	public void setMisConsultas(ArrayList<Consulta> misConsultas) {
 		this.misConsultas = misConsultas;
 	}
+	
+	public ArrayList<HistoriaClinica> getMisHistoriasClinicas() {
+		return misHistoriasClinicas;
+	}
+
+	public void setMisHistoriasClinicas(ArrayList<HistoriaClinica> misHistoriasClinicas) {
+		this.misHistoriasClinicas = misHistoriasClinicas;
+	}
 
 	//METODOS PARA INSERTAR EN LAS LISTAS:
 	
@@ -148,6 +159,12 @@ public class Clinica implements Serializable  {//u
         guardarDatos();
     }
     
+    public void insertarHistoriaClinica(HistoriaClinica historiaClinica) {
+        misHistoriasClinicas.add(historiaClinica);
+        codHistoriaClinica++;
+        guardarDatos();
+	}
+    
     public static void setClinica(Clinica clinica) {
 		Clinica.clinica = clinica;
 	}
@@ -164,8 +181,8 @@ public class Clinica implements Serializable  {//u
         guardarDatos();
     }
 
-    public void eliminarEnfermedad(String codigoEnfermedad) {
-        misEnfermedades.remove(codigoEnfermedad);
+    public void eliminarEnfermedad(Enfermedad enfermedad) {
+        misEnfermedades.remove(enfermedad);
         guardarDatos();
     }
 
@@ -181,6 +198,11 @@ public class Clinica implements Serializable  {//u
 
     public void eliminarConsulta(Consulta consulta) {
         misConsultas.remove(consulta);
+        guardarDatos();
+    }
+    
+    public void eliminarHistoriaClinica(HistoriaClinica HistoriaClinica) {
+        misHistoriasClinicas.remove(HistoriaClinica);
         guardarDatos();
     }
     
@@ -307,9 +329,29 @@ public class Clinica implements Serializable  {//u
         }    
         return index;
     }
+    
+    public void actualizarHistorialClinica(HistoriaClinica historialClinica) {
+    	int index = buscarHistorialClinica(historialClinica.getCodigo());
+    	misHistoriasClinicas.set(index,historialClinica);
+    	guardarDatos();
+    }
+    
+	private int buscarHistorialClinica(String codigo) {
+		int index = -1;
+        boolean encontrado = false;
+        int i = 0;
+        while (!encontrado && i < misHistoriasClinicas.size()) {
+            if (misHistoriasClinicas.get(i).getCodigo().equalsIgnoreCase(codigo)) {
+                encontrado = true;
+                index = i;
+            }
+            i++;
+        }    
+        return index;
+	}
 
 	//METODOS PARA EL LOGIN Y REGISTRO:
-    
+
 	public static Persona getLoggedUser() {
 		return Clinica.loggedUser;
 	}
@@ -358,16 +400,18 @@ public class Clinica implements Serializable  {//u
 	    valoresEstaticos.add(getCodEnfermedad());
 	    valoresEstaticos.add(getCodConsulta());
 	    valoresEstaticos.add(getCodVivienda());
+	    valoresEstaticos.add(getCodHistoriaClinica());
 	}
 
 	public void cargarValoresEstaticos() {
-	    if (!valoresEstaticos.isEmpty() && valoresEstaticos.size() >= 6) {
+	    if (!valoresEstaticos.isEmpty() && valoresEstaticos.size() >= 7) {
 	        setCodPersona(valoresEstaticos.get(0));
 	        setCodCita(valoresEstaticos.get(1));
 	        setCodVacuna(valoresEstaticos.get(2));
 	        setCodEnfermedad(valoresEstaticos.get(3));
 	        setCodConsulta(valoresEstaticos.get(4));
 	        setCodVivienda(valoresEstaticos.get(5));
+	        setCodVivienda(valoresEstaticos.get(6));
 	    }
 	}
 	
@@ -400,6 +444,35 @@ public class Clinica implements Serializable  {//u
 	    }
 	    return temp;
 	}
+	
+	private Vacuna buscarVacunaById(String codigo) {
+		Vacuna temp = null;
+	    boolean encontrado = false;
+	    int i = 0;
+	    while (i < misVacunas.size() && !encontrado) {
+	        if (misVacunas.get(i).getCodigo().equalsIgnoreCase(codigo)) {
+	            temp = misVacunas.get(i);
+	            encontrado = true;
+	        }
+	        i++;
+	    }
+	    return temp;
+	}
+	
+	private HistoriaClinica buscarHistorialClinicaById(String codigo) {
+		HistoriaClinica temp = null;
+	    boolean encontrado = false;
+	    int i = 0;
+	    while (i < misHistoriasClinicas.size() && !encontrado) {
+	        if (misHistoriasClinicas.get(i).getCodigo().equalsIgnoreCase(codigo)) {
+	            temp = misHistoriasClinicas.get(i);
+	            encontrado = true;
+	        }
+	        i++;
+	    }
+	    return temp;
+	}
+
 
 	//METODOS PARA BUSCAR VERIFICAR UNA PERSONA POR VIVIENDA:
 	
@@ -537,6 +610,14 @@ public class Clinica implements Serializable  {//u
 	
 	public ArrayList<Enfermedad> getEnfermedadesRegistradas() {
 	    return misEnfermedades;
+	}
+	
+	public static int getCodHistoriaClinica() {
+		return codHistoriaClinica;
+	}
+
+	public static void setCodHistoriaClinica(int codHistoriaClinica) {
+		Clinica.codHistoriaClinica = codHistoriaClinica;
 	}
 	
 	//METODOS PARA GENERAR EL REPORTE CLINICO:
@@ -895,14 +976,16 @@ public class Clinica implements Serializable  {//u
     	cargarDatosPacienteSQL();
     	cargarDatosPersonaSQL();
     	cargarDatosCitaSQL();
+    	cargarDatosHistoriaClinicaSQL();
     	cargarDatosConsultaSQL();
+    	cargarDatosVacunaSQL();
     } 
 	
 	// METODOS SQL (CARGA DE DATOS):
     
     //DOCTORES:
     
-    public void cargarDatosDoctorSQL() {
+    private void cargarDatosDoctorSQL() {
     	
     	String query = "SELECT * " + 
 	    			   "FROM PERSONA AS p " + 
@@ -953,7 +1036,7 @@ public class Clinica implements Serializable  {//u
     
     // PACIENTES:
     
-    public void cargarDatosPacienteSQL() {
+    private void cargarDatosPacienteSQL() {
     	
     	String query = "SELECT * " + 
 	    			   "FROM PERSONA AS p " + 
@@ -1017,7 +1100,7 @@ public class Clinica implements Serializable  {//u
     
     // PERSONAS:
     
-    public void cargarDatosPersonaSQL() throws ParseException {
+    private void cargarDatosPersonaSQL() throws ParseException {
         
     	String query = "SELECT * " +
         		"FROM PERSONA AS p " +
@@ -1073,8 +1156,8 @@ public class Clinica implements Serializable  {//u
         }
     }
     
-    private int obtenerRango(String rango) {
-	    // EN EL PROGRMA DE JAVA: 4 ADMIN, 3 SECRETARIO, 2 DOCTOR, 1 PACIENTE, 0 PERSONA
+    private int obtenerRango(String rango) { // EN EL PROGRMA DE JAVA: 4 ADMIN, 3 SECRETARIO, 2 DOCTOR, 1 PACIENTE, 0 PERSONA
+	    
         switch (rango) {
             case "Administrador":
                 return 4;
@@ -1091,8 +1174,9 @@ public class Clinica implements Serializable  {//u
 
     //ENFERMEDADES:
     
-    public void cargarDatosEnfermedadSQL() {
-        String query = "SELECT e.* " + 
+    private void cargarDatosEnfermedadSQL() {
+        
+    	String query = "SELECT e.* " + 
         			   "FROM ENFERMEDAD AS e ";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -1123,7 +1207,7 @@ public class Clinica implements Serializable  {//u
     
     //VIVIENDAS:
 
-    public void cargarDatosViviendaSQL() {
+    private void cargarDatosViviendaSQL() {
     	
         String query = "SELECT v.* " +
         			   "FROM VIVIENDA AS v " +
@@ -1148,8 +1232,9 @@ public class Clinica implements Serializable  {//u
     
     // CITAS:
     
-    public void cargarDatosCitaSQL() {
-        String query = "SELECT c.id_cita, c.fecha_cita, c.hora_cita, c.fecha_cita_creacion, c.completada, " +
+    private void cargarDatosCitaSQL() {
+        
+    	String query = "SELECT c.id_cita, c.fecha_cita, c.hora_cita, c.fecha_cita_creacion, c.completada, " +
         			   "c.id_doctor, c.id_persona, c.id_creador_cita, d.id_persona AS id_doctor_persona " +
         			   "FROM CITA AS c " +
         			   "INNER JOIN DOCTOR AS d ON c.id_doctor = d.id_doctor ";
@@ -1190,35 +1275,68 @@ public class Clinica implements Serializable  {//u
         }
     }
     
-    // CONSULTAS:
+    //HISTORIAL CLINICA:
     
-    public void cargarDatosConsultaSQL() {
-    	
-    	String queryConsulta = "SELECT c.id_consulta, c.fecha_consulta, c.id_historial_clinico, c.id_doctor, c.diagnostico, " +
-			    			   "c.id_cita_solicitada, d.id_persona AS id_doctor_persona " +
-			    			   "FROM CONSULTA AS c " +
-			    			   "INNER JOIN DOCTOR AS d ON c.id_doctor = d.id_doctor " +
-			    			   "INNER JOIN PERSONA AS p ON p.id_persona = d.id_persona ";
-    	
-    	String queryEnfermedad = "SELECT ec.id_enfermedad " +
-                			   	 "FROM ENFERMEDAD_CONSULTA AS ec " +
-                				 "WHERE ec.id_consulta = ?"; // "?", Es un parametro
-    	
+    private void cargarDatosHistoriaClinicaSQL() {
+        
+        String queryHistorial = "SELECT hc.id_historial_clinico, hc.id_paciente, p.id_persona AS id_paciente_persona " +
+                                "FROM HISTORIAL_CLINICO AS hc " +
+                                "INNER JOIN PACIENTE AS p ON hc.id_paciente = p.id_paciente ";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtHistorial = conn.prepareStatement(queryHistorial);
+             ResultSet rsHistorial = stmtHistorial.executeQuery()) {
+            
+            while (rsHistorial.next()) {
+                
+                String codigo = rsHistorial.getString("id_historial_clinico");
+                String id_paciente = rsHistorial.getString("id_paciente_persona");
+                
+                Paciente paciente = (Paciente) Clinica.getInstance().buscarPersonaById(id_paciente);
+                
+                ArrayList<Consulta> consultas = new ArrayList<>();
+                ArrayList<Vacuna> vacunasAplicadas = new ArrayList<>();
+                
+                HistoriaClinica historiaClinica = new HistoriaClinica(codigo, paciente, consultas, vacunasAplicadas);
+                Clinica.getInstance().insertarHistoriaClinica(historiaClinica);
+
+                System.out.println("Historia Clínica ID: " + codigo);
+                System.out.println("Paciente ID: " + id_paciente);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    // CONSULTAS:
+   
+    private void cargarDatosConsultaSQL() {
+        
+        String queryConsulta = "SELECT c.id_consulta, c.fecha_consulta, c.id_historial_clinico, c.id_doctor, c.diagnostico, " +
+                               "c.id_cita_solicitada, d.id_persona AS id_doctor_persona " +
+                               "FROM CONSULTA AS c " +
+                               "INNER JOIN DOCTOR AS d ON c.id_doctor = d.id_doctor " +
+                               "INNER JOIN PERSONA AS p ON p.id_persona = d.id_persona ";
+        
+        String queryEnfermedad = "SELECT ec.id_enfermedad " +
+                                 "FROM ENFERMEDAD_CONSULTA AS ec " +
+                                 "WHERE ec.id_consulta = ?"; // "?", Es un parametro
+        
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta);
-        	 PreparedStatement stmtEnfermedades = conn.prepareStatement(queryEnfermedad);
+             PreparedStatement stmtEnfermedades = conn.prepareStatement(queryEnfermedad);
              ResultSet rsConsulta = stmtConsulta.executeQuery()) {
-        	
-        	while (rsConsulta.next()) {
-        		
-        		String codigo = rsConsulta.getString("id_consulta");
-            	Date fechaConsulta = rsConsulta.getDate("fecha_consulta");
+            
+            while (rsConsulta.next()) {
+                
+                String codigo = rsConsulta.getString("id_consulta");
+                Date fechaConsulta = rsConsulta.getDate("fecha_consulta");
                 String id_historial_clinico = rsConsulta.getString("id_historial_clinico");
                 String id_doctor = rsConsulta.getString("id_doctor_persona");
                 String id_cita_solicitada = rsConsulta.getString("id_cita_solicitada");
                 String diagnostico = rsConsulta.getString("diagnostico") != null ? rsConsulta.getString("diagnostico") : "No tiene";
 
-                
                 Doctor doctor = (Doctor) Clinica.getInstance().buscarPersonaById(id_doctor);
                 Cita cita = Clinica.getInstance().buscarCitaById(id_cita_solicitada);
                 
@@ -1226,7 +1344,7 @@ public class Clinica implements Serializable  {//u
                 consulta.setDiagnostico(diagnostico);
                 consulta.setFechaConsulta(fechaConsulta);
 
-                stmtEnfermedades.setString(1, codigo);; // "?" cambia el parametro, segun el codigo
+                stmtEnfermedades.setString(1, codigo); // "?" cambia el parametro, segun el codigo
                 
                 try (ResultSet rsEnfermedades = stmtEnfermedades.executeQuery()) {
                     while (rsEnfermedades.next()) {
@@ -1238,23 +1356,81 @@ public class Clinica implements Serializable  {//u
                     }
                 }
                 
+                HistoriaClinica historiaClinica = Clinica.getInstance().buscarHistorialClinicaById(id_historial_clinico);
+                
+                if (historiaClinica != null) {
+                    consulta.setMiHistoriaClinica(historiaClinica);
+                    historiaClinica.getMisConsultas().add(consulta);
+                }
+                
                 Clinica.getInstance().insertarConsulta(consulta);
-            	
+
                 System.out.println("Consulta ID: " + codigo);
                 System.out.println("Fecha Consulta: " + fechaConsulta);
-                System.out.println("Historial Clï¿½nico ID: " + id_historial_clinico);
+                System.out.println("Historial Clínico ID: " + id_historial_clinico);
                 System.out.println("Doctor ID: " + id_doctor);
                 System.out.println("Cita Solicitada ID: " + id_cita_solicitada);
                 System.out.println("Enfermedades: " + consulta.getMisEnfermedades().size());
                 System.out.println();
-        	}
-        	
+            }
+            
         } catch (SQLException e) {
-        	e.printStackTrace();
-        }	
+            e.printStackTrace();
+        }
     }
-    
-    
+ 
+    //VACUNAS:
+
+    private void cargarDatosVacunaSQL() {
+        
+        String queryVacuna = "SELECT v.id_vacuna, v.nombre, v.id_historial_clinico FROM VACUNA AS v";
+        
+        String queryEnfermedades = "SELECT ev.id_enfermedad FROM ENFERMEDAD_VACUNA AS ev WHERE ev.id_vacuna = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtVacuna = conn.prepareStatement(queryVacuna);
+             PreparedStatement stmtEnfermedades = conn.prepareStatement(queryEnfermedades);
+             ResultSet rsVacuna = stmtVacuna.executeQuery()) {
+
+            while (rsVacuna.next()) {
+                
+                String codigo = rsVacuna.getString("id_vacuna");
+                String nombre = rsVacuna.getString("nombre");
+                String id_historial_clinico = rsVacuna.getString("id_historial_clinico");
+
+                Vacuna vacuna = new Vacuna(codigo, nombre);
+
+                HistoriaClinica historiaClinica = Clinica.getInstance().buscarHistorialClinicaById(id_historial_clinico);
+                if (historiaClinica != null) {
+                    vacuna.setMiHistoriaClinica(historiaClinica);
+                    historiaClinica.getVacunasAplicadas().add(vacuna);
+                }
+
+                stmtEnfermedades.setString(1, codigo);
+                
+                try (ResultSet rsEnfermedades = stmtEnfermedades.executeQuery()) {
+                    while (rsEnfermedades.next()) {
+                        String idEnfermedad = rsEnfermedades.getString("id_enfermedad");
+                        Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(idEnfermedad);
+                        if (enfermedad != null) {
+                            vacuna.agregarEnfermedad(enfermedad);
+                        }
+                    }
+                }
+
+                Clinica.getInstance().insertarVacuna(vacuna);
+
+                System.out.println("Vacuna ID: " + codigo);
+                System.out.println("Nombre: " + nombre);
+                System.out.println("Historia Clínica ID: " + (historiaClinica != null ? historiaClinica.getCodigo() : "No asociada"));
+                System.out.println("Número de Enfermedades: " + vacuna.getMisEnfermedades().size());
+                System.out.println();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }   
     
 }
 

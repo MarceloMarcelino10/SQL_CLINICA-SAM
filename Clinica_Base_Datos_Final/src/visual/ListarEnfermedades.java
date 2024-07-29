@@ -88,7 +88,8 @@ public class ListarEnfermedades extends JDialog {
                         String codigoEnfermedad = (String) table.getValueAt(selectedRow, 0);
 
                         Clinica clinica = Clinica.getInstance();
-                        clinica.eliminarEnfermedad(codigoEnfermedad);
+                        Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(codigoEnfermedad);
+                        clinica.eliminarEnfermedad(enfermedad);
                         model.removeRow(selectedRow);
 
                         JOptionPane.showMessageDialog(null, "Enfermedad eliminada correctamente",

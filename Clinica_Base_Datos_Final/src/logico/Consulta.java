@@ -17,6 +17,7 @@ public class Consulta implements Serializable{
 	private Date fechaConsulta;
 	private Cita miCita;
 	private String diagnostico;
+	private HistoriaClinica miHistoriaClinica;
 	
 	public Consulta(String codigo, Cita miCita) {
 		super();
@@ -25,6 +26,7 @@ public class Consulta implements Serializable{
 		this.fechaConsulta = new Date();
 		this.miCita = miCita;
 		this.diagnostico = diagnostico;
+		this.miHistoriaClinica = miHistoriaClinica;
 	}
 	
 	public String getCodigo() {
@@ -67,13 +69,21 @@ public class Consulta implements Serializable{
 		this.diagnostico = diagnostico;
 	}
 	
+	public HistoriaClinica getMiHistoriaClinica() {
+		return miHistoriaClinica;
+	}
+
+	public void setMiHistoriaClinica(HistoriaClinica miHistoriaClinica) {
+		this.miHistoriaClinica = miHistoriaClinica;
+	}
+	
 	//METODO PARA INSERTAR:
 	
 	public void insertarEnfermedad(Enfermedad enfermedad) {
         misEnfermedades.add(enfermedad);
     }
 	
-	//METODO PARA ELIMINAR:u
+	//METODO PARA ELIMINAR:
 	
 	public void eliminarEnfermedad(Enfermedad enfermedad) {
         misEnfermedades.remove(enfermedad);

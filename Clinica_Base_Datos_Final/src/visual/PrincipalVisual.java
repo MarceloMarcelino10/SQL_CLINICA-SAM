@@ -449,7 +449,7 @@ public class PrincipalVisual extends JFrame {
 	    }
 	    	    
 	    try {
-	        if (Clinica.getInstance().loggedUser != null && Clinica.getInstance().loggedUser.getRangoUser() != 1) { // Persona
+	        if (Clinica.getInstance().loggedUser != null && Clinica.getInstance().loggedUser.getRangoUser() != 0) { // Persona
 	            if (Clinica.getInstance().loggedUser.getRangoUser() == 4) { // Admin
 	                enablePanelAndButtons(panel_Vivienda);
 	                enablePanelAndButtons(panel_Persona);
