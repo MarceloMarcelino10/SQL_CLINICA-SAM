@@ -174,22 +174,22 @@ public class ListarPersona extends JDialog {
         String selectedItem = cbxListar.getSelectedItem().toString();
         switch (selectedItem) {
             case "Administrador":
-                headers = new String[]{"Código", "Nombre", "Apellidos", "Edad"};
+                headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad"};
                 break;
             case "Secretario":
-                headers = new String[]{"Código", "Nombre", "Apellidos", "Edad"};
+                headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad"};
                 break;
             case "Doctor":
-                headers = new String[]{"Código", "Nombre", "Apellidos", "Edad", "Especialidad", "Disponibilidad"};
+                headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad", "Especialidad", "Disponibilidad"};
                 break;
             case "Persona":
-                headers = new String[]{"Código", "Nombre", "Apellidos", "Edad"};
+                headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad"};
                 break;
             case "Paciente":
-                headers = new String[]{"Código", "Nombre", "Apellidos", "Edad", "Tipo de Sangre"};
+                headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad", "Tipo de Sangre"};
                 break;
             case "Todos":
-                headers = new String[]{"Código", "Nombre", "Apellidos", "Edad"};
+                headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad"};
                 break;
             default:
                 break; 
@@ -203,32 +203,32 @@ public class ListarPersona extends JDialog {
         model.setRowCount(0);
         rows = new Object[model.getColumnCount()];
         SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
-        String option = cbxListar.getModel().getElementAt(index).toString();
+        String option = cbxListar.getModel().getElementAt(index).toString(); 
 
-        switch(option) {
+        switch (option) {
             case "Administrador":
                 for (Persona persona : Clinica.getInstance().getMisPersonas()) {
-                    if(persona.getRangoUser() == 4) {
+                    if (persona.getRangoUser() == 1) {
                         rows[0] = persona.getCodigo();
                         rows[1] = persona.getNombre();
                         rows[2] = persona.getApellidos();
                         rows[3] = (persona.getFechaNacimiento() != null) ? dateFormatter.format(persona.getFechaNacimiento()) : "";
-                        model.addRow(rows);    
+                        model.addRow(rows);
                     }
                 }
                 break;
-            case "Secretario": //Secretario
+            case "Secretario":
                 for (Persona persona : Clinica.getInstance().getMisPersonas()) {
-                    if(persona.getRangoUser() == 3) {
+                    if (persona.getRangoUser() == 2) {
                         rows[0] = persona.getCodigo();
                         rows[1] = persona.getNombre();
                         rows[2] = persona.getApellidos();
                         rows[3] = (persona.getFechaNacimiento() != null) ? dateFormatter.format(persona.getFechaNacimiento()) : "";
-                        model.addRow(rows);    
+                        model.addRow(rows);
                     }
                 }
                 break;
-            case "Doctor": // Doctor
+            case "Doctor":
                 for (Persona persona : Clinica.getInstance().getMisPersonas()) {
                     if (persona instanceof Doctor) {
                         rows[0] = persona.getCodigo();
@@ -236,23 +236,23 @@ public class ListarPersona extends JDialog {
                         rows[2] = persona.getApellidos();
                         rows[3] = (persona.getFechaNacimiento() != null) ? dateFormatter.format(persona.getFechaNacimiento()) : "";
                         rows[4] = ((Doctor) persona).getEspecialidad();
-                        rows[5] = ((Doctor) persona).isEnServicio() ? "Sí" : "No";
-                        model.addRow(rows);    
+                        rows[5] = ((Doctor) persona).isEnServicio() ? "S�" : "No";
+                        model.addRow(rows);
                     }
                 }
                 break;
-            case "Persona": //Persona
+            case "Persona":
                 for (Persona persona : Clinica.getInstance().getMisPersonas()) {
-                    if (persona.getRangoUser() == 1 && !(persona instanceof Paciente)) {
+                    if (persona.getRangoUser() == 5 && !(persona instanceof Paciente)) {
                         rows[0] = persona.getCodigo();
                         rows[1] = persona.getNombre();
                         rows[2] = persona.getApellidos();
                         rows[3] = (persona.getFechaNacimiento() != null) ? dateFormatter.format(persona.getFechaNacimiento()) : "";
-                        model.addRow(rows);    
+                        model.addRow(rows);
                     }
                 }
                 break;
-            case "Paciente": //Paciente
+            case "Paciente":
                 for (Persona persona : Clinica.getInstance().getMisPersonas()) {
                     if (persona instanceof Paciente) {
                         rows[0] = persona.getCodigo();
@@ -260,43 +260,62 @@ public class ListarPersona extends JDialog {
                         rows[2] = persona.getApellidos();
                         rows[3] = (persona.getFechaNacimiento() != null) ? dateFormatter.format(persona.getFechaNacimiento()) : "";
                         rows[4] = ((Paciente) persona).getTipoSangre();
-                        model.addRow(rows);    
+                        model.addRow(rows);
                     }
                 }
                 break;
-            case "Todos": //Todos
+            case "Todos":
                 for (Persona persona : Clinica.getInstance().getMisPersonas()) {
                     rows[0] = persona.getCodigo();
                     rows[1] = persona.getNombre();
                     rows[2] = persona.getApellidos();
                     rows[3] = (persona.getFechaNacimiento() != null) ? dateFormatter.format(persona.getFechaNacimiento()) : "";
-                    model.addRow(rows);    
+                    model.addRow(rows);
                 }
                 break;
             default:
-                System.out.println(index);
+                System.out.println("Opci�n no reconocida: " + option);
                 break;
         }
     }
 
+    
+    
     private void usuarioLogged() {
         if (Clinica.getInstance().loggedUser != null) {
-            if (Clinica.getInstance().loggedUser.getRangoUser() == 4) {
-                cbxListar.setModel(new DefaultComboBoxModel(new String[] {"<Seleccione>", "Administrador", "Secretario", "Doctor", "Persona", "Paciente", "Todos"}));
-                btnModificar.setEnabled(true);
-                btnEliminar.setEnabled(true);
-            } else if (Clinica.getInstance().loggedUser.getRangoUser() == 3) {
-                cbxListar.setModel(new DefaultComboBoxModel(new String[] {"<Seleccione>","Doctor", "Persona"}));
-            } else if (Clinica.getInstance().loggedUser.getRangoUser() == 2) {
-                cbxListar.setModel(new DefaultComboBoxModel(new String[] {"<Seleccione>", "Doctor", "Persona", "Paciente"}));
-            }
-
-            if(Clinica.getInstance().loggedUser.getRangoUser() != 4 || Clinica.getInstance().loggedUser.getRangoUser() != 3 ) {
-                btnModificar.setEnabled(false);
-                btnEliminar.setEnabled(false);
+            int rango = Clinica.getInstance().loggedUser.getRangoUser();
+            switch (rango) {
+                case 1: // Administrador
+                    cbxListar.setModel(new DefaultComboBoxModel<>(new String[] {"<Seleccione>", "Administrador", "Secretario", "Doctor", "Paciente", "Persona", "Todos"}));
+                    btnModificar.setEnabled(true);
+                    btnEliminar.setEnabled(true);
+                    break;
+                case 2: // Secretario
+                    cbxListar.setModel(new DefaultComboBoxModel<>(new String[] {"<Seleccione>", "Doctor", "Persona"}));
+                    btnModificar.setEnabled(false);
+                    btnEliminar.setEnabled(false);
+                    break;
+                case 3: // Doctor
+                    cbxListar.setModel(new DefaultComboBoxModel<>(new String[] {"<Seleccione>", "Doctor", "Persona", "Paciente"}));
+                    btnModificar.setEnabled(false);
+                    btnEliminar.setEnabled(false);
+                    break;
+                case 4: // Paciente
+                    cbxListar.setModel(new DefaultComboBoxModel<>(new String[] {"<Seleccione>", "Doctor", "Paciente"}));
+                    btnModificar.setEnabled(false);
+                    btnEliminar.setEnabled(false);
+                    break;
+                case 5: // Persona
+                    cbxListar.setModel(new DefaultComboBoxModel<>(new String[] {"<Seleccione>", "Doctor", "Paciente"}));
+                    btnModificar.setEnabled(false);
+                    btnEliminar.setEnabled(false);
+                    break;
+                default:
+                    break;
             }
         }
     }
+
 
     public JTable getTable(String modo) {
         int temp = buscarIndexByTexto(modo);
@@ -305,6 +324,7 @@ public class ListarPersona extends JDialog {
         loadPersona(temp);
         return table;
     }
+    
     private static int buscarIndexByTexto(String modo) {
         int indice = 0;
         int i = 0;

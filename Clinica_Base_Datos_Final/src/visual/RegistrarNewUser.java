@@ -332,119 +332,120 @@ public class RegistrarNewUser extends JDialog {
 				}
 				
 				btnRegistar.addActionListener(new ActionListener() {
+				   
 					public void actionPerformed(ActionEvent e) {
-						if(p == null) {
-							Persona aux = null;
-							String codigo = txtCodigo.getText();
-							String cedula = txtCedula.getText();
-							String nombre = txtNombre.getText();
-							String apellidos = txtApellido.getText();
-							Date fecNacim = dateChooser.getDate();
-							String sexo = cbxSexo.getSelectedItem().toString();
-							String userName = txtUser.getText();
-							String password = txtpassword.getText();
-							
-							if (Clinica.getInstance().existUserName(userName)) {
-			                    
-								JOptionPane.showMessageDialog(null, " El nombre de usuario ya esta en uso.", "Error", JOptionPane.ERROR_MESSAGE);
-								
-			                } else {
-								
-			                	if(rdbtnAdministrador.isSelected()) {
-									aux = new Persona(codigo,cedula,nombre,apellidos,fecNacim,sexo,userName,password,4);
-								} 
-								if (rdbtnSecretaria.isSelected()) {
-									aux = new Persona(codigo,cedula,nombre,apellidos,fecNacim,sexo,userName,password,3);
-								}
-								if (rdbtnDoctor.isSelected()) {
-									String especialidad = txtEspecialidad.getText();
-									boolean disponible = rdbtnSi.isSelected() ? true : false; 
-									aux = new Doctor(codigo,cedula,nombre,apellidos,fecNacim,sexo,userName,password,2,especialidad,disponible);
-								}
-								if (rdbtnPersona.isSelected()) {
-									aux = new Persona(codigo,cedula,nombre,apellidos,fecNacim,sexo,userName,password,1);
-								}
-								if (rdbtnPaciente.isSelected()) {
-									String tipoSangre = cbxTipoSangre.getSelectedItem().toString();
-									aux = new Paciente(codigo,cedula,nombre,apellidos,fecNacim,sexo,userName,password,0,null,tipoSangre);
-									
-									UIManager.put("OptionPane.okButtonText", "Continuar");				   
-							        JOptionPane.showMessageDialog(null, "Necesitas agragar una vivienda!", "Agragar Vivienda", JOptionPane.INFORMATION_MESSAGE);
-							        
-									RegistrarVivienda regVivienda = new RegistrarVivienda();
-									regVivienda.setModal(true);
-									regVivienda.setVisible(true);
-									//((Paciente)aux).setMiVivienda(regVivienda.getViviendaSeleccionada());
-								}
-								JOptionPane.showMessageDialog(null, "Usuario registrado con Exito", "Registrar Persona", JOptionPane.INFORMATION_MESSAGE);
-								Clinica.getInstance().insertarPersona(aux);
-								clean();
-			                }
-							
-						} else {
-							Persona aux = null;
-							String codigo = txtCodigo.getText();
-							String cedula = txtCedula.getText();
-							String nombre = txtNombre.getText();
-							String apellidos = txtApellido.getText();
-							Date fecNacim = dateChooser.getDate();
-							String sexo = cbxSexo.getSelectedItem().toString();
-							String userName = txtUser.getText();
-							String password = txtpassword.getText();
-							
-							String userNameAntiguo = (p != null) ? p.getUser() : null;
-							
-					       if (!Objects.equals(userName, userNameAntiguo) && Clinica.getInstance().existUserName(userName)) {
-					    	   
-					    	   JOptionPane.showMessageDialog(null, " El nombre de usuario ya esta en uso.", "Error", JOptionPane.ERROR_MESSAGE);
-					    	   
-					       } else {
-					    	   
-								if(p instanceof Doctor) {
-									((Doctor)p).setEspecialidad(txtEspecialidad.getText());
-								    ((Doctor)p).setEnServicio(rdbtnSi.isSelected());
-								} else if (p instanceof Paciente) {
-									((Paciente)p).setTipoSangre(cbxTipoSangre.getSelectedItem().toString());
-								}
-								  
-								if(rdbtnAdministrador.isSelected()) {
-									aux = new Persona(codigo,cedula,nombre,apellidos,fecNacim,sexo,userName,password,4);
-								} 
-								if (rdbtnSecretaria.isSelected()) {
-									aux = new Persona(codigo,cedula,nombre,apellidos,fecNacim,sexo,userName,password,3);
-								}
-								if (rdbtnDoctor.isSelected()) {
-									String especialidad = txtEspecialidad.getText();
-									boolean disponible = rdbtnSi.isSelected() ? true : false; 
-									aux = new Doctor(codigo,cedula,nombre,apellidos,fecNacim,sexo,userName,password,2,especialidad,disponible);
-								}
-								if (rdbtnPersona.isSelected()) {
-									aux = new Persona(codigo,cedula,nombre,apellidos,fecNacim,sexo,userName,password,1);
-								}
-								if (rdbtnPaciente.isSelected()) {
-									Vivienda v = ((Paciente)p).getMiVivienda();
-									String tipoSangre = cbxTipoSangre.getSelectedItem().toString();
-									aux = new Paciente(codigo,cedula,nombre,apellidos,fecNacim,sexo,userName,password,0,v,tipoSangre);
-									
-									String[] opciones = {"Si", "No"};
-									int respuesta = JOptionPane.showOptionDialog(null, "Necesitas cambiar de vivienda?", "Modificar Vivienda", JOptionPane.YES_NO_OPTION, 
-													JOptionPane.INFORMATION_MESSAGE, null, opciones, opciones[0]);
-							       
-							        if(respuesta == JOptionPane.YES_NO_OPTION) {
-							        	RegistrarVivienda regVivienda = new RegistrarVivienda();
-										regVivienda.setModal(true);
-										regVivienda.setVisible(true);
-										//((Paciente)aux).setMiVivienda(regVivienda.getViviendaSeleccionada());
-							        }	
-								}
-							    JOptionPane.showMessageDialog(null, "Usuario modificado con exito", "Modificar Persona", JOptionPane.INFORMATION_MESSAGE);
-							    ListarPersona.loadPersona(ListarPersona.index);
-							    Clinica.getInstance().actualizarPersona(aux);
-							    dispose();
-			               }
-						}	
-					}
+				        if (p == null) {
+				            Persona aux = null;
+				            String codigo = txtCodigo.getText();
+				            String cedula = txtCedula.getText();
+				            String nombre = txtNombre.getText();
+				            String apellidos = txtApellido.getText();
+				            Date fecNacim = dateChooser.getDate();
+				            String sexo = cbxSexo.getSelectedItem().toString();
+				            String userName = txtUser.getText();
+				            String password = txtpassword.getText();
+				            
+				            if (Clinica.getInstance().existUserName(userName)) {
+				                
+				                JOptionPane.showMessageDialog(null, "El nombre de usuario ya está en uso.", "Error", JOptionPane.ERROR_MESSAGE);
+				                
+				            } else {
+				                
+				                if (rdbtnAdministrador.isSelected()) {
+				                    aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 1);
+				                } 
+				                if (rdbtnSecretaria.isSelected()) {
+				                    aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 2);
+				                }
+				                if (rdbtnDoctor.isSelected()) {
+				                    String especialidad = txtEspecialidad.getText();
+				                    boolean disponible = rdbtnSi.isSelected();
+				                    aux = new Doctor(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 3, especialidad, disponible);
+				                }
+				                if (rdbtnPersona.isSelected()) {
+				                    aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 5);
+				                }
+				                if (rdbtnPaciente.isSelected()) {
+				                    String tipoSangre = cbxTipoSangre.getSelectedItem().toString();
+				                    aux = new Paciente(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 4, null, tipoSangre);
+				                    
+				                    UIManager.put("OptionPane.okButtonText", "Continuar");                   
+				                    JOptionPane.showMessageDialog(null, "Necesitas agregar una vivienda!", "Agregar Vivienda", JOptionPane.INFORMATION_MESSAGE);
+				                    
+				                    RegistrarVivienda regVivienda = new RegistrarVivienda();
+				                    regVivienda.setModal(true);
+				                    regVivienda.setVisible(true);
+				                    //((Paciente)aux).setMiVivienda(regVivienda.getViviendaSeleccionada());
+				                }
+				                JOptionPane.showMessageDialog(null, "Usuario registrado con éxito", "Registrar Persona", JOptionPane.INFORMATION_MESSAGE);
+				                Clinica.getInstance().insertarPersona(aux);
+				                clean();
+				            }
+				        } else {
+				            Persona aux = null;
+				            String codigo = txtCodigo.getText();
+				            String cedula = txtCedula.getText();
+				            String nombre = txtNombre.getText();
+				            String apellidos = txtApellido.getText();
+				            Date fecNacim = dateChooser.getDate();
+				            String sexo = cbxSexo.getSelectedItem().toString();
+				            String userName = txtUser.getText();
+				            String password = txtpassword.getText();
+				            
+				            String userNameAntiguo = (p != null) ? p.getUser() : null;
+				            
+				            if (!Objects.equals(userName, userNameAntiguo) && Clinica.getInstance().existUserName(userName)) {
+				                
+				                JOptionPane.showMessageDialog(null, "El nombre de usuario ya está en uso.", "Error", JOptionPane.ERROR_MESSAGE);
+				                
+				            } else {
+				                
+				                if (p instanceof Doctor) {
+				                    ((Doctor)p).setEspecialidad(txtEspecialidad.getText());
+				                    ((Doctor)p).setEnServicio(rdbtnSi.isSelected());
+				                } else if (p instanceof Paciente) {
+				                    ((Paciente)p).setTipoSangre(cbxTipoSangre.getSelectedItem().toString());
+				                }
+				                
+				                if (rdbtnAdministrador.isSelected()) {
+				                    aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 1);
+				                } 
+				                if (rdbtnSecretaria.isSelected()) {
+				                    aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 2);
+				                }
+				                if (rdbtnDoctor.isSelected()) {
+				                    String especialidad = txtEspecialidad.getText();
+				                    boolean disponible = rdbtnSi.isSelected();
+				                    aux = new Doctor(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 3, especialidad, disponible);
+				                }
+				                if (rdbtnPersona.isSelected()) {
+				                    aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 5);
+				                }
+				                if (rdbtnPaciente.isSelected()) {
+				                    Vivienda v = ((Paciente)p).getMiVivienda();
+				                    String tipoSangre = cbxTipoSangre.getSelectedItem().toString();
+				                    aux = new Paciente(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 4, v, tipoSangre);
+				                    
+				                    String[] opciones = {"Sí", "No"};
+				                    int respuesta = JOptionPane.showOptionDialog(null, "Necesitas cambiar de vivienda?", "Modificar Vivienda", JOptionPane.YES_NO_OPTION, 
+				                                    JOptionPane.INFORMATION_MESSAGE, null, opciones, opciones[0]);
+				                    
+				                    if (respuesta == JOptionPane.YES_OPTION) {
+				                        RegistrarVivienda regVivienda = new RegistrarVivienda();
+				                        regVivienda.setModal(true);
+				                        regVivienda.setVisible(true);
+				                        //((Paciente)aux).setMiVivienda(regVivienda.getViviendaSeleccionada());
+				                    }    
+				                }
+				                JOptionPane.showMessageDialog(null, "Usuario modificado con éxito", "Modificar Persona", JOptionPane.INFORMATION_MESSAGE);
+				                ListarPersona.loadPersona(ListarPersona.index);
+				                Clinica.getInstance().actualizarPersona(aux);
+				                dispose();
+				            }
+				        }   
+				    }
 				});
+				
 				btnRegistar.setActionCommand("OK");
 				buttonPane.add(btnRegistar);
 				getRootPane().setDefaultButton(btnRegistar);
@@ -464,47 +465,56 @@ public class RegistrarNewUser extends JDialog {
 		usuarioLogged();
 		loadPersonas();
 	}
-	
+
 	private void usuarioLogged() {
-		 if (Clinica.getInstance().loggedUser != null) {
-			 if(Clinica.getInstance().loggedUser.getRangoUser() == 4) {
-				 rdbtnPaciente.setEnabled(false);
-			 } 
-			 if (Clinica.getInstance().loggedUser.getRangoUser() == 3) {
-				 rdbtnAdministrador.setEnabled(false);
-				 rdbtnPaciente.setEnabled(false);
-				 rdbtnSecretaria.setEnabled(false);
-				 rdbtnDoctor.setEnabled(false);
-				 rdbtnPersona.setSelected(true);
-				 rdbtnAdministrador.setSelected(false);
-			 }
-			 if (Clinica.getInstance().loggedUser.getRangoUser() == 2) {
-				 rdbtnAdministrador.setEnabled(false);
-				 rdbtnSecretaria.setEnabled(false);
-				 rdbtnDoctor.setEnabled(false);
-				 rdbtnPersona.setSelected(true);
-				 rdbtnAdministrador.setSelected(false);
-			 }
-		 }
+	    if (Clinica.getInstance().loggedUser != null) {
+	        if (Clinica.getInstance().loggedUser.getRangoUser() == 1) {
+	            rdbtnPaciente.setEnabled(false);
+	        } 
+	        if (Clinica.getInstance().loggedUser.getRangoUser() == 2) {
+	            rdbtnAdministrador.setEnabled(false);
+	            rdbtnPaciente.setEnabled(false);
+	            rdbtnSecretaria.setEnabled(false);
+	            rdbtnDoctor.setEnabled(false);
+	            rdbtnPersona.setSelected(true);
+	            rdbtnAdministrador.setSelected(false);
+	        }
+	        if (Clinica.getInstance().loggedUser.getRangoUser() == 3) {
+	            rdbtnAdministrador.setEnabled(false);
+	            rdbtnSecretaria.setEnabled(false);
+	            rdbtnDoctor.setEnabled(false);
+	            rdbtnPersona.setSelected(true);
+	            rdbtnAdministrador.setSelected(false);
+	        }
+	        if (Clinica.getInstance().loggedUser.getRangoUser() == 4) {
+	            rdbtnAdministrador.setEnabled(false);
+	            rdbtnSecretaria.setEnabled(false);
+	            rdbtnDoctor.setEnabled(false);
+	            rdbtnPersona.setEnabled(false);
+	            rdbtnPersona.setSelected(true);
+	            rdbtnAdministrador.setSelected(false);
+	        }
+	    }
 	}
 	
 	private void clean() {
-		txtCodigo.setText("" + Clinica.getInstance().codPersona);
-        txtCedula.setText("");
-        txtNombre.setText("");
-        txtApellido.setText("");
-        txtUser.setText("");
-        txtpassword.setText("");
-        txtEspecialidad.setText("");
-        dateChooser.setDate(null);
-        cbxTipoSangre.setSelectedItem("<Seleccione>");
-        cbxSexo.setSelectedItem("<Seleccione>");
-        dateChooser.setDate(null);
+	    txtCodigo.setText("" + Clinica.getInstance().codPersona);
+	    txtCedula.setText("");
+	    txtNombre.setText("");
+	    txtApellido.setText("");
+	    txtUser.setText("");
+	    txtpassword.setText("");
+	    txtEspecialidad.setText("");
+	    dateChooser.setDate(null);
+	    cbxTipoSangre.setSelectedItem("<Seleccione>");
+	    cbxSexo.setSelectedItem("<Seleccione>");
+	    dateChooser.setDate(null);
 	}
-	
+
 	private void loadPersonas() {
-		if(p != null) {
-			txtCodigo.setText(p.getCodigo());
+	    
+		if (p != null) {
+	        txtCodigo.setText(p.getCodigo());
 	        txtCedula.setText(p.getCedula());
 	        txtNombre.setText(p.getNombre());
 	        txtApellido.setText(p.getApellidos());
@@ -512,58 +522,75 @@ public class RegistrarNewUser extends JDialog {
 	        txtUser.setText(p.getUser());
 	        txtpassword.setText(p.getPassword());
 	        cbxSexo.setSelectedItem(p.getGenero());
-			
-	        if(p instanceof Doctor) { //Doctor
-	        	txtEspecialidad.setText(((Doctor)p).getEspecialidad());
-	        	rdbtnSi.setSelected(((Doctor) p).isEnServicio());
-	        	rdbtnNo.setSelected(!((Doctor) p).isEnServicio());
-	        } else if (p instanceof Paciente) { //Paciente
-	        	cbxTipoSangre.setSelectedItem(((Paciente) p).getTipoSangre());
-	        }
 	        
-	        if (p.getRangoUser() == 4) { //Admin
-	        	rdbtnAdministrador.setSelected(true);
-		        rdbtnSecretaria.setSelected(false);
-		        rdbtnPersona.setSelected(false);
-		        rdbtnPaciente.setSelected(false);
-		        rdbtnDoctor.setSelected(false);
-		        panelPaciente.setVisible(false);
-		        panelDoctor.setVisible(false);
-	        } else if (p.getRangoUser() == 3) { //Secretario
-	        	rdbtnSecretaria.setSelected(true);
-	        	rdbtnAdministrador.setSelected(false);
-		        rdbtnPersona.setSelected(false);
-		        rdbtnPaciente.setSelected(false);
-		        rdbtnDoctor.setSelected(false);
-		        panelPaciente.setVisible(false);
-		        panelDoctor.setVisible(false);
-	        } else if (p.getRangoUser() == 2) { //Doctor
-	        	rdbtnDoctor.setSelected(true);
-				rdbtnAdministrador.setSelected(false);
-		        rdbtnSecretaria.setSelected(false);
-		        rdbtnPersona.setSelected(false);
-		        rdbtnPaciente.setSelected(false);
-		        panelCredenciales.setVisible(true);
-		        panelPaciente.setVisible(false);
-		        panelDoctor.setVisible(true);
-	        } else if (p.getRangoUser() == 1) { //Persona
-	        	rdbtnPersona.setSelected(true);
-				rdbtnPaciente.setSelected(false);
-		        rdbtnAdministrador.setSelected(false);
-		        rdbtnSecretaria.setSelected(false);
-		        rdbtnDoctor.setSelected(false);
-		        panelPaciente.setVisible(false);
-		        panelDoctor.setVisible(false);
-	        } else if (p.getRangoUser() == 0) { //Paciente
-		        rdbtnPaciente.setSelected(true);
-				rdbtnAdministrador.setSelected(false);
-		        rdbtnSecretaria.setSelected(false);
-		        rdbtnPersona.setSelected(false);
-		        rdbtnDoctor.setSelected(false);
-		        panelCredenciales.setVisible(true);
-		        panelPaciente.setVisible(true);
-		        panelDoctor.setVisible(false);
-	        }   
-		}
+	        if (p instanceof Doctor) { //Doctor
+	            txtEspecialidad.setText(((Doctor)p).getEspecialidad());
+	            rdbtnSi.setSelected(((Doctor)p).isEnServicio());
+	            rdbtnNo.setSelected(!((Doctor)p).isEnServicio());
+	            
+	        } else if (p instanceof Paciente) { //Paciente
+	            cbxTipoSangre.setSelectedItem(((Paciente)p).getTipoSangre());
+	            panelPaciente.setVisible(true);
+	            panelDoctor.setVisible(false);
+	            
+	        } else if (p instanceof Persona) { //Persona
+	            rdbtnPersona.setSelected(true);
+	            rdbtnAdministrador.setSelected(false);
+	            rdbtnSecretaria.setSelected(false);
+	            rdbtnPaciente.setSelected(false);
+	            rdbtnDoctor.setSelected(false);
+	            panelPaciente.setVisible(false);
+	            panelDoctor.setVisible(false);
+	            
+	        } else if (p.getRangoUser() == 1) { //Administrador
+	            rdbtnAdministrador.setSelected(true);
+	            rdbtnSecretaria.setSelected(false);
+	            rdbtnPersona.setSelected(false);
+	            rdbtnPaciente.setSelected(false);
+	            rdbtnDoctor.setSelected(false);
+	            panelPaciente.setVisible(false);
+	            panelDoctor.setVisible(false);
+	            
+	        } else if (p.getRangoUser() == 2) { //Secretario
+	            rdbtnSecretaria.setSelected(true);
+	            rdbtnAdministrador.setSelected(false);
+	            rdbtnPersona.setSelected(false);
+	            rdbtnPaciente.setSelected(false);
+	            rdbtnDoctor.setSelected(false);
+	            panelPaciente.setVisible(false);
+	            panelDoctor.setVisible(false);
+	            
+	        } else if (p.getRangoUser() == 3) { //Doctor
+	            rdbtnDoctor.setSelected(true);
+	            rdbtnSecretaria.setSelected(false);
+	            rdbtnAdministrador.setSelected(false);
+	            rdbtnPersona.setSelected(false);
+	            rdbtnPaciente.setSelected(false);
+	            panelPaciente.setVisible(false);
+	            panelDoctor.setVisible(true);
+	            
+	        } else if (p.getRangoUser() == 4) { //Paciente
+	            rdbtnPaciente.setSelected(true);
+	            rdbtnAdministrador.setSelected(false);
+	            rdbtnSecretaria.setSelected(false);
+	            rdbtnPersona.setSelected(false);
+	            rdbtnDoctor.setSelected(false);
+	            panelPaciente.setVisible(true);
+	            panelDoctor.setVisible(false);
+	            
+	        } else if (p.getRangoUser() == 5) { //Persona
+	            rdbtnPersona.setSelected(true);
+	            rdbtnAdministrador.setSelected(false);
+	            rdbtnSecretaria.setSelected(false);
+	            rdbtnPaciente.setSelected(false);
+	            rdbtnDoctor.setSelected(false);
+	            panelPaciente.setVisible(false);
+	            panelDoctor.setVisible(false);
+	            
+	        }
+	    }
 	}
+	
+	
+	
 }

@@ -447,33 +447,49 @@ public class PrincipalVisual extends JFrame {
 	            }
 	        }
 	    }
-	    	    
+	    
 	    try {
-	        if (Clinica.getInstance().loggedUser != null && Clinica.getInstance().loggedUser.getRangoUser() != 0) { // Persona
-	            if (Clinica.getInstance().loggedUser.getRangoUser() == 4) { // Admin
-	                enablePanelAndButtons(panel_Vivienda);
-	                enablePanelAndButtons(panel_Persona);
-	                enablePanelAndButtons(panel_Enfermedad);
-	                enablePanelAndButtons(panel_Vacuna);
-	                enablePanelAndButtons(panel_Reporte);
-	            } else if (Clinica.getInstance().loggedUser.getRangoUser() == 3) { // Secretario
-	                enablePanelAndButtons(panel_Persona);
-	                enablePanelAndButtons(panel_Cita);
-	                enablePanelAndButtons(panel_Historia);
-	                enablePanelAndButtons(panel_Reporte);
-	                enablePanelAndButtons(panel_Vivienda);
-	            } else if (Clinica.getInstance().loggedUser.getRangoUser() == 2) { // Doctor
-	                enablePanelAndButtons(panel_Persona);
-	                enablePanelAndButtons(panel_Cita);
-	                enablePanelAndButtons(panel_Consulta);
-	                enablePanelAndButtons(panel_Historia);
-	                enablePanelAndButtons(panel_Vivienda);
-	                enablePanelAndButtons(panel_Enfermedad);
-	            } else { // Paciente
-	                enablePanelAndButtons(panel_Historia);
+	        if (Clinica.getInstance().loggedUser != null) {
+	            int rango = Clinica.getInstance().loggedUser.getRangoUser();
+	            switch (rango) {
+	                case 1: // Administrador
+	                    enablePanelAndButtons(panel_Persona);
+	                    //enablePanelAndButtons(panel_Cita);
+	                    //enablePanelAndButtons(panel_Consulta);
+	                    enablePanelAndButtons(panel_Historia);
+	                    enablePanelAndButtons(panel_Vivienda);
+	                    enablePanelAndButtons(panel_Enfermedad);
+	                    enablePanelAndButtons(panel_Vacuna);
+	                    enablePanelAndButtons(panel_Reporte);
+	                    break;
+	                case 2: // Secretario
+	                    enablePanelAndButtons(panel_Persona);
+	                    enablePanelAndButtons(panel_Cita);
+	                    enablePanelAndButtons(panel_Historia);
+	                    enablePanelAndButtons(panel_Reporte);
+	                    enablePanelAndButtons(panel_Vivienda);
+	                    break;
+	                case 3: // Doctor
+	                    enablePanelAndButtons(panel_Persona);
+	                    enablePanelAndButtons(panel_Cita);
+	                    enablePanelAndButtons(panel_Consulta);
+	                    enablePanelAndButtons(panel_Historia);
+	                    enablePanelAndButtons(panel_Vivienda);
+	                    enablePanelAndButtons(panel_Enfermedad);
+	                    break;
+	                case 4: // Paciente
+	                    enablePanelAndButtons(panel_Historia);
+	                    break;
+	                case 5: // Persona
+	                    // No necesita habilitar paneles
+	                    break;
+	                default:
+	                    System.out.println("Rango no reconocido: " + rango);
+	                    break;
 	            }
 	        }
 	    } catch (NullPointerException e) {
+	        e.printStackTrace();
 	    }
 	}
 	

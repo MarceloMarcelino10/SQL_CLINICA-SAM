@@ -150,7 +150,7 @@ public class CrearVivienda extends JDialog {
 	}
 	
 	private void usuarioLogged() {
-		if(Clinica.getInstance().loggedUser.getRangoUser() != 4) {
+		if(Clinica.getInstance().loggedUser.getRangoUser() != 1) {
 			btnRegistrar.setEnabled(false);
 		} else {
 			btnRegistrar.setEnabled(true);

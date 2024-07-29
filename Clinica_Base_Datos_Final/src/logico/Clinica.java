@@ -1155,22 +1155,23 @@ public class Clinica implements Serializable  {//u
             e.printStackTrace();
         }
     }
-    
-    private int obtenerRango(String rango) { // EN EL PROGRMA DE JAVA: 4 ADMIN, 3 SECRETARIO, 2 DOCTOR, 1 PACIENTE, 0 PERSONA
-	    
-        switch (rango) {
-            case "Administrador":
-                return 4;
+	  
+    private int obtenerRango(String rango) { // Corresponde al valor en la base de datos(nuevo) // EN EL PROGRMA DE JAVA: 4 ADMIN, 3 SECRETARIO, 2 DOCTOR, 1 PACIENTE, 0 PERSONA(viejo)
+        
+    	switch (rango) {
+        	case "Administrador":
+                return 1; 
             case "Secretario":
-                return 3;
-            case "Doctor":
                 return 2;
-            case "Persona":
-                return 1;
-            default: // Paciente
+            case "Doctor":
+                return 3;
+            case "Paciente":
+                return 4;
+            default: // Persona
                 return 5;
         }
     }
+
 
     //ENFERMEDADES:
     
