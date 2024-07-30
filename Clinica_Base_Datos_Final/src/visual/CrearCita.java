@@ -73,7 +73,7 @@ public class CrearCita extends JDialog {
 
         JLabel lblHoraCita = new JLabel("Hora de la cita:");
         spnHoraCita = new JSpinner();
-        spnHoraCita.setModel(new SpinnerDateModel(new Date(), null, null, Calendar.HOUR_OF_DAY));
+        spnHoraCita.setModel(new SpinnerDateModel(new Date(), null, null, Calendar.MINUTE));
         JSpinner.DateEditor de_spnHoraCita = new JSpinner.DateEditor(spnHoraCita, "HH:mm");
         spnHoraCita.setEditor(de_spnHoraCita);
 
@@ -105,14 +105,12 @@ public class CrearCita extends JDialog {
         JLabel lblPersona = new JLabel("Persona:");
         comboBoxPersona = new JComboBox<>();
         for (Persona persona : Clinica.getInstance().getMisPersonas()) {
-            if (!(persona instanceof Paciente || persona instanceof Doctor)) {
-                comboBoxPersona.addItem(persona);
-            }
+            comboBoxPersona.addItem(persona); // Añadir todas las personas, incluidas Pacientes y Doctores
         }
         comboBoxPersona.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                super.getListCellRendererComponent(list, value, index, isSelected, isSelected);
                 if (value instanceof Persona) {
                     Persona persona = (Persona) value;
                     setText(persona.getNombre() + " " + persona.getApellidos());
@@ -210,22 +208,6 @@ public class CrearCita extends JDialog {
         if (selectedPersona != null && selectedDoctor != null && fecha != null && hora != null) {
             String codigo = txtCodigoCita.getText();
 
-            // Convertir Persona a Paciente
-            Paciente nuevoPaciente = new Paciente(
-                selectedPersona.getCodigo(), 
-                selectedPersona.getCedula(), 
-                selectedPersona.getNombre(), 
-                selectedPersona.getApellidos(), 
-                selectedPersona.getFechaNacimiento(), 
-                selectedPersona.getGenero(), 
-                selectedPersona.getUser(), 
-                selectedPersona.getPassword(), 
-                1, null, null);
-
-            // Actualizar la lista de personas en Clinica
-            Clinica.getInstance().eliminarPersona(selectedPersona);
-            Clinica.getInstance().insertarPersona(nuevoPaciente);
-
             // Combinar fecha y hora
             Calendar fechaHora = Calendar.getInstance();
             fechaHora.setTime(fecha);
@@ -236,21 +218,14 @@ public class CrearCita extends JDialog {
 
             Cita cita = Clinica.getInstance().buscarCitaById(codigo);
             if (cita == null) {
-                cita = new Cita(codigo, nuevoPaciente, selectedDoctor, fechaHora.getTime(), new Time(fechaHora.getTimeInMillis()));
+                cita = new Cita(codigo, selectedPersona, selectedDoctor, fechaHora.getTime(), new Time(fechaHora.getTimeInMillis()));
                 Clinica.getInstance().insertarCita(cita);
                 Clinica.setCodCita(Clinica.getCodCita() + 1); // Incrementar el código de cita después de insertar una nueva cita
                 JOptionPane.showMessageDialog(null, "Operación satisfactoria", "Registro", JOptionPane.INFORMATION_MESSAGE);
+                limpiarCampos();
             } else {
-                cita.setFechaCita(fechaHora.getTime());
-                cita.setHoraCita(new Time(fechaHora.getTimeInMillis()));
-                cita.setMiPersona(nuevoPaciente);
-                cita.setMiDoctor(selectedDoctor);
-                Clinica.getInstance().actualizarCita(cita);
-                JOptionPane.showMessageDialog(null, "Cita modificada con éxito", "Modificación", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, "La cita con este código ya existe", "Error", JOptionPane.ERROR_MESSAGE);
             }
-
-            // Limpiar campos después de registrar la cita
-            limpiarCampos();
         } else {
             JOptionPane.showMessageDialog(null, "Por favor complete todos los campos", "Error", JOptionPane.ERROR_MESSAGE);
         }

@@ -1301,7 +1301,7 @@ public class Clinica implements Serializable  {//u
                 HistoriaClinica historiaClinica = new HistoriaClinica(codigo, paciente, consultas, vacunasAplicadas);
                 Clinica.getInstance().insertarHistoriaClinica(historiaClinica);
 
-                System.out.println("Historia Clínica ID: " + codigo);
+                System.out.println("Historia Clï¿½nica ID: " + codigo);
                 System.out.println("Paciente ID: " + id_paciente);
             }
 
@@ -1368,7 +1368,7 @@ public class Clinica implements Serializable  {//u
 
                 System.out.println("Consulta ID: " + codigo);
                 System.out.println("Fecha Consulta: " + fechaConsulta);
-                System.out.println("Historial Clínico ID: " + id_historial_clinico);
+                System.out.println("Historial Clï¿½nico ID: " + id_historial_clinico);
                 System.out.println("Doctor ID: " + id_doctor);
                 System.out.println("Cita Solicitada ID: " + id_cita_solicitada);
                 System.out.println("Enfermedades: " + consulta.getMisEnfermedades().size());
@@ -1379,6 +1379,13 @@ public class Clinica implements Serializable  {//u
             e.printStackTrace();
         }
     }
+    
+    public void insertarPaciente(Paciente paciente) {
+        misPersonas.add(paciente);
+        guardarDatos();
+    }
+
+ 
  
     //VACUNAS:
 
@@ -1423,8 +1430,8 @@ public class Clinica implements Serializable  {//u
 
                 System.out.println("Vacuna ID: " + codigo);
                 System.out.println("Nombre: " + nombre);
-                System.out.println("Historia Clínica ID: " + (historiaClinica != null ? historiaClinica.getCodigo() : "No asociada"));
-                System.out.println("Número de Enfermedades: " + vacuna.getMisEnfermedades().size());
+                System.out.println("Historia Clï¿½nica ID: " + (historiaClinica != null ? historiaClinica.getCodigo() : "No asociada"));
+                System.out.println("Nï¿½mero de Enfermedades: " + vacuna.getMisEnfermedades().size());
                 System.out.println();
             }
 
@@ -1435,7 +1442,6 @@ public class Clinica implements Serializable  {//u
     
 }
 
-	
 	
 
 
