@@ -118,7 +118,26 @@ public class ListarConsulta extends JDialog {
                 btnModificar = new JButton("Modificar");
                 btnModificar.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        modificarConsulta();
+                    	
+                    	int selectedRow = table.getSelectedRow();
+                        
+                    	if (selectedRow >= 0) {
+                           
+                    		String codigo = (String) model.getValueAt(selectedRow, 0);
+                            Consulta consulta = Clinica.getInstance().buscarConsultaById(codigo);
+                    		
+                    		RegistrarConsulta modConsulta = new RegistrarConsulta(consulta);
+                    		modConsulta.setModal(true);
+                    		modConsulta.setVisible(true);
+                    		
+                    		
+                    		
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Por favor seleccione una consulta", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                        //modificarConsulta();
+                    	
+                    	
                     }
                 });
                 buttonPane.add(btnModificar);
