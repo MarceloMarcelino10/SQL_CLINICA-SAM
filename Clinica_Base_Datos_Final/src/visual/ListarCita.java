@@ -34,7 +34,7 @@ public class ListarCita extends JDialog {
             dialog.setVisible(true);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }//
     }
 
     public ListarCita() {
