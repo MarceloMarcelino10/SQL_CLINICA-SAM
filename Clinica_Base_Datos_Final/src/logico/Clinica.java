@@ -242,6 +242,15 @@ public class Clinica implements Serializable  {//u
             guardarDatos();
         }            
     }
+	
+	 public void agregarEnfermedad(Enfermedad enfermedad) {
+	        misEnfermedades.add(enfermedad);
+	        // Aquí se debería añadir la lógica para registrar la enfermedad en la base de datos si es necesario
+	    }
+	 
+
+
+	
 
     private int buscarPersonaByIndex(String codigo) {
         int index = -1;

@@ -102,7 +102,7 @@ public class Login_o_Registro extends JFrame {
 	                frame.setVisible(true);
 	            } catch (Exception e) {
 	                e.printStackTrace();
-	                JOptionPane.showMessageDialog(null, "Error al iniciar la aplicación: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+	                JOptionPane.showMessageDialog(null, "Error al iniciar la aplicaciï¿½n: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 	            }
 	        }
 	    });
