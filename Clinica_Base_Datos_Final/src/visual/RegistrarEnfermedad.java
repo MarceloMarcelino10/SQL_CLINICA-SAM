@@ -12,27 +12,20 @@ import logico.Enfermedad;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-import javax.swing.JSeparator;
-import java.awt.Label;
-import java.awt.Choice;
-import java.awt.TextField;
-import java.awt.TextArea;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.border.EtchedBorder;
-import java.awt.Color;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.JTextArea;
-import javax.swing.UIManager;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Toolkit;
 import javax.swing.ImageIcon;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class RegistrarEnfermedad extends JDialog {
-    
+
     private static final long serialVersionUID = 1L;
     private final JPanel contentPanel = new JPanel();
     private Enfermedad tempenfer;
@@ -41,6 +34,7 @@ public class RegistrarEnfermedad extends JDialog {
     private JTextArea txtAreaSintomas;
     private JTextArea txtAreaTratamiento;
     private JComboBox<String> cbxGravedad;
+    private boolean isEditMode = false;
 
     public static void main(String[] args) {
         try {
@@ -53,6 +47,10 @@ public class RegistrarEnfermedad extends JDialog {
     }
 
     public RegistrarEnfermedad() {
+        this(null, null, null, null, 0);
+    }
+
+    public RegistrarEnfermedad(String codigo, String nombre, String sintomas, String tratamiento, int gravedad) {
         setIconImage(Toolkit.getDefaultToolkit().getImage(RegistrarEnfermedad.class.getResource("/imagenes/fotoTituloDeVentana.png")));
         setTitle("Registro Enfermedad");
         setBounds(100, 100, 680, 490);
@@ -73,7 +71,7 @@ public class RegistrarEnfermedad extends JDialog {
         panel_1.setBounds(23, 16, 302, 117);
         panel.add(panel_1);
 
-        JLabel labelCodigo = new JLabel("C骴igo:");
+        JLabel labelCodigo = new JLabel("C贸digo:");
         labelCodigo.setBounds(21, 29, 46, 14);
         panel_1.add(labelCodigo);
 
@@ -120,7 +118,7 @@ public class RegistrarEnfermedad extends JDialog {
         scrollPaneSintomas.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         panel_3.add(scrollPaneSintomas, BorderLayout.CENTER);
 
-        JLabel labelSintomas = new JLabel("S韓tomas:");
+        JLabel labelSintomas = new JLabel("S铆ntomas:");
         labelSintomas.setBounds(136, 149, 71, 14);
         panel.add(labelSintomas);
 
@@ -159,15 +157,21 @@ public class RegistrarEnfermedad extends JDialog {
                 String codigo = txtCodigoEnfermedad.getText();
                 String nombre = txtNombreEnfermedad.getText();
                 String sintomas = txtAreaSintomas.getText();
-                String gravedad = cbxGravedad.getSelectedItem().toString(); 
+                String gravedad = cbxGravedad.getSelectedItem().toString();
                 String tratamiento = txtAreaTratamiento.getText();
 
                 if (nombre.isEmpty() || sintomas.isEmpty() || gravedad.equals("<Seleccionar>") || tratamiento.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos.", "Campos vac韔s", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos.", "Campos vac铆os", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    tempenfer = new Enfermedad(codigo, nombre, sintomas, tratamiento, Integer.parseInt(gravedad.substring(0, 1)));
-                    Clinica.getInstance().insertarDatosEnfermedadSQL(tempenfer);
-                    JOptionPane.showMessageDialog(null, "Operaci髇 Satisfactoria", "Registro Enfermedad", JOptionPane.INFORMATION_MESSAGE);
+                    int gravedadValue = Integer.parseInt(gravedad.substring(0, 1));
+                    tempenfer = new Enfermedad(codigo, nombre, sintomas, tratamiento, gravedadValue);
+                    if (isEditMode) {
+                        Clinica.getInstance().actualizarDatosEnfermedadSQL(tempenfer);
+                        JOptionPane.showMessageDialog(null, "Enfermedad actualizada correctamente", "Modificaci贸n Enfermedad", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        Clinica.getInstance().insertarDatosEnfermedadSQL(tempenfer);
+                        JOptionPane.showMessageDialog(null, "Operaci贸n Satisfactoria", "Registro Enfermedad", JOptionPane.INFORMATION_MESSAGE);
+                    }
                     clean();
                 }
             }
@@ -185,6 +189,16 @@ public class RegistrarEnfermedad extends JDialog {
         });
         cancelButton.setActionCommand("Cancel");
         buttonPane.add(cancelButton);
+
+        // Si se est谩 en modo edici贸n, inicializar los campos con los datos pasados
+        if (codigo != null) {
+            isEditMode = true;
+            txtCodigoEnfermedad.setText(codigo);
+            txtNombreEnfermedad.setText(nombre);
+            txtAreaSintomas.setText(sintomas);
+            txtAreaTratamiento.setText(tratamiento);
+            cbxGravedad.setSelectedIndex(gravedad - 1);
+        }
     }
 
     private void clean() {

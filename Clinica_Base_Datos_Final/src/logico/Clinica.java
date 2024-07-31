@@ -1730,6 +1730,29 @@ public class Clinica implements Serializable  {//u
     }
     
     
+    public void actualizarDatosEnfermedadSQL(Enfermedad enfermedad) {
+        String query = "UPDATE ENFERMEDAD SET nombre = ?, sintomas = ?, tratamiento = ?, id_gravedad_enfermedad = ? WHERE id_enfermedad = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+   
+            stmt.setString(1, enfermedad.getNombre());
+            stmt.setString(2, enfermedad.getSintomas());
+            stmt.setString(3, enfermedad.getTratamiento());
+            stmt.setInt(4, enfermedad.getGravedad());
+            stmt.setString(5, enfermedad.getCodigo());
+            int filas = stmt.executeUpdate();
+            
+            System.out.println("Enfermedades actualizadas: " + filas);
+            // Si necesitas actualizar la instancia en la aplicación, podrías hacerlo aquí también
+             Clinica.getInstance().actualizarEnfermedad(enfermedad);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
 
     
 }

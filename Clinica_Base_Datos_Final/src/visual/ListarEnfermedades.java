@@ -26,6 +26,7 @@ public class ListarEnfermedades extends JDialog {
     private JTable table;
     private DefaultTableModel model;
     private Object[] row;
+    private JButton btnModificar;
 
     public static void main(String[] args) {
 
@@ -78,11 +79,11 @@ public class ListarEnfermedades extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
-                    JOptionPane.showMessageDialog(null, "Por favor, seleccione una enfermedad a eliminar.", "Error de eliminación", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Por favor, seleccione una enfermedad a eliminar.", "Error de eliminaciÃ³n", JOptionPane.ERROR_MESSAGE);
                     
                 } else {
                 	
-                    int dialogResult = JOptionPane.showConfirmDialog(null,"¿Estás seguro que deseas eliminar esta enfermedad?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+                    int dialogResult = JOptionPane.showConfirmDialog(null,"Â¿EstÃ¡s seguro que deseas eliminar esta enfermedad?", "Confirmar eliminaciÃ³n", JOptionPane.YES_NO_OPTION);
 
                     if (dialogResult == JOptionPane.YES_OPTION) {
 
@@ -131,6 +132,31 @@ public class ListarEnfermedades extends JDialog {
                         });
                         buttonPane.add(btnNuevaEnfermedad);
                 buttonPane.add(btnVerMas);
+        
+        btnModificar = new JButton("Modificar");
+        btnModificar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow != -1) {
+                    String codigo = (String) table.getValueAt(selectedRow, 0);
+                    String nombre = (String) table.getValueAt(selectedRow, 1);
+                    String sintomas = (String) table.getValueAt(selectedRow, 2);
+                    String tratamiento = (String) table.getValueAt(selectedRow, 3);
+                    int gravedad = (int) table.getValueAt(selectedRow, 4);
+
+                    // Crear y mostrar la ventana de registro con los datos de la enfermedad seleccionada
+                    RegistrarEnfermedad regEnfermedad = new RegistrarEnfermedad(codigo, nombre, sintomas, tratamiento, gravedad);
+                    regEnfermedad.setModal(true);
+                    regEnfermedad.setVisible(true);
+                    
+                    // Actualizar la tabla despuÃ©s de modificar
+                    cargarEnfermedad();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Por favor, seleccione una enfermedad para modificar.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        buttonPane.add(btnModificar);
 
         buttonPane.add(eliminarButton);
 
