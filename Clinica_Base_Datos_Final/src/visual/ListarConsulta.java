@@ -125,19 +125,14 @@ public class ListarConsulta extends JDialog {
                            
                     		String codigo = (String) model.getValueAt(selectedRow, 0);
                             Consulta consulta = Clinica.getInstance().buscarConsultaById(codigo);
-                    		
-                    		RegistrarConsulta modConsulta = new RegistrarConsulta(consulta);
-                    		modConsulta.setModal(true);
+                            
+                            ModificarConsulta modConsulta = new ModificarConsulta(consulta);
+                            modConsulta.setModal(true);
                     		modConsulta.setVisible(true);
-                    		
-                    		
                     		
                         } else {
                             JOptionPane.showMessageDialog(null, "Por favor seleccione una consulta", "Error", JOptionPane.ERROR_MESSAGE);
                         }
-                        //modificarConsulta();
-                    	
-                    	
                     }
                 });
                 buttonPane.add(btnModificar);
@@ -222,99 +217,6 @@ public class ListarConsulta extends JDialog {
 
         } else {
             JOptionPane.showMessageDialog(null, "Por favor seleccione una consulta", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void modificarConsulta() {
-        int selectedRow = table.getSelectedRow();
-        if (selectedRow >= 0) {
-            String codigo = (String) model.getValueAt(selectedRow, 0);
-            Consulta consulta = Clinica.getInstance().buscarConsultaById(codigo);
-            if (consulta != null) {
-                ModificarConsultaDialog modificarDialog = new ModificarConsultaDialog(this, consulta);
-                modificarDialog.setVisible(true);
-                // Refrescar los datos de la tabla después de la modificación
-                model.setRowCount(0); // Limpiar la tabla
-                loadTableData(); // Cargar datos nuevamente
-            }
-        } else {
-            JOptionPane.showMessageDialog(null, "Por favor seleccione una consulta", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private class ModificarConsultaDialog extends JDialog {
-        private final JPanel contentPanel = new JPanel();
-        private JTextField txtFechaConsulta;
-        private JTextArea txtDiagnostico;
-        private Consulta consulta;
-
-        public ModificarConsultaDialog(JDialog parent, Consulta consulta) {
-            super(parent, "Modificar Consulta", true);
-            this.consulta = consulta;
-            setBounds(100, 100, 450, 300);
-            setLocationRelativeTo(parent);
-            getContentPane().setLayout(new BorderLayout());
-            contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-            getContentPane().add(contentPanel, BorderLayout.CENTER);
-            contentPanel.setLayout(new GridBagLayout());
-
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(5, 5, 5, 5);
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-            gbc.anchor = GridBagConstraints.WEST;
-            contentPanel.add(new JLabel("Fecha Consulta (dd/MM/yyyy):"), gbc);
-
-            gbc.gridx = 1;
-            txtFechaConsulta = new JTextField(20);
-            contentPanel.add(txtFechaConsulta, gbc);
-
-            gbc.gridx = 0;
-            gbc.gridy = 1;
-            contentPanel.add(new JLabel("Diagnóstico:"), gbc);
-
-            gbc.gridx = 1;
-            txtDiagnostico = new JTextArea(5, 20);
-            JScrollPane scrollPane = new JScrollPane(txtDiagnostico);
-            contentPanel.add(scrollPane, gbc);
-
-            // Rellenar campos con datos existentes
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-            txtFechaConsulta.setText(sdf.format(consulta.getFechaConsulta()));
-            txtDiagnostico.setText(consulta.getDiagnostico());
-
-            JPanel buttonPane = new JPanel();
-            buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-            getContentPane().add(buttonPane, BorderLayout.SOUTH);
-
-            JButton okButton = new JButton("OK");
-            okButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    actualizarConsulta();
-                }
-            });
-            buttonPane.add(okButton);
-
-            JButton cancelButton = new JButton("Cancelar");
-            cancelButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    dispose();
-                }
-            });
-            buttonPane.add(cancelButton);
-        }
-
-        private void actualizarConsulta() {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-            try {
-                Date nuevaFecha = sdf.parse(txtFechaConsulta.getText());
-                consulta.setFechaConsulta(nuevaFecha);
-                consulta.setDiagnostico(txtDiagnostico.getText());
-                dispose();
-                JOptionPane.showMessageDialog(this, "Consulta modificada con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            } catch (ParseException e) {
-                JOptionPane.showMessageDialog(this, "Formato de fecha inválido.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
         }
     }
 }

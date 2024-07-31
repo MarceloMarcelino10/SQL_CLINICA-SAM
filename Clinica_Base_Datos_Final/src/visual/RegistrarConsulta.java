@@ -57,7 +57,6 @@ public class RegistrarConsulta extends JDialog {
 	private JPanel panel;
 	private JComboBox cbxVivienda;
 	private JComboBox cbxtipoSangre;
-	private Consulta miConsulta = null;
 	private JButton btnAgregarEnfermedad;
 	private JButton btnQuitarEnfermedad;
 	/**
@@ -65,7 +64,7 @@ public class RegistrarConsulta extends JDialog {
 	 */
 	public static void main(String[] args) {
 		try {
-			RegistrarConsulta dialog = new RegistrarConsulta(null);
+			RegistrarConsulta dialog = new RegistrarConsulta();
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
@@ -76,14 +75,9 @@ public class RegistrarConsulta extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public RegistrarConsulta(Consulta modConsulta) {
-		
-		miConsulta = modConsulta;
-		if (miConsulta == null) {
-			setTitle("Registrar Consulta");
-		} else {
-			setTitle("Modificar Consulta");
-		}
+	public RegistrarConsulta() {
+
+		setTitle("Registrar Consulta");
 		setResizable(false);
 		setBounds(100, 100, 878, 685);
 		setLocationRelativeTo(null);
@@ -259,15 +253,7 @@ public class RegistrarConsulta extends JDialog {
 				btnRegistrar = new JButton("Registrar");
 				btnRegistrar.addActionListener(new ActionListener() {
 				    public void actionPerformed(ActionEvent e) {
-				    	
-				    	if (miConsulta == null) {
-					    	
-					    	registrarConsulta();
-					    	
-				    	} else {
-				    		
-				    		modificarConsulta();
-				    	}
+				    	registrarConsulta();
 				    }
 				});
 				
@@ -289,40 +275,8 @@ public class RegistrarConsulta extends JDialog {
 		loadCita();
 		loadEnfermedades();
 		loadViviendas();
-		checkBotones();
-		
+
 	}
-	
-	public void checkBotones() {
-		
-		if (miConsulta == null) {
-			
-			txtCodigo.setEnabled(true);
-		    txtFecha.setEnabled(true);
-		    txtDoctorLoggeado.setEnabled(true);
-		    txtAreaDiagnostico.setEnabled(true);
-		    cbxEnfermedades.setEnabled(true);
-		    txtAreaEnfermedadesConsultadas.setEnabled(true);
-		    cbxVivienda.setEnabled(true);
-		    cbxtipoSangre.setEnabled(true);
-		    btnAgregarEnfermedad.setEnabled(true);
-		    btnQuitarEnfermedad.setEnabled(true);
-			
-		} else {
-			
-			txtCodigo.setEnabled(false);
-		    txtFecha.setEnabled(false);
-		    txtDoctorLoggeado.setEnabled(false);
-		    txtAreaDiagnostico.setEnabled(true);
-		    cbxEnfermedades.setEnabled(true);
-		    txtAreaEnfermedadesConsultadas.setEnabled(true);
-		    cbxVivienda.setEnabled(false);
-		    cbxtipoSangre.setEnabled(false);
-		    btnAgregarEnfermedad.setEnabled(true);
-		    btnQuitarEnfermedad.setEnabled(true);
-			
-		}
-	}	
 	
 	
 	private void registrarConsulta() {
@@ -405,19 +359,6 @@ public class RegistrarConsulta extends JDialog {
 	
 	// DEBEMOS LLENAR EL TXT AREA CON LAS ENFERMEDADES QUE TIENE miConsulta
 	// Luego de eso debemos asegurarnos de insetar la enfermedades seleccionadas o borradas dentro de mi consulta
-	
-	private void modificarConsulta() {
-		
-		Consulta modConsulta = miConsulta;
-		
-		
-		
-		//enfermedadesLista.(modConsulta.getMisEnfermedades());
-		
-		
-		
-	}
-	
 
 	private void loadCita() {
 		if (Clinica.getInstance() != null && Clinica.getInstance().loggedUser != null) {
@@ -440,59 +381,43 @@ public class RegistrarConsulta extends JDialog {
 	}
 
 	private void loadCampos() {
-		
 	    if (Clinica.getInstance() != null && selected != null) {
 	        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 	        SimpleDateFormat shf = new SimpleDateFormat("hh:mm aa");
-	        //txtCodigo.setText(String.valueOf(Clinica.getInstance().getCodConsulta()));
+	        
+	        txtCodigo.setText(String.valueOf(Clinica.getInstance().getCodConsulta()));
 	        txtFecha.setText(sdf.format(selected.getFechaCita()) + " " + shf.format(selected.getHoraCita()));
-	       // txtDoctorLoggeado.setText(Clinica.getInstance().loggedUser.getNombre() + " " + Clinica.getInstance().loggedUser.getApellidos());
+	        txtDoctorLoggeado.setText(Clinica.getInstance().loggedUser.getNombre() + " " + Clinica.getInstance().loggedUser.getApellidos());
 	        
-	        if (miConsulta == null) {
-	        	
-		        if (selected.getMiPersona() instanceof Paciente) {
-		            Paciente paciente = (Paciente) selected.getMiPersona();
-		            cbxtipoSangre.setSelectedItem(paciente.getTipoSangre());
-		            cbxVivienda.setSelectedItem("V-" + paciente.getMiVivienda().getCodigo() + " " + paciente.getMiVivienda().getDireccion());
+	        // Caso en el que `miConsulta` es null (nueva consulta)
+            if (selected.getMiPersona() instanceof Paciente) {
+                Paciente paciente = (Paciente) selected.getMiPersona();
+                cbxtipoSangre.setSelectedItem(paciente.getTipoSangre());
+                cbxVivienda.setSelectedItem("V-" + paciente.getMiVivienda().getCodigo() + " " + paciente.getMiVivienda().getDireccion());
 
-		            cbxtipoSangre.setEnabled(false);
-		            cbxVivienda.setEnabled(false);
-		        } else {
-		            cbxtipoSangre.setSelectedIndex(0);
-		            cbxVivienda.setSelectedIndex(0);
+                cbxtipoSangre.setEnabled(false);
+                cbxVivienda.setEnabled(false);
+            } else {
+                cbxtipoSangre.setSelectedIndex(0);
+                cbxVivienda.setSelectedIndex(0);
 
-		            cbxtipoSangre.setEnabled(true);
-		            cbxVivienda.setEnabled(true);
-		        }
-	        	
-	        }
-	        
-	        if (miConsulta != null) {
-	        	
-	        	txtCodigo.setText(miConsulta.getCodigo().toString());
-	        	txtDoctorLoggeado.setText(miConsulta.getMiCita().getMiDoctor().getNombre() + " " + miConsulta.getMiCita().getMiDoctor().getApellidos());
-	        	
-	        } else {
-	        	
-	        	txtCodigo.setText(String.valueOf(Clinica.getInstance().getCodConsulta()));
-	        	txtDoctorLoggeado.setText(Clinica.getInstance().loggedUser.getNombre() + " " + Clinica.getInstance().loggedUser.getApellidos());
-	        }
-	        	
-	        	
-	        
+                cbxtipoSangre.setEnabled(true);
+                cbxVivienda.setEnabled(true);
+            }
 	        
 	    }
-		
 	}
+
 
 
 	private void loadEnfermedades() {
 		cbxEnfermedades.removeAllItems();
 		cbxEnfermedades.addItem("<Seleccione>");
-        for (Enfermedad enfermedad : Clinica.getInstance().getMisEnfermedades()) {
+		for (Enfermedad enfermedad : Clinica.getInstance().getMisEnfermedades()) {
         	cbxEnfermedades.addItem("E-" + enfermedad.getCodigo() + " " + enfermedad.getNombre() );
         }
 	}
+	
 
 	private void loadViviendas() {
 		cbxVivienda.removeAllItems();
@@ -547,25 +472,26 @@ public class RegistrarConsulta extends JDialog {
 	}
 
     private void actualizarEnfermedadesConsultadas() {
-        StringBuilder enfermedadesText = new StringBuilder();
-        for (Enfermedad enf : enfermedadesLista) {
-            enfermedadesText.append("E-" + enf.getCodigo() + " " + enf.getNombre()).append("\n");
-        }
+    	StringBuilder enfermedadesText = new StringBuilder();
+    	
+    	for (Enfermedad enf : enfermedadesLista) {
+    		enfermedadesText.append("E-" + enf.getCodigo() + " " + enf.getNombre()).append("\n");
+    	}
         txtAreaEnfermedadesConsultadas.setText(enfermedadesText.toString());
     }
     
     private void clear() {
        
-    	txtCodigo.setText(String.valueOf(Clinica.getInstance().getCodConsulta()));
         txtFecha.setText("");
         txtAreaDiagnostico.setText("");
-        txtDoctorLoggeado.setText(Clinica.getInstance().getLoggedUser().getNombre() + " " + Clinica.getInstance().getLoggedUser().getApellidos());
         cbxEnfermedades.setSelectedIndex(0);
         cbxVivienda.setSelectedIndex(0);
         cbxtipoSangre.setSelectedIndex(0);
         txtAreaEnfermedadesConsultadas.setText("");
         enfermedadesLista.clear();
         btnRegistrar.setEnabled(false);
+        txtCodigo.setText(String.valueOf(Clinica.getInstance().getCodConsulta()));
+    	txtDoctorLoggeado.setText(Clinica.getInstance().loggedUser.getNombre() + " " + Clinica.getInstance().loggedUser.getApellidos());
     }
    
     
