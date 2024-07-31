@@ -146,7 +146,7 @@ public class RegistrarEnfermedad extends JDialog {
 		panel.add(panel_4);
 		
 		cbxGravedad = new JComboBox();
-		cbxGravedad.setModel(new DefaultComboBoxModel(new String[] {"<Seleccionar>", "1 - (Sin Urgencia)", "2 - (Emergencia Menor)", "3 - (Urgencia)", "4 - (Emergencia)", "5 - (Resucitacion)"}));
+		cbxGravedad.setModel(new DefaultComboBoxModel(new String[] {"<Seleccionar>", "1 - Leve", "2 - Moderada", "3 - Grave"}));
 		cbxGravedad.setBounds(106, 47, 179, 22);
 		panel_4.add(cbxGravedad);
 		
@@ -177,19 +177,15 @@ public class RegistrarEnfermedad extends JDialog {
 				        String tratamiento = txtAreaTratamiento.getText();
 				        
 				        if (nombre.isEmpty() || sintomas.isEmpty() || gravedad.equals("<Seleccionar>") || tratamiento.isEmpty()) {
+				        	
 				            JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos.", "Campos vacios", JOptionPane.ERROR_MESSAGE);
+				            
 				        } else {
 				        	
-				            tempenfer = new Enfermedad(codigo, nombre, sintomas, tratamiento, Integer.parseInt(gravedad.substring(0, 1)));
-				            Clinica.getInstance().insertarEnfermedad(tempenfer);
+				        	Clinica.getInstance().insertarDatosEnfermedadSQL(tempenfer);
 				            JOptionPane.showMessageDialog(null, "Operacion Satisfactoria", "Registro Enfermedad", JOptionPane.INFORMATION_MESSAGE);
-				            clean();
+					        clean();
 				        }
-				        
-				     //   tempenfer = new Enfermedad(codigo, nombre, sintomas, tratamiento, Integer.parseInt(gravedad.substring(0, 1)));
-				      //  Clinica.getInstance().insertarEnfermedad(tempenfer);
-				       // JOptionPane.showMessageDialog(null, "Operaci�n Satisfactoria", "Registro Enfermedad", JOptionPane.INFORMATION_MESSAGE);
-				        clean();
 					}
 				});
 				okButton.setActionCommand("OK");

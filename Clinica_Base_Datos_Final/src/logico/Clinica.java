@@ -206,6 +206,13 @@ public class Clinica implements Serializable  {//u
         guardarDatos();
     }
     
+    
+    public void insertarPaciente(Paciente paciente) {
+        misPersonas.add(paciente);
+        guardarDatos();
+    }
+
+    
     //METODOS PARA ACTUALIZAR EL ELEMENTO DE UNA LISTA:
 	
     public void actualizarVivienda(Vivienda vivienda) {
@@ -985,7 +992,7 @@ public class Clinica implements Serializable  {//u
     
     //DOCTORES:
     
-    private void cargarDatosDoctorSQL() {
+    public void cargarDatosDoctorSQL() {
     	
     	String query = "SELECT * " + 
 	    			   "FROM PERSONA AS p " + 
@@ -1036,7 +1043,7 @@ public class Clinica implements Serializable  {//u
     
     // PACIENTES:
     
-    private void cargarDatosPacienteSQL() {
+    public void cargarDatosPacienteSQL() {
     	
     	String query = "SELECT * " + 
 	    			   "FROM PERSONA AS p " + 
@@ -1100,7 +1107,7 @@ public class Clinica implements Serializable  {//u
     
     // PERSONAS:
     
-    private void cargarDatosPersonaSQL() throws ParseException {
+    public void cargarDatosPersonaSQL() throws ParseException {
         
     	String query = "SELECT * " +
         		"FROM PERSONA AS p " +
@@ -1156,7 +1163,7 @@ public class Clinica implements Serializable  {//u
         }
     }
 	  
-    private int obtenerRango(String rango) { // Corresponde al valor en la base de datos(nuevo) // EN EL PROGRMA DE JAVA: 4 ADMIN, 3 SECRETARIO, 2 DOCTOR, 1 PACIENTE, 0 PERSONA(viejo)
+    public int obtenerRango(String rango) { // Corresponde al valor en la base de datos(nuevo) // EN EL PROGRMA DE JAVA: 4 ADMIN, 3 SECRETARIO, 2 DOCTOR, 1 PACIENTE, 0 PERSONA(viejo)
         
     	switch (rango) {
         	case "Administrador":
@@ -1175,7 +1182,9 @@ public class Clinica implements Serializable  {//u
 
     //ENFERMEDADES:
     
-    private void cargarDatosEnfermedadSQL() {
+    public void cargarDatosEnfermedadSQL() {
+    	
+        Clinica.getInstance().getMisEnfermedades().clear();
         
     	String query = "SELECT e.* " + 
         			   "FROM ENFERMEDAD AS e ";
@@ -1200,15 +1209,69 @@ public class Clinica implements Serializable  {//u
                 
                 Enfermedad enfermedad = new Enfermedad(codigo, nombre, sintomas, tratamiento, Integer.parseInt(gravedad));
                 Clinica.getInstance().insertarEnfermedad(enfermedad);
+                
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
     
+    public void insertarDatosEnfermedadSQL(Enfermedad enfermedad) {
+
+    	String query = "INSERT INTO ENFERMEDAD (id_enfermedad, nombre, sintomas, tratamiento, id_gravedad_enfermedad) VALUES (?, ?, ?, ?, ?)";
+    	int filas = 0;
+    
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, enfermedad.getCodigo());
+            stmt.setString(2, enfermedad.getNombre());
+            stmt.setString(3, enfermedad.getSintomas());
+            stmt.setString(4, enfermedad.getTratamiento());
+            stmt.setInt(5, enfermedad.getGravedad());
+            filas =+ stmt.executeUpdate();
+            System.out.println("Enfermedades agregadas: " + filas);
+            Clinica.getInstance().insertarEnfermedad(enfermedad);
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void modificarDatosEnfermedadSQL(Enfermedad enfermedad) {
+    	
+    	
+    	
+    }
+    
+    public void eliminarDatosEnfermedadSQL(String id_enfermedad) {
+    	
+    	String query = "DELETE FROM ENFERMEDAD WHERE id_enfermedad = ? ";
+    	
+    	try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+    		 
+    		stmt.setString(1, id_enfermedad);
+    		System.out.println("Enfermedad con codigo: " + id_enfermedad + " eliminada.");
+    		stmt.executeUpdate();
+            Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(id_enfermedad);
+            Clinica.getInstance().eliminarEnfermedad(enfermedad);
+    		
+    	} catch (SQLException e) {
+    		e.printStackTrace();
+    	}
+    }
+    
+    
+
+    
+    
+    
+    
+    
     //VIVIENDAS:
 
-    private void cargarDatosViviendaSQL() {
+    public void cargarDatosViviendaSQL() {
     	
         String query = "SELECT v.* " +
         			   "FROM VIVIENDA AS v " +
@@ -1233,7 +1296,7 @@ public class Clinica implements Serializable  {//u
     
     // CITAS:
     
-    private void cargarDatosCitaSQL() {
+    public void cargarDatosCitaSQL() {
         
     	String query = "SELECT c.id_cita, c.fecha_cita, c.hora_cita, c.fecha_cita_creacion, c.completada, " +
         			   "c.id_doctor, c.id_persona, c.id_creador_cita, d.id_persona AS id_doctor_persona " +
@@ -1278,7 +1341,7 @@ public class Clinica implements Serializable  {//u
     
     //HISTORIAL CLINICA:
     
-    private void cargarDatosHistoriaClinicaSQL() {
+    public void cargarDatosHistoriaClinicaSQL() {
         
         String queryHistorial = "SELECT hc.id_historial_clinico, hc.id_paciente, p.id_persona AS id_paciente_persona " +
                                 "FROM HISTORIAL_CLINICO AS hc " +
@@ -1312,7 +1375,7 @@ public class Clinica implements Serializable  {//u
     
     // CONSULTAS:
    
-    private void cargarDatosConsultaSQL() {
+    public void cargarDatosConsultaSQL() {
         
         String queryConsulta = "SELECT c.id_consulta, c.fecha_consulta, c.id_historial_clinico, c.id_doctor, c.diagnostico, " +
                                "c.id_cita_solicitada, d.id_persona AS id_doctor_persona " +
@@ -1379,17 +1442,12 @@ public class Clinica implements Serializable  {//u
             e.printStackTrace();
         }
     }
-    
-    public void insertarPaciente(Paciente paciente) {
-        misPersonas.add(paciente);
-        guardarDatos();
-    }
 
  
  
     //VACUNAS:
 
-    private void cargarDatosVacunaSQL() {
+    public void cargarDatosVacunaSQL() {
         
         String queryVacuna = "SELECT v.id_vacuna, v.nombre, v.id_historial_clinico FROM VACUNA AS v";
         
