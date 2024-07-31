@@ -110,7 +110,4 @@ public class ListarVacuna extends JDialog {
 
         }
     }
-
-
-}//
-//
+}

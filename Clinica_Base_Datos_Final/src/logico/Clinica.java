@@ -56,7 +56,6 @@ public class Clinica implements Serializable  {//u
 		this.misVacunas =  new ArrayList<Vacuna>();
 		this.misConsultas =  new ArrayList<Consulta>();
 		this.misHistoriasClinicas = new ArrayList<HistoriaClinica>();
-		cargarMaximosIDsDesdeSQL(); /// SEGMENTAR
 	}
 	
 	public static Clinica getInstance() {
@@ -125,9 +124,9 @@ public class Clinica implements Serializable  {//u
 	//METODOS PARA INSERTAR EN LAS LISTAS:
 	
     public void insertarVivienda(Vivienda vivienda) {
-        misViviendas.add(vivienda);
-        codVivienda++;
-        guardarDatos();
+        Clinica.getInstance().obtenerMaximoIdVivienda();
+    	misViviendas.add(vivienda);
+        //guardarDatos();
     }
 
     public void insertarPersona(Persona persona) {
@@ -247,7 +246,7 @@ public class Clinica implements Serializable  {//u
 	 public void agregarEnfermedad(Enfermedad enfermedad) {
 	        misEnfermedades.add(enfermedad);
 	        // Aquí se debería añadir la lógica para registrar la enfermedad en la base de datos si es necesario
-	    }
+	 }
 	 
 
 
@@ -1234,7 +1233,7 @@ public class Clinica implements Serializable  {//u
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setString(1, enfermedad.getCodigo());
+            stmt.setInt(1, Integer.parseInt(enfermedad.getCodigo()));
             stmt.setString(2, enfermedad.getNombre());
             stmt.setString(3, enfermedad.getSintomas());
             stmt.setString(4, enfermedad.getTratamiento());
@@ -1262,7 +1261,7 @@ public class Clinica implements Serializable  {//u
              PreparedStatement stmt = conn.prepareStatement(query)) {
     		 
     		stmt.setString(1, id_enfermedad);
-    		System.out.println("Enfermedad con codigo: " + id_enfermedad + " eliminada.");
+    		System.out.println("Enfermedad con codigo " + id_enfermedad + " eliminada.");
     		stmt.executeUpdate();
             Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(id_enfermedad);
             Clinica.getInstance().eliminarEnfermedad(enfermedad);
@@ -1302,8 +1301,55 @@ public class Clinica implements Serializable  {//u
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        cargarValoresEstaticos();
     }
+    
+    
+    public void insertarDatosViviendaSQL(Vivienda vivienda) {
+
+        String query = "INSERT INTO VIVIENDA (id_vivienda, direccion) VALUES (?, ?)";
+        int filas = 0;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+        	stmt.setInt(1, Integer.parseInt(vivienda.getCodigo()));
+            stmt.setString(2, vivienda.getDireccion());
+            
+            filas = stmt.executeUpdate();
+            System.out.println("Viviendas agregadas: " + filas);
+
+            Clinica.getInstance().insertarVivienda(vivienda);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void eliminarDatosViviendaSQL(String id_vivienda) {
+
+        String query = "DELETE FROM VIVIENDA WHERE id_vivienda = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, Integer.parseInt(id_vivienda));
+    		System.out.println("Vivienda con codigo " + id_vivienda + " eliminada.");
+            stmt.executeUpdate();
+            Vivienda vivienda = Clinica.getInstance().buscarViviendaById(id_vivienda);
+            Clinica.getInstance().eliminarVivienda(vivienda);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    
+    
+    
+    
+    
     
     // CITAS:
     
@@ -1348,7 +1394,6 @@ public class Clinica implements Serializable  {//u
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        cargarValoresEstaticos();
     }
     
     //HISTORIAL CLINICA:
@@ -1383,7 +1428,6 @@ public class Clinica implements Serializable  {//u
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        cargarValoresEstaticos();
     }
     
     // CONSULTAS:
@@ -1454,7 +1498,6 @@ public class Clinica implements Serializable  {//u
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        cargarValoresEstaticos();
     }
 
  
@@ -1510,43 +1553,183 @@ public class Clinica implements Serializable  {//u
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
-        cargarValoresEstaticos();
-
     }
-    
-    
+
     
     //MANEJO DE INDICES BASE DE DATOS:
     
-    public void cargarMaximosIDsDesdeSQL() {
-        String query = "SELECT " +
-                       "(SELECT MAX(id_persona) FROM PERSONA) AS maxPersonaID, " +
-                       "(SELECT MAX(id_cita) FROM CITA) AS maxCitaID, " +
-                       "(SELECT MAX(id_vacuna) FROM VACUNA) AS maxVacunaID, " +
-                       "(SELECT MAX(id_enfermedad) FROM ENFERMEDAD) AS maxEnfermedadID, " +
-                       "(SELECT MAX(id_consulta) FROM CONSULTA) AS maxConsultaID, " +
-                       "(SELECT MAX(id_vivienda) FROM VIVIENDA) AS maxViviendaID, " +
-                       "(SELECT MAX(id_historial_clinico) FROM HISTORIAL_CLINICO) AS maxHistoriaClinicaID";
-
+    public int cargarMaximoIdAdministrador() {
+        
+    	String query = "SELECT MAX(id_administrador) AS max_administrador_id FROM ADMINISTRADOR";
+        
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
-
+            
             if (rs.next()) {
-                codPersona = rs.getInt("maxPersonaID") + 1;
-                codCita = rs.getInt("maxCitaID") + 1;
-                codVacuna = rs.getInt("maxVacunaID") + 1;
-                codEnfermedad = rs.getInt("maxEnfermedadID") + 1;
-                codConsulta = rs.getInt("maxConsultaID") + 1;
-                codVivienda = rs.getInt("maxViviendaID") + 1;
-                codHistoriaClinica = rs.getInt("maxHistoriaClinicaID") + 1;
+                return rs.getInt("max_administrador_id") + 1;
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return 1; // Si no hay datos, empezar en 1
     }
+    
+    public int cargarMaximoIdSecretario() {
+        
+    	String query = "SELECT MAX(id_secretario) AS max_secretario_id FROM SECRETARIO";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt("id_secretario") + 1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 1;
+    }
+    
+   public int cargarMaximoIdDoctor() {
+        
+    	String query = "SELECT MAX(id_doctor) AS max_doctor_id FROM DOCTOR";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt("max_doctor_id") + 1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 1;
+    }
+    
+    public int cargarMaximoIdPaciente() {
+        
+    	String query = "SELECT MAX(id_paciente) AS max_paciente_id FROM PACIENTE";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt("max_paciente_id") + 1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 1;
+    }
+    
+    public int cargarMaximoIdPesona() {
+        
+    	String query = "SELECT MAX(id_persona) AS max_persona_id FROM PERSONA";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt("max_persona_id") + 1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 1;
+    }
+
+    
+    public int obtenerMaximoIdEnfermedad() {
+        String query = "SELECT MAX(id_enfermedad) AS max_enfermedad_id FROM ENFERMEDAD";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt("max_enfermedad_id") + 1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 1;
+    }
+    
+    public int obtenerMaximoIdConsulta() {
+        String query = "SELECT MAX(id_consulta) AS max_consulta_id FROM CONSULTA";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt("max_consulta_id") + 1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 1;
+    }
+    
+    public int obtenerMaximoIdVivienda() {
+        String query = "SELECT MAX(id_vivienda) AS max_vivienda_id FROM VIVIENDA";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt("max_vivienda_id") + 1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 1;
+    }
+    
+    public int obtenerMaximoIdHistoriaClinica() {
+        String query = "SELECT MAX(id_historial_clinico) AS max_historia_consulta_id FROM HISTORIAL_CLINICO";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt("max_historia_consulta_id") + 1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 1;
+    }
+
+    public int obtenerMaximoIdVacuna() {
+        String query = "SELECT MAX(id_vacuna) AS max_vacuna_id FROM VACUNA";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt("max_vacuna_id") + 1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 1;
+    }
+    
+    
 
     
 }

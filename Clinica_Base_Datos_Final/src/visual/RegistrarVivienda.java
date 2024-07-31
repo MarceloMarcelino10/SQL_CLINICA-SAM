@@ -105,7 +105,6 @@ public class RegistrarVivienda extends JDialog {
                 JOptionPane.showMessageDialog(null, "Vivienda añadida correctamente", "Registrar Vivienda", JOptionPane.INFORMATION_MESSAGE);
                 System.out.println(newVivienda.getCodigo());
 
-                // Asegúrate de que ListarVivienda está inicializado y luego carga las viviendas
                 ListarVivienda listarVivienda = new ListarVivienda();
                 listarVivienda.loadViviendas();
                 clean();

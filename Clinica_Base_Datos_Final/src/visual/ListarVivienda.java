@@ -72,6 +72,7 @@ public class ListarVivienda extends JDialog {
     }
 
     public void loadViviendas() {
+    	Clinica.getInstance().cargarDatosViviendaSQL();
         model.setRowCount(0);
         rows = new Object[model.getColumnCount()];
         for (Vivienda vivienda : Clinica.getInstance().getMisViviendas()) {
