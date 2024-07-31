@@ -64,6 +64,6 @@ public class Enfermedad implements Serializable {
 	}
 	
     public String toString() {
-        return nombre; // Devuelve el nombre de la enfermedad
+        return nombre; // Devuelve el nombre de la enfermedad//
     }
 }

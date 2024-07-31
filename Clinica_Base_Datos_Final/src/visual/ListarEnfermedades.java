@@ -16,7 +16,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
-
 import logico.Clinica;
 import logico.Enfermedad;
 import javax.swing.ImageIcon;
@@ -29,25 +28,21 @@ public class ListarEnfermedades extends JDialog {
     private JTable table;
     private DefaultTableModel model;
     private Object[] row;
+    private JButton btnModificar;
 
     public static void main(String[] args) {
-        
-    	
-    	try {    		
+        try {
             ListarEnfermedades dialog = new ListarEnfermedades();
             dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
             dialog.setModal(true);
             dialog.setVisible(true);
         } catch (Exception e) {
             e.printStackTrace();
-        }        
+        }
     }
 
     public ListarEnfermedades() {
-    	
-
-    	
-    	setIconImage(Toolkit.getDefaultToolkit().getImage(ListarEnfermedades.class.getResource("/imagenes/fotoTituloDeVentana.png")));
+        setIconImage(Toolkit.getDefaultToolkit().getImage(ListarEnfermedades.class.getResource("/imagenes/fotoTituloDeVentana.png")));
         setTitle("Lista de Enfermedades");
         setBounds(100, 100, 686, 376);
         setLocationRelativeTo(null);
@@ -86,56 +81,75 @@ public class ListarEnfermedades extends JDialog {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
                     JOptionPane.showMessageDialog(null, "Por favor, seleccione una enfermedad a eliminar.",
-                            "Error de eliminación", JOptionPane.ERROR_MESSAGE);
+                            "Error de eliminaciÃ³n", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    int dialogResult = JOptionPane.showConfirmDialog(null,"¿Estás seguro que deseas eliminar esta enfermedad?", "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+                    int dialogResult = JOptionPane.showConfirmDialog(null, "Â¿EstÃ¡s seguro que deseas eliminar esta enfermedad?", "Confirmar eliminaciÃ³n", JOptionPane.YES_NO_OPTION);
                     
                     if (dialogResult == JOptionPane.YES_OPTION) {
+                        String id_enfermedad = (String) table.getValueAt(selectedRow, 0);
                         
-                    	String id_enfermedad = (String) table.getValueAt(selectedRow, 0);
-                    	
-                    	Clinica.getInstance().eliminarDatosEnfermedadSQL(id_enfermedad);
+                        Clinica.getInstance().eliminarDatosEnfermedadSQL(id_enfermedad);
                         
                         model.removeRow(selectedRow);
-
                         JOptionPane.showMessageDialog(null, "Enfermedad eliminada correctamente", "Enfermedad eliminada", JOptionPane.INFORMATION_MESSAGE);
                     }
                 }
             }
         });
         
-                JButton btnVerMas = new JButton("Ver Mas");
-                btnVerMas.setIcon(new ImageIcon(ListarEnfermedades.class.getResource("/imagenes/vermasBOTON.png")));
-                btnVerMas.setForeground(new Color(34, 139, 34));
-                setLocationRelativeTo(null);
-                btnVerMas.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        int selectedRow = table.getSelectedRow();
-                        if (selectedRow != -1) {
-                            String sintomas = (String) table.getValueAt(selectedRow, 2);
-                            String tratamiento = (String) table.getValueAt(selectedRow, 3);
+        JButton btnVerMas = new JButton("Ver MÃ¡s");
+        btnVerMas.setIcon(new ImageIcon(ListarEnfermedades.class.getResource("/imagenes/vermasBOTON.png")));
+        btnVerMas.setForeground(new Color(34, 139, 34));
+        btnVerMas.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow != -1) {
+                    String sintomas = (String) table.getValueAt(selectedRow, 2);
+                    String tratamiento = (String) table.getValueAt(selectedRow, 3);
 
-                            VerMasEnfermedad verEnfermedad = new VerMasEnfermedad(sintomas, tratamiento);
-                            verEnfermedad.setModal(true);
-                            verEnfermedad.setVisible(true);
-                        } else {
-                            JOptionPane.showMessageDialog(null, "Por favor, seleccione una enfermedad.",
-                                    "Error", JOptionPane.ERROR_MESSAGE);
-                        }
+                    VerMasEnfermedad verEnfermedad = new VerMasEnfermedad(sintomas, tratamiento);
+                    verEnfermedad.setModal(true);
+                    verEnfermedad.setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Por favor, seleccione una enfermedad.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        
+        JButton btnNuevaEnfermedad = new JButton("Nueva Enfermedad");
+        btnNuevaEnfermedad.setIcon(new ImageIcon(ListarEnfermedades.class.getResource("/imagenes/agregarOcrearboton.png")));
+        btnNuevaEnfermedad.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                RegistrarEnfermedad regNewEnfe = new RegistrarEnfermedad();
+                regNewEnfe.setModal(true);
+                regNewEnfe.setVisible(true);
+            }
+        });
+        buttonPane.add(btnNuevaEnfermedad);
+        buttonPane.add(btnVerMas);
+        
+        btnModificar = new JButton("Modificar");
+        btnModificar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow != -1) {
+                    String codigo = (String) table.getValueAt(selectedRow, 0);
+                    Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(codigo); // Implementar este mÃ©todo en Clinica
+                    if (enfermedad != null) {
+                        RegistrarEnfermedad regEnfermedad = new RegistrarEnfermedad(enfermedad);
+                        regEnfermedad.setModal(true);
+                        regEnfermedad.setVisible(true);
+                        //cargarEnfermedad(); // Recargar los datos de la tabla
+                    } else {
+                        JOptionPane.showMessageDialog(null, "No se pudo encontrar la enfermedad.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
-                });
-                
-                        JButton btnNuevaEnfermedad = new JButton("Nueva Enfermedad");
-                        btnNuevaEnfermedad.setIcon(new ImageIcon(ListarEnfermedades.class.getResource("/imagenes/agregarOcrearboton.png")));
-                        btnNuevaEnfermedad.addActionListener(new ActionListener() {
-                            public void actionPerformed(ActionEvent e) {
-                                RegistrarEnfermedad regNewEnfe = new RegistrarEnfermedad();
-                                regNewEnfe.setModal(true);
-                                regNewEnfe.setVisible(true);
-                            }
-                        });
-                        buttonPane.add(btnNuevaEnfermedad);
-                buttonPane.add(btnVerMas);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Por favor, seleccione una enfermedad.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        buttonPane.add(btnModificar);
 
         buttonPane.add(eliminarButton);
 
@@ -148,14 +162,11 @@ public class ListarEnfermedades extends JDialog {
         });
         buttonPane.add(cancelButton);
 
-        cargarEnfermedad();
-
+      //  cargarEnfermedad();
     }
 
     private void cargarEnfermedad() {
-    	
         Clinica.getInstance().cargarDatosEnfermedadSQL();
-    	
         model.setRowCount(0);
         row = new Object[model.getColumnCount()];
         for (Enfermedad enfermedad : Clinica.getInstance().getMisEnfermedades()) {
@@ -167,7 +178,8 @@ public class ListarEnfermedades extends JDialog {
             model.addRow(row);
         }
     }
-    public  JTable getTable() {
-    	return table;
+
+    public JTable getTable() {
+        return table;
     }
 }
