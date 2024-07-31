@@ -56,6 +56,7 @@ public class Clinica implements Serializable  {//u
 		this.misVacunas =  new ArrayList<Vacuna>();
 		this.misConsultas =  new ArrayList<Consulta>();
 		this.misHistoriasClinicas = new ArrayList<HistoriaClinica>();
+		cargarMaximosIDsDesdeSQL(); /// SEGMENTAR
 	}
 	
 	public static Clinica getInstance() {
@@ -138,7 +139,7 @@ public class Clinica implements Serializable  {//u
     public void insertarEnfermedad(Enfermedad enfermedad) {
         misEnfermedades.add(enfermedad);
         codEnfermedad++;
-       // guardarDatos();
+        guardarDatos();
     }
 
     public void insertarCita(Cita cita) {
@@ -1301,6 +1302,7 @@ public class Clinica implements Serializable  {//u
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        cargarValoresEstaticos();
     }
     
     // CITAS:
@@ -1346,6 +1348,7 @@ public class Clinica implements Serializable  {//u
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        cargarValoresEstaticos();
     }
     
     //HISTORIAL CLINICA:
@@ -1380,6 +1383,7 @@ public class Clinica implements Serializable  {//u
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        cargarValoresEstaticos();
     }
     
     // CONSULTAS:
@@ -1450,6 +1454,7 @@ public class Clinica implements Serializable  {//u
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        cargarValoresEstaticos();
     }
 
  
@@ -1505,7 +1510,44 @@ public class Clinica implements Serializable  {//u
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }   
+        
+        cargarValoresEstaticos();
+
+    }
+    
+    
+    
+    //MANEJO DE INDICES BASE DE DATOS:
+    
+    public void cargarMaximosIDsDesdeSQL() {
+        String query = "SELECT " +
+                       "(SELECT MAX(id_persona) FROM PERSONA) AS maxPersonaID, " +
+                       "(SELECT MAX(id_cita) FROM CITA) AS maxCitaID, " +
+                       "(SELECT MAX(id_vacuna) FROM VACUNA) AS maxVacunaID, " +
+                       "(SELECT MAX(id_enfermedad) FROM ENFERMEDAD) AS maxEnfermedadID, " +
+                       "(SELECT MAX(id_consulta) FROM CONSULTA) AS maxConsultaID, " +
+                       "(SELECT MAX(id_vivienda) FROM VIVIENDA) AS maxViviendaID, " +
+                       "(SELECT MAX(id_historial_clinico) FROM HISTORIAL_CLINICO) AS maxHistoriaClinicaID";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                codPersona = rs.getInt("maxPersonaID") + 1;
+                codCita = rs.getInt("maxCitaID") + 1;
+                codVacuna = rs.getInt("maxVacunaID") + 1;
+                codEnfermedad = rs.getInt("maxEnfermedadID") + 1;
+                codConsulta = rs.getInt("maxConsultaID") + 1;
+                codVivienda = rs.getInt("maxViviendaID") + 1;
+                codHistoriaClinica = rs.getInt("maxHistoriaClinicaID") + 1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     
 }
 

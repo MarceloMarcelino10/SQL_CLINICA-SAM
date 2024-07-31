@@ -202,7 +202,7 @@ public class ModificarConsulta extends JDialog {
 	 private void agregarEnfermedad() {
         String enfermedadSeleccionada = (String) cbxEnfermedades.getSelectedItem();
         if (enfermedadSeleccionada != null && !enfermedadSeleccionada.equals("<Seleccione>")) {
-            String codigo = enfermedadSeleccionada.split(" ")[0].substring(2);
+            String codigo = enfermedadSeleccionada.split(" ")[0].substring(2); 
             Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(codigo);
             if (enfermedad != null && !enfermedadesLista.contains(enfermedad)) {
                 enfermedadesLista.add(enfermedad);

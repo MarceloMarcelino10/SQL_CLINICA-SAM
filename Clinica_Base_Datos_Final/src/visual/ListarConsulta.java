@@ -188,7 +188,7 @@ public class ListarConsulta extends JDialog {
         if (selectedRow >= 0) {
             String diagnostico = (String) model.getValueAt(selectedRow, 3);
 
-            JDialog dialog = new JDialog(this, "Diagnóstico", true);
+            JDialog dialog = new JDialog(this, "Diagnóstico", true); 
             dialog.setSize(400, 300);
             dialog.setLocationRelativeTo(this);
             dialog.getContentPane().setLayout(new BorderLayout());

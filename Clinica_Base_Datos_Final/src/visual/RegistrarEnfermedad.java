@@ -31,8 +31,8 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import javax.swing.ImageIcon;
 
-
 public class RegistrarEnfermedad extends JDialog {
+    
     private static final long serialVersionUID = 1L;
     private final JPanel contentPanel = new JPanel();
     private Enfermedad tempenfer;
@@ -73,7 +73,7 @@ public class RegistrarEnfermedad extends JDialog {
         panel_1.setBounds(23, 16, 302, 117);
         panel.add(panel_1);
 
-        JLabel labelCodigo = new JLabel("CÃ³digo:");
+        JLabel labelCodigo = new JLabel("Código:");
         labelCodigo.setBounds(21, 29, 46, 14);
         panel_1.add(labelCodigo);
 
@@ -98,7 +98,7 @@ public class RegistrarEnfermedad extends JDialog {
         panel.add(panel_2);
         panel_2.setLayout(new BorderLayout(0, 0));
 
-        JTextArea txtAreaTratamiento = new JTextArea();
+        txtAreaTratamiento = new JTextArea();
         txtAreaTratamiento.setFont(new Font("Monospaced", Font.PLAIN, 13));
         txtAreaTratamiento.setWrapStyleWord(true);
         txtAreaTratamiento.setLineWrap(true);
@@ -111,7 +111,7 @@ public class RegistrarEnfermedad extends JDialog {
         panel.add(panel_3);
         panel_3.setLayout(new BorderLayout(0, 0));
 
-        JTextArea txtAreaSintomas = new JTextArea();
+        txtAreaSintomas = new JTextArea();
         txtAreaSintomas.setBackground(Color.WHITE);
         txtAreaSintomas.setFont(new Font("Monospaced", Font.PLAIN, 13));
         txtAreaSintomas.setWrapStyleWord(true);
@@ -120,7 +120,7 @@ public class RegistrarEnfermedad extends JDialog {
         scrollPaneSintomas.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         panel_3.add(scrollPaneSintomas, BorderLayout.CENTER);
 
-        JLabel labelSintomas = new JLabel("SÃ­ntomas:");
+        JLabel labelSintomas = new JLabel("Síntomas:");
         labelSintomas.setBounds(136, 149, 71, 14);
         panel.add(labelSintomas);
 
@@ -149,7 +149,7 @@ public class RegistrarEnfermedad extends JDialog {
 
         JPanel buttonPane = new JPanel();
         buttonPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
         getContentPane().add(buttonPane, BorderLayout.SOUTH);
 
         JButton okButton = new JButton("Registrar");
@@ -159,16 +159,15 @@ public class RegistrarEnfermedad extends JDialog {
                 String codigo = txtCodigoEnfermedad.getText();
                 String nombre = txtNombreEnfermedad.getText();
                 String sintomas = txtAreaSintomas.getText();
-                String gravedad = cbxGravedad.getSelectedItem().toString();
+                String gravedad = cbxGravedad.getSelectedItem().toString(); 
                 String tratamiento = txtAreaTratamiento.getText();
 
                 if (nombre.isEmpty() || sintomas.isEmpty() || gravedad.equals("<Seleccionar>") || tratamiento.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos.", "Campos vacÃ­os", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos.", "Campos vacíos", JOptionPane.ERROR_MESSAGE);
                 } else {
                     tempenfer = new Enfermedad(codigo, nombre, sintomas, tratamiento, Integer.parseInt(gravedad.substring(0, 1)));
-                    Clinica.getInstance().insertarEnfermedad(tempenfer);
                     Clinica.getInstance().insertarDatosEnfermedadSQL(tempenfer);
-                    JOptionPane.showMessageDialog(null, "OperaciÃ³n Satisfactoria", "Registro Enfermedad", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Operación Satisfactoria", "Registro Enfermedad", JOptionPane.INFORMATION_MESSAGE);
                     clean();
                 }
             }
