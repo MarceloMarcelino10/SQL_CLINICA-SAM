@@ -71,7 +71,7 @@ public class VerHistorialClinico extends JDialog {
 					public void actionPerformed(ActionEvent e) {
 					}
 				});
-				okButton.setActionCommand("OK");
+				okButton.setActionCommand("OK"); 
 				buttonPane.add(okButton);
 				getRootPane().setDefaultButton(okButton);
 			}

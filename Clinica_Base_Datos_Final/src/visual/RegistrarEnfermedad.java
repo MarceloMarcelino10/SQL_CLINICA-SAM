@@ -78,7 +78,7 @@ public class RegistrarEnfermedad extends JDialog {
         txtCodigoEnfermedad = new JTextField();
         txtCodigoEnfermedad.setText(String.valueOf(Clinica.getCodEnfermedad()));
         txtCodigoEnfermedad.setEditable(false);
-        txtCodigoEnfermedad.setColumns(10);
+        txtCodigoEnfermedad.setColumns(10); 
         txtCodigoEnfermedad.setBounds(82, 26, 172, 20);
         panel_1.add(txtCodigoEnfermedad);
 
@@ -150,7 +150,16 @@ public class RegistrarEnfermedad extends JDialog {
         buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
         getContentPane().add(buttonPane, BorderLayout.SOUTH);
 
-        JButton okButton = new JButton("Registrar");
+        JButton okButton = new JButton();
+        
+        if(isEditMode) {
+        	okButton.setText("Modificar");
+
+        } else {
+        	okButton.setText("Registrar");
+
+        }
+        
         okButton.setIcon(new ImageIcon(RegistrarEnfermedad.class.getResource("/imagenes/agregarOcrearboton.png")));
         okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -168,6 +177,8 @@ public class RegistrarEnfermedad extends JDialog {
                     if (isEditMode) {
                         Clinica.getInstance().actualizarDatosEnfermedadSQL(tempenfer);
                         JOptionPane.showMessageDialog(null, "Enfermedad actualizada correctamente", "Modificación Enfermedad", JOptionPane.INFORMATION_MESSAGE);
+                        dispose();
+
                     } else {
                         Clinica.getInstance().insertarDatosEnfermedadSQL(tempenfer);
                         JOptionPane.showMessageDialog(null, "Operación Satisfactoria", "Registro Enfermedad", JOptionPane.INFORMATION_MESSAGE);
@@ -197,7 +208,7 @@ public class RegistrarEnfermedad extends JDialog {
             txtNombreEnfermedad.setText(nombre);
             txtAreaSintomas.setText(sintomas);
             txtAreaTratamiento.setText(tratamiento);
-            cbxGravedad.setSelectedIndex(gravedad - 1);
+            cbxGravedad.setSelectedIndex(gravedad);
         }
     }
 
@@ -207,5 +218,5 @@ public class RegistrarEnfermedad extends JDialog {
         txtAreaTratamiento.setText("");
         cbxGravedad.setSelectedIndex(0);
         txtCodigoEnfermedad.setText(String.valueOf(Clinica.getCodEnfermedad()));
-    }
+    } 
 }

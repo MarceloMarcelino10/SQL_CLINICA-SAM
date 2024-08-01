@@ -69,6 +69,8 @@ public class ListarVivienda extends JDialog {
         scrollPane.setViewportView(table);
 
         loadViviendas();
+        
+        
     }
 
     public void loadViviendas() {

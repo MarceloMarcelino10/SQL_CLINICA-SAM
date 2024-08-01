@@ -84,6 +84,7 @@ public class CrearVivienda extends JDialog {
 			txtCodigo.setEditable(false);
 			txtCodigo.setBounds(122, 40, 154, 20);
 			panel.add(txtCodigo);
+			txtCodigo.setText("" + Clinica.getInstance().obtenerMaximoIdVivienda());
 			txtCodigo.setColumns(10);
 			
 			txtDireccion = new JTextField();
@@ -108,8 +109,13 @@ public class CrearVivienda extends JDialog {
 						if(v == null) {
 							String codigo = txtCodigo.getText();
 							String direccion = txtDireccion.getText();
+							
+							//ILEGAL
 							Vivienda aux = new Vivienda(codigo, direccion);
-							Clinica.getInstance().insertarVivienda(aux);
+							//Clinica.getInstance().insertarVivienda(aux);
+							Clinica.getInstance().insertarDatosViviendaSQL(aux);
+							
+							
 						} else {
 							String codigo = txtCodigo.getText();
 							String direccion = txtDireccion.getText();
@@ -156,4 +162,10 @@ public class CrearVivienda extends JDialog {
 			btnRegistrar.setEnabled(true);
 		}
 	}
+	
+    private void clean() {
+        txtCodigo.setText("" + Clinica.getInstance().obtenerMaximoIdVivienda());
+        txtDireccion.setText("");
+    }
+	
 }

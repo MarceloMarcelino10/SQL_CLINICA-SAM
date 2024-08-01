@@ -7,9 +7,11 @@ import java.sql.SQLException;
 
 import java.sql.Statement;
 
-public class DatabaseConnection {
-
-    private static final String SERVER = "serversamsql.database.windows.net";
+public class DatabaseConnection { 
+	
+	//Azure:
+	private static final String SERVER = "serversamsql.database.windows.net";
+	//private static final String SERVER = "192.168.100.118";
     private static final String DATABASE = "CLINICA_SAM";
     private static final String USER = "m.marcelino";
     private static final String PASSWORD = "M@rcelo200312";

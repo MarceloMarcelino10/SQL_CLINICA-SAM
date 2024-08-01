@@ -45,7 +45,7 @@ public class ModificarConsulta extends JDialog {
 			ModificarConsulta dialog = new ModificarConsulta(null);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
-		} catch (Exception e) {
+		} catch (Exception e) {  
 			e.printStackTrace();
 		}
 	}
@@ -239,7 +239,7 @@ public class ModificarConsulta extends JDialog {
     }
 	 
 	 private void modificarConsulta() {
-		 if (miConsulta != null) {
+		if (miConsulta != null) {
 			 if (enfermedadesLista.isEmpty()) {
 				 JOptionPane.showMessageDialog(null, "Debe haber al menos una enfermedad en la consulta.", "Error", JOptionPane.ERROR_MESSAGE);
 				 return;

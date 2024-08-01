@@ -130,7 +130,7 @@ public class Login_o_Registro extends JFrame {
 
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
-		
+		 
 		JLabel lblNewLabel = new JLabel("Usuario:");
 		lblNewLabel.setForeground(Color.WHITE);
 		lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 13));

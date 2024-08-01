@@ -439,7 +439,7 @@ public class RegistrarNewUser extends JDialog {
 				                }
 				                JOptionPane.showMessageDialog(null, "Usuario modificado con éxito", "Modificar Persona", JOptionPane.INFORMATION_MESSAGE);
 				                ListarPersona.loadPersona(ListarPersona.index);
-				                Clinica.getInstance().actualizarPersona(aux);
+				                Clinica.getInstance().actualizarPersona(aux); 
 				                dispose();
 				            }
 				        }   
