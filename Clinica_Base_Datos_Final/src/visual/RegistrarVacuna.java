@@ -20,6 +20,10 @@ import java.awt.event.ActionEvent;
 import java.awt.Toolkit;
 import javax.swing.ImageIcon;
 import java.awt.Color;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.ScrollPaneConstants;
 
 public class RegistrarVacuna extends JDialog {
 
@@ -28,10 +32,13 @@ public class RegistrarVacuna extends JDialog {
     private JTextField txtCodigo;
     private JTextField txtNombre;
     private JComboBox<String> cbxEnfermedades;
+    private ArrayList<Enfermedad> enfermedadesSeleccionadas = new ArrayList<>();
+    private JTextArea txtAreaEnfermedades;
+    private Vacuna miVacuna = null;
 
     public static void main(String[] args) {
         try {
-            RegistrarVacuna dialog = new RegistrarVacuna();
+            RegistrarVacuna dialog = new RegistrarVacuna(null);
             dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
             dialog.setVisible(true);
         } catch (Exception e) {
@@ -39,11 +46,12 @@ public class RegistrarVacuna extends JDialog {
         }
     }
 
-    public RegistrarVacuna() {
+    public RegistrarVacuna(Vacuna modVacuna) {
+    	miVacuna = modVacuna;
+        setTitle(miVacuna == null ? "Registrar Vacuna" : "Modificar Vacuna");
     	setIconImage(Toolkit.getDefaultToolkit().getImage(RegistrarVacuna.class.getResource("/imagenes/fotoTituloDeVentana.png")));
-    	setTitle("Registrar Vacuna");
     	setResizable(false);
-        setBounds(100, 100, 412, 227);
+        setBounds(100, 100, 424, 545);
         setLocationRelativeTo(null);
         getContentPane().setLayout(new BorderLayout());
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -57,35 +65,69 @@ public class RegistrarVacuna extends JDialog {
         panel.setLayout(null);
 
         JLabel lblNewLabel = new JLabel("Codigo:");
-        lblNewLabel.setBounds(78, 27, 57, 14);
+        lblNewLabel.setBounds(40, 19, 57, 14);
         panel.add(lblNewLabel);
 
         JLabel lblNewLabel_1 = new JLabel("Nombre: ");
-        lblNewLabel_1.setBounds(78, 68, 57, 14);
+        lblNewLabel_1.setBounds(40, 52, 57, 14);
         panel.add(lblNewLabel_1);
 
         JLabel lblNewLabel_2 = new JLabel("Enfermedades:");
-        lblNewLabel_2.setBounds(48, 109, 87, 14);
+        lblNewLabel_2.setBounds(58, 341, 87, 14);
         panel.add(lblNewLabel_2);
 
         txtCodigo = new JTextField();
 		txtCodigo.setEditable(false);
-        txtCodigo.setText("Vacu#"+Clinica.getInstance().codVacuna);
-        txtCodigo.setBounds(157, 24, 151, 20);
+        txtCodigo.setText(""+Clinica.getInstance().getCodVivienda());
+        txtCodigo.setBounds(125, 16, 151, 20);
         panel.add(txtCodigo);
         txtCodigo.setColumns(10);
 
         txtNombre = new JTextField();
-        txtNombre.setBounds(157, 65, 151, 20);
+        txtNombre.setBounds(125, 49, 151, 20);
         panel.add(txtNombre);
         txtNombre.setColumns(10);
 
         cbxEnfermedades = new JComboBox<String>();
-        cbxEnfermedades.setBounds(157, 105, 151, 22);
+        cbxEnfermedades.setModel(new DefaultComboBoxModel(new String[] {"<Seleccione>"}));
+        cbxEnfermedades.setBounds(157, 337, 151, 22);
         panel.add(cbxEnfermedades);
-
-        // Cargar las enfermedades al iniciar la ventana
-        cargarEnfermedades();
+        
+        JPanel panel_1 = new JPanel();
+        panel_1.setBounds(40, 118, 327, 204);
+        panel.add(panel_1);
+        panel_1.setLayout(new BorderLayout(0, 0));
+        
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        panel_1.add(scrollPane, BorderLayout.CENTER);
+        
+        txtAreaEnfermedades = new JTextArea();
+        txtAreaEnfermedades.setEditable(false);
+        txtAreaEnfermedades.setLineWrap(true);
+        scrollPane.setViewportView(txtAreaEnfermedades);
+        
+        JLabel lblEnfermedadesQueCura = new JLabel("Enfermedades que cura:");
+        lblEnfermedadesQueCura.setBounds(40, 85, 167, 14);
+        panel.add(lblEnfermedadesQueCura);
+        
+        JButton btnAgregar = new JButton("Agregar");
+        btnAgregar.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		agregarEnfermedad();
+        	}
+        });
+        btnAgregar.setBounds(76, 405, 89, 23);
+        panel.add(btnAgregar);
+        
+        JButton btnQuitar = new JButton("Quitar");
+        btnQuitar.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		quitarEnfermedad();
+        	}
+        });
+        btnQuitar.setBounds(241, 405, 89, 23);
+        panel.add(btnQuitar);
 
         JPanel buttonPane = new JPanel();
         buttonPane.setBackground(new Color(0, 128, 255));
@@ -93,39 +135,18 @@ public class RegistrarVacuna extends JDialog {
         buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
         getContentPane().add(buttonPane, BorderLayout.SOUTH);
 
-        JButton okButton = new JButton("Registrar");
+        JButton okButton = new JButton();
+        if(miVacuna == null) {
+        	okButton.setText("Registrar");
+        } else {
+        	okButton.setText("Modificar");
+
+        }
         okButton.setIcon(new ImageIcon(RegistrarVacuna.class.getResource("/imagenes/agregarOcrearboton.png")));
         okButton.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
-        	    String codigo = txtCodigo.getText();
-        	    String nombre = txtNombre.getText();
-        	    String enfermedadSeleccionada = cbxEnfermedades.getSelectedItem().toString();
-
-        	    if (nombre.isEmpty() || enfermedadSeleccionada.equals("<Seleccionar>")) {
-        	        JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos.", "Campos vacÃ­os", JOptionPane.ERROR_MESSAGE);
-        	    } else {
-        	        Clinica clinica = Clinica.getInstance();
-        	        ArrayList<Enfermedad> enfermedades = clinica.getInstance().getMisEnfermedades();
-        	        Enfermedad enfermedad = null;
-
-        	        for (Enfermedad enf : enfermedades) {
-        	            if (enf.getNombre().equals(enfermedadSeleccionada)) {
-        	                enfermedad = enf;
-        	                break;
-        	            }
-        	        }
-
-        	        if (enfermedad != null) {
-        	            Vacuna vacuna = new Vacuna(codigo, nombre);
-        	            vacuna.agregarEnfermedad(enfermedad);
-        	            clinica.insertarVacuna(vacuna);
-        	            clinica.guardarDatos();
-        	            JOptionPane.showMessageDialog(null, "Registrado con Ã‰xito", "Registrar Vacuna", JOptionPane.INFORMATION_MESSAGE);
-        	            limpiarCampos();
-        	        } else {
-        	            JOptionPane.showMessageDialog(null, "Error al obtener la enfermedad seleccionada", "Error", JOptionPane.ERROR_MESSAGE);
-        	        }
-        	    }
+        	   
+        		registrarVacuna();
         	}
         });
 
@@ -141,24 +162,121 @@ public class RegistrarVacuna extends JDialog {
         });
 
         buttonPane.add(cancelButton);
+        
+        loadCampos();
+        loadEnfermedades();
     }
-
-    // Metodo para cargar las enfermedades en el JComboBox al iniciar la ventana
-    private void cargarEnfermedades() {
-        Clinica clinica = Clinica.getInstance();
-        ArrayList<Enfermedad> enfermedades = clinica.getEnfermedadesRegistradas();
+ 
+    
+    private void loadEnfermedades() {
+    	Clinica.getInstance().cargarDatosEnfermedadSQL();
+        ArrayList<Enfermedad> todasEnfermedades = Clinica.getInstance().getMisEnfermedades();
 
         cbxEnfermedades.removeAllItems();
         cbxEnfermedades.addItem("<Seleccione>");
-        // Agregar las enfermedades al JComboBox
-        for (Enfermedad enfermedad : enfermedades) {
-            cbxEnfermedades.addItem(enfermedad.getNombre());
+        for (Enfermedad enf : todasEnfermedades) {
+            cbxEnfermedades.addItem("E-" + enf.getCodigo() + " " + enf.getNombre());
         }
     }
     
+
+    
+ 
+    private void agregarEnfermedad() {
+        String enfermedadSeleccionada = (String) cbxEnfermedades.getSelectedItem();
+        if (enfermedadSeleccionada != null && !enfermedadSeleccionada.equals("<Seleccione>")) {
+            String codigo = enfermedadSeleccionada.split(" ")[0].substring(2);
+            Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(codigo);
+            if (enfermedad != null && !enfermedadesSeleccionadas.contains(enfermedad)) {
+                enfermedadesSeleccionadas.add(enfermedad);
+                actualizarTextoEnfermedades();
+            } else if (enfermedadesSeleccionadas.contains(enfermedad)) {
+                JOptionPane.showMessageDialog(this, "La enfermedad ya está en la lista.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Seleccione una enfermedad.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private void quitarEnfermedad() {
+        String enfermedadSeleccionada = (String) cbxEnfermedades.getSelectedItem();
+        if (enfermedadSeleccionada != null && !enfermedadSeleccionada.equals("<Seleccione>")) {
+            String codigo = enfermedadSeleccionada.split(" ")[0].substring(2);
+            Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(codigo);
+            if (enfermedad != null) {
+                // Buscar y eliminar la enfermedad de la lista
+                for (Enfermedad e : enfermedadesSeleccionadas) {
+                    if (e.getCodigo().equals(codigo)) {
+                        enfermedadesSeleccionadas.remove(e);
+                        actualizarTextoEnfermedades();
+                        JOptionPane.showMessageDialog(this, "Enfermedad removida con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                        return;
+                    }
+                }
+                JOptionPane.showMessageDialog(this, "La enfermedad no está en la lista.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Seleccione una enfermedad.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    
     private void limpiarCampos() {
         txtNombre.setText("");
-        cbxEnfermedades.setSelectedIndex(0); 
-        txtCodigo.setText("Vac-#" + Clinica.getInstance().codVacuna); 
+        cbxEnfermedades.setSelectedIndex(0);
+        txtCodigo.setText("" +  Clinica.getInstance().getCodVivienda());
+        enfermedadesSeleccionadas.clear();
+        actualizarTextoEnfermedades();
     }
+
+    
+    private void actualizarTextoEnfermedades() {
+        StringBuilder sb = new StringBuilder();
+        for (Enfermedad enfermedad : enfermedadesSeleccionadas) {
+            sb.append("E-" + enfermedad.getCodigo() + " " + enfermedad.getNombre()).append("\n");
+        }
+        txtAreaEnfermedades.setText(sb.toString());
+    }
+    
+    private void loadCampos() {
+        if (miVacuna != null) {
+            txtCodigo.setText(miVacuna.getCodigo());
+            txtNombre.setText(miVacuna.getNombre());
+            enfermedadesSeleccionadas = new ArrayList<>(miVacuna.getMisEnfermedades());
+            actualizarTextoEnfermedades();
+        } else {
+            txtCodigo.setText("" + Clinica.getInstance().getCodVivienda());
+        }
+    }
+    
+    
+    private void registrarVacuna() {
+        String codigo = txtCodigo.getText(); 
+        String nombre = txtNombre.getText();
+
+        if (nombre.isEmpty() || enfermedadesSeleccionadas.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos y seleccione al menos una enfermedad.", "Campos vacíos", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (miVacuna == null) {
+
+            Vacuna nuevaVacuna = new Vacuna(codigo, nombre);
+            nuevaVacuna.setMisEnfermedades(new ArrayList<>(enfermedadesSeleccionadas));
+            Clinica.getInstance().insertarDatosVacunaSQL(nuevaVacuna);
+            JOptionPane.showMessageDialog(null, "Vacuna registrada con éxito", "Registrar Vacuna", JOptionPane.INFORMATION_MESSAGE);
+            
+        } else {
+
+            miVacuna.setNombre(nombre);
+            miVacuna.setMisEnfermedades(new ArrayList<>(enfermedadesSeleccionadas));
+            Clinica.getInstance().actualizarDatosVacunaSQL(miVacuna);
+            JOptionPane.showMessageDialog(null, "Vacuna modificada con éxito", "Modificar Vacuna", JOptionPane.INFORMATION_MESSAGE);
+    		ListarVacuna.cargarVacuna();
+            dispose();
+        }
+        
+        limpiarCampos();
+    }
+
 }

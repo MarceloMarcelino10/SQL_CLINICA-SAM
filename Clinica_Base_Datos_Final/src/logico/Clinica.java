@@ -37,6 +37,10 @@ public class Clinica implements Serializable  {//u
 	private ArrayList<Consulta> misConsultas;
 	private ArrayList<HistoriaClinica> misHistoriasClinicas;
 	private static Clinica clinica = null;
+	public static int codAdministrador = 1;
+	public static int codSecretario = 1;
+	public static int codDoctor = 1;
+	public static int codPaciente = 1;
 	public static int codPersona = 1;
 	public static int codCita= 1;
 	public static int codVacuna = 1;
@@ -56,6 +60,7 @@ public class Clinica implements Serializable  {//u
 		this.misVacunas =  new ArrayList<Vacuna>();
 		this.misConsultas =  new ArrayList<Consulta>();
 		this.misHistoriasClinicas = new ArrayList<HistoriaClinica>();
+		//cargarLastIdUsed();
 	}
 	
 	public static Clinica getInstance() {
@@ -124,45 +129,45 @@ public class Clinica implements Serializable  {//u
 	//METODOS PARA INSERTAR EN LAS LISTAS:
 	
     public void insertarVivienda(Vivienda vivienda) {
-        Clinica.getInstance().obtenerMaximoIdVivienda();
+        //Clinica.getInstance().obtenerMaximoIdVivienda();
     	misViviendas.add(vivienda);
-        //guardarDatos();
+    	codVivienda++;
     }
 
     public void insertarPersona(Persona persona) {
-        misPersonas.add(persona);
-        codPersona++;
-        guardarDatos();
+        //Clinica.getInstance().obtenerMaximoIdPersona();
+    	misPersonas.add(persona);
+    	codPersona++;
     }
 
     public void insertarEnfermedad(Enfermedad enfermedad) {
-        misEnfermedades.add(enfermedad);
-        codEnfermedad++;
-        guardarDatos();
+    	//Clinica.getInstance().obtenerMaximoIdEnfermedad();
+    	misEnfermedades.add(enfermedad);
+    	codEnfermedad++;
     }
 
     public void insertarCita(Cita cita) {
-        misCitas.add(cita);
-        codCita++;
-        guardarDatos();
+        //Clinica.getInstance().obtenerMaximoIdCita();
+    	misCitas.add(cita);
+    	codCita++;
     }
 
     public void insertarVacuna(Vacuna vacuna) {
+    	//Clinica.getInstance().obtenerMaximoIdVacuna();
         misVacunas.add(vacuna);
         codVacuna++;
-        guardarDatos();
     }
 
     public void insertarConsulta(Consulta consulta) {
-        misConsultas.add(consulta);
-        codConsulta++;
-        guardarDatos();
+       // Clinica.getInstance().obtenerMaximoIdConsulta();
+    	misConsultas.add(consulta);
+    	codConsulta++;
     }
     
     public void insertarHistoriaClinica(HistoriaClinica historiaClinica) {
-        misHistoriasClinicas.add(historiaClinica);
-        codHistoriaClinica++;
-        guardarDatos();
+        //Clinica.getInstance().obtenerMaximoIdHistoriaClinica();
+    	misHistoriasClinicas.add(historiaClinica);
+    	codHistoriaClinica++;
 	}
     
     public static void setClinica(Clinica clinica) {
@@ -245,7 +250,7 @@ public class Clinica implements Serializable  {//u
 	
 	 public void agregarEnfermedad(Enfermedad enfermedad) {
 	        misEnfermedades.add(enfermedad);
-	        // Aquí se debería añadir la lógica para registrar la enfermedad en la base de datos si es necesario
+	        // AquÃ­ se deberÃ­a aÃ±adir la lÃ³gica para registrar la enfermedad en la base de datos si es necesario
 	 }
 	 
 
@@ -271,6 +276,8 @@ public class Clinica implements Serializable  {//u
             misEnfermedades.set(index, enfermedad);
             guardarDatos();
     }
+    
+
 
     private int buscarEnfermedadByIndex(String codigo) {
         int index = -1;
@@ -461,7 +468,7 @@ public class Clinica implements Serializable  {//u
 	    return temp;
 	}
 	
-	private Vacuna buscarVacunaById(String codigo) {
+	public Vacuna buscarVacunaById(String codigo) {
 		Vacuna temp = null;
 	    boolean encontrado = false;
 	    int i = 0;
@@ -526,7 +533,7 @@ public class Clinica implements Serializable  {//u
 	        JOptionPane.showMessageDialog(null, "Persona eliminada correctamente de la vivienda", "Eliminar Persona", JOptionPane.INFORMATION_MESSAGE);
 	        guardarDatos();
 	    } else {
-	        JOptionPane.showMessageDialog(null, "La persona no est� registrada en ninguna vivienda", "Error", JOptionPane.ERROR_MESSAGE);
+	        JOptionPane.showMessageDialog(null, "La persona no estï¿½ registrada en ninguna vivienda", "Error", JOptionPane.ERROR_MESSAGE);
 	    }
 	}
 	
@@ -572,8 +579,6 @@ public class Clinica implements Serializable  {//u
 	    }
 	    return citasPendientes;
 	}
-	
-	
 
 
 	//SETTERS AND GETTERS ESTATICOS (Probando guardar los valores esticaos)
@@ -643,7 +648,7 @@ public class Clinica implements Serializable  {//u
 	public String obtenerViviendasMasPobladas() {
 		
 		if (misViviendas.isEmpty()) {
-	        return "Informaci�n no disponible!\n";
+	        return "Informaciï¿½n no disponible!\n";
 	    }
 		ArrayList<Vivienda> viviendasOrdenadas = new ArrayList<>(misViviendas);
 		
@@ -651,7 +656,7 @@ public class Clinica implements Serializable  {//u
         Collections.reverse(viviendasOrdenadas);
         
         int limite = Math.min(3, viviendasOrdenadas.size());
-        StringBuilder resultado = new StringBuilder("Las viviendas m�s pobladas son:\n");
+        StringBuilder resultado = new StringBuilder("Las viviendas mï¿½s pobladas son:\n");
 
         for (int i = 0; i < limite; i++) {
             Vivienda vivienda = viviendasOrdenadas.get(i);
@@ -662,7 +667,7 @@ public class Clinica implements Serializable  {//u
 	
     public String calcularPromedioEdadPersonas() {
         if (misPersonas.isEmpty()) {
-        	return "Informaci�n no disponible!\n";
+        	return "Informaciï¿½n no disponible!\n";
         }
 
         Calendar calHoy = Calendar.getInstance();
@@ -684,12 +689,12 @@ public class Clinica implements Serializable  {//u
             }
         }
         double promedioEdad = (double) sumEdades / misPersonas.size();
-        return String.format("El promedio de edad de las personas tratadas: %.2f a�os.\n", promedioEdad);
+        return String.format("El promedio de edad de las personas tratadas: %.2f aï¿½os.\n", promedioEdad);
     }
 	
     public String calcularPromedioSexoPersoanas() {
         if (misPersonas.isEmpty()) {
-        	return "Informaci�n no disponible!\n";
+        	return "Informaciï¿½n no disponible!\n";
         }
 
         int countMasculino = 0;
@@ -715,7 +720,7 @@ public class Clinica implements Serializable  {//u
     
     public String obtenerTotalPersonasAtendidas() {
         if (misPersonas.isEmpty()) {
-        	return "Informaci�n no disponible!\n";
+        	return "Informaciï¿½n no disponible!\n";
         }
         int total = 0;
         for (Persona persona : misPersonas) {
@@ -728,7 +733,7 @@ public class Clinica implements Serializable  {//u
     
     public String obtenerEnfermedadesMasRecurrentes() {
         if (misEnfermedades.isEmpty()) {
-        	return "Informaci�n no disponible!\n";
+        	return "Informaciï¿½n no disponible!\n";
         }
 
         String[] nombresEnfermedades = new String[misEnfermedades.size()];
@@ -751,7 +756,7 @@ public class Clinica implements Serializable  {//u
         ordenarPorFrecuenciaDescendente(nombresEnfermedades, frecuenciasEnfermedades);
         
         int limite = Math.min(3, misEnfermedades.size());
-        StringBuilder resultado = new StringBuilder("Las enfermedades m�s recurrentes son:\n");
+        StringBuilder resultado = new StringBuilder("Las enfermedades mï¿½s recurrentes son:\n");
 
         for (int i = 0; i < limite; i++) {
             resultado.append(String.format("%d. %s: %d veces\n", i + 1, nombresEnfermedades[i], frecuenciasEnfermedades[i]));
@@ -788,7 +793,7 @@ public class Clinica implements Serializable  {//u
     
     public String obtenerEnfermedadesMasGraves() {
         if (misEnfermedades.isEmpty()) {
-            return "Informaci�n no disponible!\n";
+            return "Informaciï¿½n no disponible!\n";
         }
 
         ArrayList<Enfermedad> enfermedadesGraves = new ArrayList<>();
@@ -815,7 +820,7 @@ public class Clinica implements Serializable  {//u
     
     public String obtenerDoctorConMasCitas() {
         if (misCitas.isEmpty()) {
-            return "Informaci�n no disponible!\n";
+            return "Informaciï¿½n no disponible!\n";
         }
 
         Doctor doctorConMasCitas = null;
@@ -831,7 +836,7 @@ public class Clinica implements Serializable  {//u
         }
 
         if (doctorConMasCitas != null) {
-        	return String.format("El doctor con m�s citas es: %s, con especialidad de %s, y tiene %d citas.\n", doctorConMasCitas.getNombre(), doctorConMasCitas.getEspecialidad(), maxCitas);
+        	return String.format("El doctor con mï¿½s citas es: %s, con especialidad de %s, y tiene %d citas.\n", doctorConMasCitas.getNombre(), doctorConMasCitas.getEspecialidad(), maxCitas);
         } else {
             return "No hay doctores con citas registradas.\n";
         }
@@ -864,7 +869,7 @@ public class Clinica implements Serializable  {//u
 
     public String obtenerTotalCitasRealizadas() {
         if (misCitas.isEmpty()) {
-        	return "Informaci�n no disponible!\n";
+        	return "Informaciï¿½n no disponible!\n";
         }
         int totalCitasRealizadas = 0;
         for (Cita cita : misCitas) {
@@ -877,7 +882,7 @@ public class Clinica implements Serializable  {//u
 
     public String calcularPromedioSexoDoctores() {
         if (misPersonas.isEmpty()) {
-        	return "Informaci�n no disponible!\n";
+        	return "Informaciï¿½n no disponible!\n";
         }
 
         int countMasculino = 0;
@@ -902,12 +907,12 @@ public class Clinica implements Serializable  {//u
         double porcentajeMasculino = (double) countMasculino / cantDoctores * 100;
         double porcentajeFemenino = (double) countFemenino / cantDoctores * 100;
 
-        return String.format("Promedio de G�nero entre los doctores:\nMasculino: %.2f%%\nFemenino: %.2f%%\n", porcentajeMasculino, porcentajeFemenino);
+        return String.format("Promedio de Gï¿½nero entre los doctores:\nMasculino: %.2f%%\nFemenino: %.2f%%\n", porcentajeMasculino, porcentajeFemenino);
     }
     
     public String obtenerVacunaMasCurativa() {
         if (misVacunas.isEmpty()) {
-        	return "Informaci�n no disponible!\n";
+        	return "Informaciï¿½n no disponible!\n";
         }
 
         Vacuna vacunaConMasEnfermedades = null;
@@ -925,8 +930,8 @@ public class Clinica implements Serializable  {//u
             return "No hay vacunas con enfermedades asociadas.\n";
         }
 
-        StringBuilder resultado = new StringBuilder("La vacuna que m�s cura enfermedades es:\n");
-        resultado.append(String.format("- %s (C�digo: %s)\n", vacunaConMasEnfermedades.getNombre(), vacunaConMasEnfermedades.getCodigo()));
+        StringBuilder resultado = new StringBuilder("La vacuna que mï¿½s cura enfermedades es:\n");
+        resultado.append(String.format("- %s (Cï¿½digo: %s)\n", vacunaConMasEnfermedades.getNombre(), vacunaConMasEnfermedades.getCodigo()));
         resultado.append("Enfermedades asociadas:\n");
 
         for (Enfermedad enfermedad : vacunaConMasEnfermedades.getMisEnfermedades()) {
@@ -1004,6 +1009,8 @@ public class Clinica implements Serializable  {//u
     //DOCTORES:
     
     public void cargarDatosDoctorSQL() {
+
+    	Clinica.getInstance().getMisPersonas().clear();
     	
     	String query = "SELECT * " + 
 	    			   "FROM PERSONA AS p " + 
@@ -1055,6 +1062,8 @@ public class Clinica implements Serializable  {//u
     // PACIENTES:
     
     public void cargarDatosPacienteSQL() {
+    	
+    	Clinica.getInstance().getMisPersonas().clear();
     	
     	String query = "SELECT * " + 
 	    			   "FROM PERSONA AS p " + 
@@ -1119,6 +1128,8 @@ public class Clinica implements Serializable  {//u
     // PERSONAS:
     
     public void cargarDatosPersonaSQL() throws ParseException {
+    	
+    	Clinica.getInstance().getMisPersonas().clear();
         
     	String query = "SELECT * " +
         		"FROM PERSONA AS p " +
@@ -1159,7 +1170,7 @@ public class Clinica implements Serializable  {//u
                 System.out.println("Nombre: " + nombre);
                 System.out.println("Apellido: " + apellido);
                 System.out.println("Sexo: " + sexo);
-                System.out.println("Fecha de Nacimiento: " + (fec_nacim != null ? sdf.format(fec_nacim) : "Fecha inv�lida o no disponible"));
+                System.out.println("Fecha de Nacimiento: " + (fec_nacim != null ? sdf.format(fec_nacim) : "Fecha invï¿½lida o no disponible"));
                 System.out.println("User: " + user);
                 System.out.println("Password: " + password);
                 System.out.println("Rango: " + rango);
@@ -1194,10 +1205,10 @@ public class Clinica implements Serializable  {//u
     //ENFERMEDADES:
     
     public void cargarDatosEnfermedadSQL() {
-    	
+
         Clinica.getInstance().getMisEnfermedades().clear();
         
-    	String query = "SELECT e.* " + 
+    	String query = "SELECT e.id_enfermedad, e.nombre, e.sintomas, e.tratamiento, e.id_gravedad_enfermedad " + 
         			   "FROM ENFERMEDAD AS e ";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -1211,12 +1222,12 @@ public class Clinica implements Serializable  {//u
                 String tratamiento = rs.getString("tratamiento");
                 String gravedad = rs.getString("id_gravedad_enfermedad");
 
-                System.out.println("Codigo: " + codigo);
-                System.out.println("Nombre: " + nombre);
-                System.out.println("Sintomas: " + sintomas);
-                System.out.println("Tratamiento: " + tratamiento);
-                System.out.println("Gravedad: " + gravedad);
-                System.out.println();
+             //   System.out.println("Codigo: " + codigo);
+           //     System.out.println("Nombre: " + nombre);
+           //     System.out.println("Sintomas: " + sintomas);
+           //     System.out.println("Tratamiento: " + tratamiento);
+           //     System.out.println("Gravedad: " + gravedad);
+           //     System.out.println(); /
                 
                 Enfermedad enfermedad = new Enfermedad(codigo, nombre, sintomas, tratamiento, Integer.parseInt(gravedad));
                 Clinica.getInstance().insertarEnfermedad(enfermedad);
@@ -1228,6 +1239,8 @@ public class Clinica implements Serializable  {//u
     }
     
     public void insertarDatosEnfermedadSQL(Enfermedad enfermedad) {
+    	
+    	Clinica.getInstance().obtenerMaximoIdEnfermedad();
 
     	String query = "INSERT INTO ENFERMEDAD (id_enfermedad, nombre, sintomas, tratamiento, id_gravedad_enfermedad) VALUES (?, ?, ?, ?, ?)";
     	int filas = 0;
@@ -1249,10 +1262,27 @@ public class Clinica implements Serializable  {//u
         }
     }
     
-    public void modificarDatosEnfermedadSQL(Enfermedad enfermedad) {
-    	
-    	
-    	
+
+    public void actualizarDatosEnfermedadSQL(Enfermedad enfermedad) {
+        String query = "UPDATE ENFERMEDAD SET nombre = ?, sintomas = ?, tratamiento = ?, id_gravedad_enfermedad = ? WHERE id_enfermedad = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+   
+            stmt.setString(1, enfermedad.getNombre());
+            stmt.setString(2, enfermedad.getSintomas());
+            stmt.setString(3, enfermedad.getTratamiento());
+            stmt.setInt(4, enfermedad.getGravedad());
+            stmt.setString(5, enfermedad.getCodigo());
+            int filas = stmt.executeUpdate();
+            
+            System.out.println("Enfermedades actualizadas: " + filas);
+            Clinica.getInstance().actualizarEnfermedad(enfermedad);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
     
     public void eliminarDatosEnfermedadSQL(String id_enfermedad) {
@@ -1274,41 +1304,38 @@ public class Clinica implements Serializable  {//u
     }
     
     
-
-    
-    
-    
-    
-    
     //VIVIENDAS:
 
     public void cargarDatosViviendaSQL() {
-        String query = "SELECT v.id_vivienda, v.direccion " +
-                       "FROM VIVIENDA AS v";
+    	
+    	Clinica.getInstance().getMisViviendas().clear();
+    	
+        String query = "SELECT v.* " +
+        			   "FROM VIVIENDA AS v " +
+        			   "LEFT JOIN PACIENTE AS p ON v.id_vivienda = p.id_vivienda ";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
-
-            Clinica.getInstance().getMisViviendas().clear();
-
+        	
             while (rs.next()) {
                 String codigo_vivienda = rs.getString("id_vivienda");
                 String direccion = rs.getString("direccion");
-
+                
                 Vivienda vivienda = new Vivienda(codigo_vivienda, direccion);
-                Clinica.getInstance().insertarVivienda(vivienda);  
+                Clinica.getInstance().insertarVivienda(vivienda);
             }
-
+            
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
     
     
     public void insertarDatosViviendaSQL(Vivienda vivienda) {
-
+    	
+    	Clinica.getInstance().obtenerMaximoIdVivienda();
+    	
         String query = "INSERT INTO VIVIENDA (id_vivienda, direccion) VALUES (?, ?)";
         int filas = 0;
 
@@ -1358,7 +1385,7 @@ public class Clinica implements Serializable  {//u
     
     public void cargarDatosCitaSQL() {
     	
-    	clinica.getInstance().misCitas.clear();
+    	Clinica.getInstance().getMisCitas().clear();
         
     	String query = "SELECT c.id_cita, c.fecha_cita, c.hora_cita, c.fecha_cita_creacion, c.completada, " +
         			   "c.id_doctor, c.id_persona, c.id_creador_cita, d.id_persona AS id_doctor_persona " +
@@ -1404,6 +1431,8 @@ public class Clinica implements Serializable  {//u
     //HISTORIAL CLINICA:
     
     public void cargarDatosHistoriaClinicaSQL() {
+    	
+    	Clinica.getInstance().getMisHistoriasClinicas().clear();
         
         String queryHistorial = "SELECT hc.id_historial_clinico, hc.id_paciente, p.id_persona AS id_paciente_persona " +
                                 "FROM HISTORIAL_CLINICO AS hc " +
@@ -1426,7 +1455,7 @@ public class Clinica implements Serializable  {//u
                 HistoriaClinica historiaClinica = new HistoriaClinica(codigo, paciente, consultas, vacunasAplicadas);
                 Clinica.getInstance().insertarHistoriaClinica(historiaClinica);
 
-                System.out.println("Historia Cl�nica ID: " + codigo);
+                System.out.println("Historia Clï¿½nica ID: " + codigo);
                 System.out.println("Paciente ID: " + id_paciente);
             }
 
@@ -1438,6 +1467,8 @@ public class Clinica implements Serializable  {//u
     // CONSULTAS:
    
     public void cargarDatosConsultaSQL() {
+    	
+    	Clinica.getInstance().getMisConsultas().clear();
         
         String queryConsulta = "SELECT c.id_consulta, c.fecha_consulta, c.id_historial_clinico, c.id_doctor, c.diagnostico, " +
                                "c.id_cita_solicitada, d.id_persona AS id_doctor_persona " +
@@ -1491,13 +1522,13 @@ public class Clinica implements Serializable  {//u
                 
                 Clinica.getInstance().insertarConsulta(consulta);
 
-                System.out.println("Consulta ID: " + codigo);
-                System.out.println("Fecha Consulta: " + fechaConsulta);
-                System.out.println("Historial Cl�nico ID: " + id_historial_clinico);
-                System.out.println("Doctor ID: " + id_doctor);
-                System.out.println("Cita Solicitada ID: " + id_cita_solicitada);
-                System.out.println("Enfermedades: " + consulta.getMisEnfermedades().size());
-                System.out.println();
+            //    System.out.println("Consulta ID: " + codigo);
+             //   System.out.println("Fecha Consulta: " + fechaConsulta);
+             //   System.out.println("Historial Clï¿½nico ID: " + id_historial_clinico);
+             //   System.out.println("Doctor ID: " + id_doctor);
+             //   System.out.println("Cita Solicitada ID: " + id_cita_solicitada);
+             //   System.out.println("Enfermedades: " + consulta.getMisEnfermedades().size());
+             //   System.out.println();
             }
             
         } catch (SQLException e) {
@@ -1511,6 +1542,8 @@ public class Clinica implements Serializable  {//u
 
     public void cargarDatosVacunaSQL() {
         
+    	Clinica.getInstance().getMisVacunas().clear();
+    	
         String queryVacuna = "SELECT v.id_vacuna, v.nombre, v.id_historial_clinico FROM VACUNA AS v";
         
         String queryEnfermedades = "SELECT ev.id_enfermedad FROM ENFERMEDAD_VACUNA AS ev WHERE ev.id_vacuna = ?";
@@ -1548,12 +1581,48 @@ public class Clinica implements Serializable  {//u
 
                 Clinica.getInstance().insertarVacuna(vacuna);
 
-                System.out.println("Vacuna ID: " + codigo);
-                System.out.println("Nombre: " + nombre);
-                System.out.println("Historia Cl�nica ID: " + (historiaClinica != null ? historiaClinica.getCodigo() : "No asociada"));
-                System.out.println("N�mero de Enfermedades: " + vacuna.getMisEnfermedades().size());
-                System.out.println();
+                //System.out.println("Vacuna ID: " + codigo);
+              //  System.out.println("Nombre: " + nombre);
+               // System.out.println("Historia Clï¿½nica ID: " + (historiaClinica != null ? historiaClinica.getCodigo() : "No asociada"));
+               // System.out.println("Nï¿½mero de Enfermedades: " + vacuna.getMisEnfermedades().size());
+               // System.out.println();
             }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
+    public void insertarDatosVacunaSQL(Vacuna vacuna) {
+    	
+    	Clinica.getInstance().obtenerMaximoIdVacuna();
+
+        String queryVacuna = "INSERT INTO VACUNA (id_vacuna, nombre, id_historial_clinico) VALUES (?, ?, ?)";
+        String queryEnferemedad = "INSERT INTO ENFERMEDAD_VACUNA (id_vacuna, id_enfermedad) VALUES (?, ?)";
+        int filas = 0;
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement insertVacunaStmt = conn.prepareStatement(queryVacuna)) {
+
+            insertVacunaStmt.setString(1, vacuna.getCodigo());
+            insertVacunaStmt.setString(2, vacuna.getNombre());
+            insertVacunaStmt.setString(3, vacuna.getMiHistoriaClinica() != null ? vacuna.getMiHistoriaClinica().getCodigo() : null);
+
+            // Ejecutar la inserción de la vacuna
+            filas = insertVacunaStmt.executeUpdate();
+            System.out.println("Vacunas agregadas: " + filas);
+
+            try (PreparedStatement insertEnfermedadesStmt = conn.prepareStatement(queryEnferemedad)) {
+                for (Enfermedad enfermedad : vacuna.getMisEnfermedades()) {
+                    insertEnfermedadesStmt.setString(1, vacuna.getCodigo());
+                    insertEnfermedadesStmt.setString(2, enfermedad.getCodigo());
+                    insertEnfermedadesStmt.addBatch(); // Agrupamos todas las llamadas
+                }
+                insertEnfermedadesStmt.executeBatch(); // Ejecutamos todas las llamadas en batch
+            }
+            
+            Clinica.getInstance().insertarVacuna(vacuna);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -1561,9 +1630,76 @@ public class Clinica implements Serializable  {//u
     }
 
     
+    public void actualizarDatosVacunaSQL(Vacuna vacuna) {
+
+        String query = "UPDATE VACUNA SET nombre = ?, id_historial_clinico = ? WHERE id_vacuna = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, vacuna.getNombre());
+            stmt.setString(2, vacuna.getMiHistoriaClinica() != null ? vacuna.getMiHistoriaClinica().getCodigo() : null);
+            stmt.setString(3, vacuna.getCodigo());
+
+            int filas = stmt.executeUpdate();
+            System.out.println("Vacunas actualizadas: " + filas);
+
+            // Actualizar las enfermedades asociadas
+            // Primero eliminamos las enfermedades existentes asociadas a la vacuna
+            String deleteEnfermedadesQuery = "DELETE FROM ENFERMEDAD_VACUNA WHERE id_vacuna = ?";
+            try (PreparedStatement deleteStmt = conn.prepareStatement(deleteEnfermedadesQuery)) {
+                deleteStmt.setString(1, vacuna.getCodigo());
+                deleteStmt.executeUpdate();
+            }
+
+            // Luego insertamos las nuevas asociaciones
+            String insertEnfermedadesQuery = "INSERT INTO ENFERMEDAD_VACUNA (id_vacuna, id_enfermedad) VALUES (?, ?)";
+            try (PreparedStatement insertStmt = conn.prepareStatement(insertEnfermedadesQuery)) {
+                for (Enfermedad enfermedad : vacuna.getMisEnfermedades()) {
+                    insertStmt.setString(1, vacuna.getCodigo());
+                    insertStmt.setString(2, enfermedad.getCodigo());
+                    insertStmt.addBatch(); //Agrupamos todas las llamadas.
+                }
+                insertStmt.executeBatch(); //Ejecutamos todas las llamadas.
+            }
+            
+            Clinica.getInstance().actualizarVacuna(vacuna);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void eliminarDatosVacunaSQL(String id_vacuna) {
+
+        String queryEnferemedadVacuna = "DELETE FROM ENFERMEDAD_VACUNA WHERE id_vacuna = ?";
+        String queryVacuna = "DELETE FROM VACUNA WHERE id_vacuna = ?";
+        int filas = 0;
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+        	
+            try (PreparedStatement deleteEnfermedadesStmt = conn.prepareStatement(queryEnferemedadVacuna)) {
+                deleteEnfermedadesStmt.setInt(1, Integer.parseInt(id_vacuna));
+                deleteEnfermedadesStmt.executeUpdate();
+            }
+
+            try (PreparedStatement deleteVacunaStmt = conn.prepareStatement(queryVacuna)) {
+                deleteVacunaStmt.setInt(1, Integer.parseInt(id_vacuna));
+                filas = deleteVacunaStmt.executeUpdate();
+                System.out.println(filas + " Vacunas eliminada.");
+            }
+ 
+            Vacuna vacuna = Clinica.getInstance().buscarVacunaById(id_vacuna);
+            Clinica.getInstance().eliminarVacuna(vacuna);
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    } 
+    
+    
     //MANEJO DE INDICES BASE DE DATOS:
     
-    public int cargarMaximoIdAdministrador() {
+    public int obtenerMaximoIdAdministrador() {
         
     	String query = "SELECT MAX(id_administrador) AS max_administrador_id FROM ADMINISTRADOR";
         
@@ -1572,16 +1708,17 @@ public class Clinica implements Serializable  {//u
              ResultSet rs = stmt.executeQuery()) {
             
             if (rs.next()) {
-                return rs.getInt("max_administrador_id") + 1;
+            	codAdministrador = rs.getInt("max_administrador_id") + 1;
+                return codAdministrador; 
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 1; // Si no hay datos, empezar en 1
+        return codAdministrador; // Si no hay datos, empezar en 1
     }
     
-    public int cargarMaximoIdSecretario() {
+    public int obtenerMaximoIdSecretario() {
         
     	String query = "SELECT MAX(id_secretario) AS max_secretario_id FROM SECRETARIO";
         
@@ -1590,16 +1727,17 @@ public class Clinica implements Serializable  {//u
              ResultSet rs = stmt.executeQuery()) {
             
             if (rs.next()) {
-                return rs.getInt("id_secretario") + 1;
+                codSecretario = rs.getInt("max_secretario_id") + 1;
+                return codSecretario;
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 1;
+        return codSecretario;
     }
     
-   public int cargarMaximoIdDoctor() {
+   public int obtenerMaximoIdDoctor() {
         
     	String query = "SELECT MAX(id_doctor) AS max_doctor_id FROM DOCTOR";
         
@@ -1608,16 +1746,17 @@ public class Clinica implements Serializable  {//u
              ResultSet rs = stmt.executeQuery()) {
             
             if (rs.next()) {
-                return rs.getInt("max_doctor_id") + 1;
+                codDoctor = rs.getInt("max_doctor_id") + 1;
+                return codDoctor;
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 1;
+        return codDoctor;
     }
     
-    public int cargarMaximoIdPaciente() {
+    public int obtenerMaximoIdPaciente() {
         
     	String query = "SELECT MAX(id_paciente) AS max_paciente_id FROM PACIENTE";
         
@@ -1626,16 +1765,17 @@ public class Clinica implements Serializable  {//u
              ResultSet rs = stmt.executeQuery()) {
             
             if (rs.next()) {
-                return rs.getInt("max_paciente_id") + 1;
+                codPaciente = rs.getInt("max_paciente_id") + 1;
+                return codPaciente;
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 1;
+        return codPaciente;
     }
     
-    public int cargarMaximoIdPesona() {
+    public int obtenerMaximoIdPersona() {
         
     	String query = "SELECT MAX(id_persona) AS max_persona_id FROM PERSONA";
         
@@ -1644,30 +1784,33 @@ public class Clinica implements Serializable  {//u
              ResultSet rs = stmt.executeQuery()) {
             
             if (rs.next()) {
-                return rs.getInt("max_persona_id") + 1;
+                codPersona = rs.getInt("max_persona_id") + 1;
+                return codPersona;
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 1;
+        return codPersona;
     }
 
     
     public int obtenerMaximoIdEnfermedad() {
-        String query = "SELECT MAX(id_enfermedad) AS max_enfermedad_id FROM ENFERMEDAD";
+        
+    	String query = "SELECT MAX(id_enfermedad) AS max_enfermedad_id FROM ENFERMEDAD";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
             
             if (rs.next()) {
-                return rs.getInt("max_enfermedad_id") + 1;
+                codEnfermedad = rs.getInt("max_enfermedad_id") + 1;
+                return codEnfermedad;
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 1;
+        return codEnfermedad;
     }
     
     public int obtenerMaximoIdConsulta() {
@@ -1677,13 +1820,14 @@ public class Clinica implements Serializable  {//u
              ResultSet rs = stmt.executeQuery()) {
             
             if (rs.next()) {
-                return rs.getInt("max_consulta_id") + 1;
+                codConsulta = rs.getInt("max_consulta_id") + 1;
+                return codConsulta;
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 1;
+        return codConsulta;
     }
     
     public int obtenerMaximoIdVivienda() {
@@ -1693,13 +1837,14 @@ public class Clinica implements Serializable  {//u
              ResultSet rs = stmt.executeQuery()) {
             
             if (rs.next()) {
-                return rs.getInt("max_vivienda_id") + 1;
+                codVivienda = rs.getInt("max_vivienda_id") + 1;
+                return codVivienda;
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 1;
+        return codVivienda;
     }
     
     public int obtenerMaximoIdHistoriaClinica() {
@@ -1709,13 +1854,14 @@ public class Clinica implements Serializable  {//u
              ResultSet rs = stmt.executeQuery()) {
             
             if (rs.next()) {
-                return rs.getInt("max_historia_consulta_id") + 1;
+                codHistoriaClinica = rs.getInt("max_historia_consulta_id") + 1;
+                return codHistoriaClinica;
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 1;
+        return codHistoriaClinica;
     }
 
     public int obtenerMaximoIdVacuna() {
@@ -1725,39 +1871,50 @@ public class Clinica implements Serializable  {//u
              ResultSet rs = stmt.executeQuery()) {
             
             if (rs.next()) {
-                return rs.getInt("max_vacuna_id") + 1;
+                codVacuna = rs.getInt("max_vacuna_id") + 1;
+                return codVacuna;
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 1;
+        return codVacuna;
     }
     
-    
-    public void actualizarDatosEnfermedadSQL(Enfermedad enfermedad) {
-        String query = "UPDATE ENFERMEDAD SET nombre = ?, sintomas = ?, tratamiento = ?, id_gravedad_enfermedad = ? WHERE id_enfermedad = ?";
-        
+    public int obtenerMaximoIdCita() {
+        String query = "SELECT MAX(id_cita) AS max_cita_id FROM CITA";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-   
-            stmt.setString(1, enfermedad.getNombre());
-            stmt.setString(2, enfermedad.getSintomas());
-            stmt.setString(3, enfermedad.getTratamiento());
-            stmt.setInt(4, enfermedad.getGravedad());
-            stmt.setString(5, enfermedad.getCodigo());
-            int filas = stmt.executeUpdate();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
             
-            System.out.println("Enfermedades actualizadas: " + filas);
-            // Si necesitas actualizar la instancia en la aplicación, podrías hacerlo aquí también
-             Clinica.getInstance().actualizarEnfermedad(enfermedad);
+            if (rs.next()) {
+                codCita = rs.getInt("max_cita_id") + 1;
+                return codCita;
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return codCita;
     }
     
+    public void cargarLastIdUsed() {
+    	
+    	//Metodo para cargar los id de la base de datos, al progrma debido a lo mucho que cuesta cargar toda la info!
+
+    	
+    	obtenerMaximoIdAdministrador();
+    	obtenerMaximoIdSecretario();
+    	obtenerMaximoIdDoctor();
+    	obtenerMaximoIdPaciente();
+    	obtenerMaximoIdPersona();
+    	obtenerMaximoIdEnfermedad();
+    	obtenerMaximoIdConsulta();
+    	obtenerMaximoIdVivienda();
+    	obtenerMaximoIdHistoriaClinica();
+    	obtenerMaximoIdVacuna();
+    	obtenerMaximoIdCita();
+    }
     
     public void actualizarViviendaSQL(Vivienda vivienda) {
         String query = "UPDATE VIVIENDA SET direccion = ? WHERE id_vivienda = ?";
@@ -1774,6 +1931,5 @@ public class Clinica implements Serializable  {//u
         }
     }
     
-
-    
-}
+      
+} 

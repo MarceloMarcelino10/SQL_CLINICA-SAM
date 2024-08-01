@@ -328,7 +328,7 @@ public class PrincipalVisual extends JFrame {
 		btnRegistrarVacuna = new JButton("Registrar");
 		btnRegistrarVacuna.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				RegistrarVacuna regvacu = new RegistrarVacuna();
+				RegistrarVacuna regvacu = new RegistrarVacuna(null); 
 				regvacu.setModal(true);
 				regvacu.setVisible(true);
 			}

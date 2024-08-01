@@ -104,7 +104,7 @@ public class CrearVivienda extends JDialog {
                 if (v != null) {
                     btnRegistrar.setText("Modificar");
                 }
-                btnRegistrar.addActionListener(new ActionListener() {
+                btnRegistrar.addActionListener(new ActionListener() {//
                     public void actionPerformed(ActionEvent e) {
                         if(v == null) {
                             String codigo = txtCodigo.getText();

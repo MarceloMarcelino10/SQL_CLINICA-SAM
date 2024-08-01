@@ -110,6 +110,7 @@ public class ListarVivienda extends JDialog {
             }
         });
         buttonPane.add(btnCancelar);
+        
     }
 
     public void loadViviendas() {

@@ -470,7 +470,7 @@ public class RegistrarConsulta extends JDialog {
 	        JOptionPane.showMessageDialog(null, "Seleccione una enfermedad.", "Advertencia", JOptionPane.WARNING_MESSAGE);
 	    }
 	}
-
+ 
     private void actualizarEnfermedadesConsultadas() {
     	StringBuilder enfermedadesText = new StringBuilder();
     	

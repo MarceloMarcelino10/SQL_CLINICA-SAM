@@ -114,12 +114,10 @@ public class ListarEnfermedades extends JDialog {
                             verEnfermedad.setModal(true);
                             verEnfermedad.setVisible(true);
                         } else {
-                            JOptionPane.showMessageDialog(null, "Por favor, seleccione una enfermedad.",
-                                    "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "Por favor, seleccione una enfermedad.","Error", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 });
-
                         JButton btnNuevaEnfermedad = new JButton("Nueva Enfermedad");
                         btnNuevaEnfermedad.setIcon(new ImageIcon(ListarEnfermedades.class.getResource("/imagenes/agregarOcrearboton.png")));
                         btnNuevaEnfermedad.addActionListener(new ActionListener() {
@@ -148,8 +146,6 @@ public class ListarEnfermedades extends JDialog {
                     RegistrarEnfermedad regEnfermedad = new RegistrarEnfermedad(codigo, nombre, sintomas, tratamiento, gravedad);
                     regEnfermedad.setModal(true);
                     regEnfermedad.setVisible(true);
-                    
-                    // Actualizar la tabla después de modificar
                     cargarEnfermedad();
                 } else {
                     JOptionPane.showMessageDialog(null, "Por favor, seleccione una enfermedad para modificar.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -161,7 +157,7 @@ public class ListarEnfermedades extends JDialog {
         buttonPane.add(eliminarButton);
 
         JButton cancelButton = new JButton("Salir");
-        cancelButton.setIcon(new ImageIcon(ListarEnfermedades.class.getResource("/imagenes/salir16.png")));
+        cancelButton.setIcon(new ImageIcon(ListarEnfermedades.class.getResource("/imagenes/salir16.png"))); 
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 dispose();
@@ -175,7 +171,7 @@ public class ListarEnfermedades extends JDialog {
 
     private void cargarEnfermedad() {
 
-        Clinica.getInstance().cargarDatosEnfermedadSQL();
+    	Clinica.getInstance().cargarDatosEnfermedadSQL();
 
         model.setRowCount(0);
         row = new Object[model.getColumnCount()];
