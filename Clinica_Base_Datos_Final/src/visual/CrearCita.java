@@ -201,6 +201,8 @@ public class CrearCita extends JDialog {
         comboBoxPersona.setSelectedItem(cita.getMiPersona());
     }
 
+ // CrearCita.java
+
     private void registrarCita() {
         Date fecha = dateChooser.getDate();
         Date hora = (Date) spnHoraCita.getValue();
@@ -230,6 +232,7 @@ public class CrearCita extends JDialog {
             JOptionPane.showMessageDialog(null, "Por favor complete todos los campos", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     private void limpiarCampos() {
         txtCodigoCita.setText(String.valueOf(Clinica.getCodCita()));

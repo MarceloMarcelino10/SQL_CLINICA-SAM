@@ -572,6 +572,8 @@ public class Clinica implements Serializable  {//u
 	    }
 	    return citasPendientes;
 	}
+	
+	
 
 
 	//SETTERS AND GETTERS ESTATICOS (Probando guardar los valores esticaos)
@@ -1281,27 +1283,28 @@ public class Clinica implements Serializable  {//u
     //VIVIENDAS:
 
     public void cargarDatosViviendaSQL() {
-    	
-        String query = "SELECT v.* " +
-        			   "FROM VIVIENDA AS v " +
-        			   "LEFT JOIN PACIENTE AS p ON v.id_vivienda = p.id_vivienda ";
+        String query = "SELECT v.id_vivienda, v.direccion " +
+                       "FROM VIVIENDA AS v";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
-        	
+
+            Clinica.getInstance().getMisViviendas().clear();
+
             while (rs.next()) {
                 String codigo_vivienda = rs.getString("id_vivienda");
                 String direccion = rs.getString("direccion");
-                
+
                 Vivienda vivienda = new Vivienda(codigo_vivienda, direccion);
-                Clinica.getInstance().insertarVivienda(vivienda);
+                Clinica.getInstance().insertarVivienda(vivienda);  
             }
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
     
     
     public void insertarDatosViviendaSQL(Vivienda vivienda) {
@@ -1354,6 +1357,8 @@ public class Clinica implements Serializable  {//u
     // CITAS:
     
     public void cargarDatosCitaSQL() {
+    	
+    	clinica.getInstance().misCitas.clear();
         
     	String query = "SELECT c.id_cita, c.fecha_cita, c.hora_cita, c.fecha_cita_creacion, c.completada, " +
         			   "c.id_doctor, c.id_persona, c.id_creador_cita, d.id_persona AS id_doctor_persona " +
@@ -1753,12 +1758,22 @@ public class Clinica implements Serializable  {//u
         }
     }
     
+    
+    public void actualizarViviendaSQL(Vivienda vivienda) {
+        String query = "UPDATE VIVIENDA SET direccion = ? WHERE id_vivienda = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, vivienda.getDireccion());
+            stmt.setString(2, vivienda.getCodigo());
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
 
     
 }
-
-	
-
-
-
-

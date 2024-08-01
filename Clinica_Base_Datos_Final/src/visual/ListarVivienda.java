@@ -1,22 +1,23 @@
 package visual;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import logico.Clinica;
 import logico.Vivienda;
-import javax.swing.border.TitledBorder;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.Color;
-import java.awt.Toolkit;
 
 public class ListarVivienda extends JDialog {
 
@@ -24,6 +25,8 @@ public class ListarVivienda extends JDialog {
     private JTable table;
     private DefaultTableModel model;
     private Object[] rows;
+    private JButton btnModificar;
+    private JButton btnCancelar;
 
     /**
      * Launch the application.
@@ -69,10 +72,48 @@ public class ListarVivienda extends JDialog {
         scrollPane.setViewportView(table);
 
         loadViviendas();
+        
+        JPanel buttonPane = new JPanel();
+        buttonPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        getContentPane().add(buttonPane, BorderLayout.SOUTH);
+        
+        btnModificar = new JButton("Modificar");
+        btnModificar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow >= 0) {
+                    String codigo = (String) model.getValueAt(selectedRow, 0);
+                    Vivienda vivienda = Clinica.getInstance().buscarViviendaById(codigo);
+                    if (vivienda != null) {
+                        // Crear y mostrar el diálogo de modificación como modal
+                        CrearVivienda dialog = new CrearVivienda(vivienda);
+                        dialog.setModal(true); // Establecer como modal
+                        dialog.setVisible(true);
+
+                        if (dialog.isConfirmed()) {
+                            // Guardar los cambios en la base de datos
+                            Clinica.getInstance().actualizarViviendaSQL(vivienda);
+                            JOptionPane.showMessageDialog(null, "Vivienda modificada exitosamente");
+                            loadViviendas(); // Recargar los datos después de modificar
+                        }
+                    }
+                }
+            }
+        });
+        buttonPane.add(btnModificar);
+        
+        btnCancelar = new JButton("Cancelar");
+        btnCancelar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+        buttonPane.add(btnCancelar);
     }
 
     public void loadViviendas() {
-    	Clinica.getInstance().cargarDatosViviendaSQL();
+        Clinica.getInstance().cargarDatosViviendaSQL();
         model.setRowCount(0);
         rows = new Object[model.getColumnCount()];
         for (Vivienda vivienda : Clinica.getInstance().getMisViviendas()) {

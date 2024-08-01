@@ -11,8 +11,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import logico.Cita;
 import logico.Clinica;
+
 import java.text.SimpleDateFormat;
-import java.util.List;
+import java.util.ArrayList;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JOptionPane;
@@ -23,9 +24,9 @@ public class ListarCita extends JDialog {
     private final JPanel contentPanel = new JPanel();
     private JTable table;
     private DefaultTableModel model;
-    private Object[] row;
     private JButton btnModificar;
     private JButton btnEliminar;
+    private Object[] row;
 
     public static void main(String[] args) {
         try {
@@ -34,7 +35,7 @@ public class ListarCita extends JDialog {
             dialog.setVisible(true);
         } catch (Exception e) {
             e.printStackTrace();
-        }//
+        }
     }
 
     public ListarCita() {
@@ -127,19 +128,58 @@ public class ListarCita extends JDialog {
     }
 
     private void loadCitas() {
-        model.setRowCount(0);
-        List<Cita> citas = Clinica.getInstance().getMisCitas();
+        Clinica clinica = Clinica.getInstance();
+        clinica.cargarDatosCitaSQL(); // Asegúrate de que esta llamada solo se haga una vez
+        clinica.cargarDatosDoctorSQL();
+        clinica.cargarDatosPacienteSQL();
+
+        if (clinica == null) {
+            JOptionPane.showMessageDialog(null, "La instancia de Clinica es null.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        ArrayList<Cita> citas = clinica.getMisCitas();
+        if (citas == null) {
+            JOptionPane.showMessageDialog(null, "La lista de citas es null.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        model.setRowCount(0); // Limpia la tabla antes de recargar los datos
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm a");
+        ArrayList<String> seenCitas = new ArrayList<>(); // Usar ArrayList para verificar duplicados
 
         for (Cita cita : citas) {
+            if (cita == null) {
+                continue; // Salta las citas que son null
+            }
+
+            String codigoCita = cita.getCodigo();
+            if (seenCitas.contains(codigoCita)) {
+                continue; // Salta las citas duplicadas
+            }
+
             row = new Object[6];
+
+            String nombrePaciente = "Desconocido";
+            if (cita.getMiPersona() != null) {
+                nombrePaciente = cita.getMiPersona().getNombre() + " " + cita.getMiPersona().getApellidos();
+            }
+
+            String nombreDoctor = "Desconocido";
+            if (cita.getMiDoctor() != null) {
+                nombreDoctor = cita.getMiDoctor().getNombre() + " " + cita.getMiDoctor().getApellidos();
+            }
+
             row[0] = cita.getCodigo();
-            row[1] = cita.getMiPersona().getNombre() + " " + cita.getMiPersona().getApellidos();
-            row[2] = cita.getMiDoctor().getNombre() + " " + cita.getMiDoctor().getApellidos();
-            row[3] = dateFormat.format(cita.getFechaCita()) + " " + new SimpleDateFormat("hh:mm a").format(cita.getHoraCita());
+            row[1] = nombrePaciente;
+            row[2] = nombreDoctor;
+            row[3] = (cita.getFechaCita() != null) ? dateFormat.format(cita.getFechaCita()) + " " + new SimpleDateFormat("hh:mm a").format(cita.getHoraCita()) : "Desconocida";
             row[4] = cita.isRealizada() ? "Sí" : "No";
-            row[5] = cita.isRealizada() ? "Sí" : "No";
+            row[5] = cita.isRealizada() ? "Sí" : "No"; // Asegúrate de que `isCompletada` existe en la clase Cita
+
             model.addRow(row);
+            seenCitas.add(codigoCita); // Añade el código de la cita a la lista de códigos ya vistos
         }
     }
 }
