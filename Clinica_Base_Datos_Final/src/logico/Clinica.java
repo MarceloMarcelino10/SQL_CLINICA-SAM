@@ -1225,7 +1225,7 @@ public class Clinica implements Serializable  {//u
            //     System.out.println("Sintomas: " + sintomas);
            //     System.out.println("Tratamiento: " + tratamiento);
            //     System.out.println("Gravedad: " + gravedad);
-           //     System.out.println();
+           //     System.out.println(); /
                 
                 Enfermedad enfermedad = new Enfermedad(codigo, nombre, sintomas, tratamiento, Integer.parseInt(gravedad));
                 Clinica.getInstance().insertarEnfermedad(enfermedad);
