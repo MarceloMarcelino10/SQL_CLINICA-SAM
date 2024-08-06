@@ -171,27 +171,51 @@ public class ListarPersona extends JDialog {
     }
 
     private void actualizarTitulo() {
+    	
+    	
         String selectedItem = cbxListar.getSelectedItem().toString();
         switch (selectedItem) {
             case "Administrador":
                 headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad"};
+                Clinica.getInstance().cargarDatosPersonaSQL();
+                
                 break;
             case "Secretario":
+            	
+            	Clinica.getInstance().cargarDatosPersonaSQL();
                 headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad"};
                 break;
             case "Doctor":
+            	
+            	Clinica.getInstance().cargarDatosDoctorSQL();
                 headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad", "Especialidad", "Disponibilidad"};
                 break;
             case "Persona":
+            	
+            	Clinica.getInstance().cargarDatosPersonaSQL();
                 headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad"};
                 break;
             case "Paciente":
+            	
+            	Clinica.getInstance().cargarDatosPacienteSQL();
                 headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad", "Tipo de Sangre"};
-                break;
+                
+                break;               
             case "Todos":
-                headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad"};
+            	Clinica.getInstance().cargarDatosDoctorSQL();
+            	Clinica.getInstance().cargarDatosPacienteSQL();
+                Clinica.getInstance().cargarDatosPersonaSQL();
+            	
+            	
+                headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad"};        
+                
                 break;
             default:
+            	
+                Clinica.getInstance().cargarDatosPersonaSQL();
+            	Clinica.getInstance().cargarDatosDoctorSQL();
+            	Clinica.getInstance().cargarDatosPacienteSQL();
+            	
                 break; 
         }
 

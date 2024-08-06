@@ -291,11 +291,9 @@ public class PrincipalVisual extends JFrame {
 		btnRegistrarEnfermedad = new JButton("Registrar");
 		btnRegistrarEnfermedad.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				RegistrarEnfermedad regenfe = new RegistrarEnfermedad();
+				RegistrarEnfermedad regenfe = new RegistrarEnfermedad(null);
 				regenfe.setModal(true);
 				regenfe.setVisible(true);
-				
-				
 			}
 		});
 		btnRegistrarEnfermedad.setBounds(100, 104, 89, 23);

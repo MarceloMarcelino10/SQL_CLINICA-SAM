@@ -28,6 +28,8 @@ import logico.Doctor;
 import logico.Paciente;
 import logico.Persona;
 import logico.Vivienda;
+import seguridad.GestorUsuario;
+
 import java.awt.Toolkit;
 import javax.swing.ImageIcon;
 
@@ -121,7 +123,7 @@ public class RegistrarNewUser extends JDialog {
 		txtCodigo = new JTextField();
 		txtCodigo.setEditable(false);
 		txtCodigo.setBounds(64, 20, 142, 20);
-		txtCodigo.setText("" + Clinica.getInstance().codPersona);
+		txtCodigo.setText("" + Clinica.getInstance().obtenerMaximoIdPersona());
 		panelDatosGenerales.add(txtCodigo);
 		txtCodigo.setColumns(10);
 		
@@ -327,123 +329,126 @@ public class RegistrarNewUser extends JDialog {
 			{
 				JButton btnRegistar = new JButton("Registrar");
 				btnRegistar.setIcon(new ImageIcon(RegistrarNewUser.class.getResource("/imagenes/agregarOcrearboton.png")));
+				
 				if (p != null) {
 					btnRegistar.setText("Modifcar");
 				}
 				
 				btnRegistar.addActionListener(new ActionListener() {
-				   
-					public void actionPerformed(ActionEvent e) {
+				    public void actionPerformed(ActionEvent e) {
+				    	
+				        if (!rdbtnAdministrador.isSelected() && !rdbtnSecretaria.isSelected() && !rdbtnDoctor.isSelected() && !rdbtnPaciente.isSelected() && !rdbtnPersona.isSelected()) {
+				            JOptionPane.showMessageDialog(null, "Debe seleccionar un tipo de usuario.", "Error", JOptionPane.ERROR_MESSAGE);
+				            return;
+				        }
+				        
+				        String codigo = txtCodigo.getText();
+				        String cedula = txtCedula.getText();
+				        String nombre = txtNombre.getText();
+				        String apellidos = txtApellido.getText();
+				        Date fecNacim = dateChooser.getDate();
+				        String sexo = cbxSexo.getSelectedItem().toString();
+				        String userName = txtUser.getText();
+				        String password = txtpassword.getText();
+
+				        if (codigo.isEmpty() || cedula.isEmpty() || nombre.isEmpty() || apellidos.isEmpty() || fecNacim == null || sexo.equals("<Seleccione>") || userName.isEmpty() || password.isEmpty()) {
+				            JOptionPane.showMessageDialog(null, "Todos los campos obligatorios deben estar llenos.", "Error", JOptionPane.ERROR_MESSAGE);
+				            return;
+				        }
+
+				        if (rdbtnDoctor.isSelected()) {
+				            String especialidad = txtEspecialidad.getText();
+				            if (especialidad.isEmpty()) {
+				                JOptionPane.showMessageDialog(null, "Debe ingresar la especialidad del doctor.", "Error", JOptionPane.ERROR_MESSAGE);
+				                return;
+				            }
+				        }
+
+				        if (rdbtnPaciente.isSelected()) {
+				            String tipoSangre = cbxTipoSangre.getSelectedItem().toString();
+				            if (tipoSangre.equals("<Seleccione>")) {
+				                JOptionPane.showMessageDialog(null, "Debe seleccionar el tipo de sangre.", "Error", JOptionPane.ERROR_MESSAGE);
+				                return;
+				            }
+				        }
+
+				        if (GestorUsuario.existUserNameSQL(userName)) {
+				            JOptionPane.showMessageDialog(null, "El nombre de usuario ya está en uso.", "Error", JOptionPane.ERROR_MESSAGE);
+				            return;
+				        }
+
+				        Persona aux = null;
+				        if (rdbtnAdministrador.isSelected()) {
+				            aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 1);
+				        } else if (rdbtnSecretaria.isSelected()) {
+				            aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 2);
+				        } else if (rdbtnDoctor.isSelected()) {
+				            String especialidad = txtEspecialidad.getText();
+				            boolean disponible = rdbtnSi.isSelected();
+				            aux = new Doctor(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 3, especialidad, disponible);
+				        } else if (rdbtnPersona.isSelected()) {
+				            aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 5);
+				        } else if (rdbtnPaciente.isSelected()) {
+				            String tipoSangre = cbxTipoSangre.getSelectedItem().toString();
+				            aux = new Paciente(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 4, null, tipoSangre);
+				        }
+				        
+
 				        if (p == null) {
-				            Persona aux = null;
-				            String codigo = txtCodigo.getText();
-				            String cedula = txtCedula.getText();
-				            String nombre = txtNombre.getText();
-				            String apellidos = txtApellido.getText();
-				            Date fecNacim = dateChooser.getDate();
-				            String sexo = cbxSexo.getSelectedItem().toString();
-				            String userName = txtUser.getText();
-				            String password = txtpassword.getText();
 				            
-				            if (Clinica.getInstance().existUserName(userName)) {
-				                
-				                JOptionPane.showMessageDialog(null, "El nombre de usuario ya está en uso.", "Error", JOptionPane.ERROR_MESSAGE);
-				                
-				            } else {
-				                
-				                if (rdbtnAdministrador.isSelected()) {
-				                    aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 1);
-				                } 
-				                if (rdbtnSecretaria.isSelected()) {
-				                    aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 2);
-				                }
-				                if (rdbtnDoctor.isSelected()) {
-				                    String especialidad = txtEspecialidad.getText();
-				                    boolean disponible = rdbtnSi.isSelected();
-				                    aux = new Doctor(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 3, especialidad, disponible);
-				                }
-				                if (rdbtnPersona.isSelected()) {
-				                    aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 5);
-				                }
-				                if (rdbtnPaciente.isSelected()) {
-				                    String tipoSangre = cbxTipoSangre.getSelectedItem().toString();
-				                    aux = new Paciente(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 4, null, tipoSangre);
-				                    
-				                    UIManager.put("OptionPane.okButtonText", "Continuar");                   
-				                    JOptionPane.showMessageDialog(null, "Necesitas agregar una vivienda!", "Agregar Vivienda", JOptionPane.INFORMATION_MESSAGE);
-				                    
+				            Clinica.getInstance().insertarDatosPersonaSQL(aux);
+				            
+				            JOptionPane.showMessageDialog(null, "Usuario registrado con éxito", "Registrar Persona", JOptionPane.INFORMATION_MESSAGE);
+				            
+				            clean();
+				            
+				        } else {
+				            if (p instanceof Doctor) {
+				                ((Doctor)p).setEspecialidad(txtEspecialidad.getText());
+				                ((Doctor)p).setEnServicio(rdbtnSi.isSelected());
+				            } else if (p instanceof Paciente) {
+				                ((Paciente)p).setTipoSangre(cbxTipoSangre.getSelectedItem().toString());
+				            }
+
+				            if (rdbtnAdministrador.isSelected()) {
+				                aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 1);
+				            } else if (rdbtnSecretaria.isSelected()) {
+				                aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 2);
+				            } else if (rdbtnDoctor.isSelected()) {
+				                String especialidad = txtEspecialidad.getText();
+				                boolean disponible = rdbtnSi.isSelected();
+				                aux = new Doctor(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 3, especialidad, disponible);
+				            } else if (rdbtnPersona.isSelected()) {
+				                aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 5);
+				            } else if (rdbtnPaciente.isSelected()) {
+				                Vivienda v = ((Paciente)p).getMiVivienda();
+				                String tipoSangre = cbxTipoSangre.getSelectedItem().toString();
+				                aux = new Paciente(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 4, v, tipoSangre);
+
+				                String[] opciones = {"Sí", "No"};
+				                int respuesta = JOptionPane.showOptionDialog(null, "Necesitas cambiar de vivienda?", "Modificar Vivienda", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opciones, opciones[0]);
+
+				                if (respuesta == JOptionPane.YES_OPTION) {
 				                    RegistrarVivienda regVivienda = new RegistrarVivienda();
 				                    regVivienda.setModal(true);
 				                    regVivienda.setVisible(true);
-				                    //((Paciente)aux).setMiVivienda(regVivienda.getViviendaSeleccionada());
+				                    // ((Paciente)aux).setMiVivienda(regVivienda.getViviendaSeleccionada());
 				                }
-				                JOptionPane.showMessageDialog(null, "Usuario registrado con éxito", "Registrar Persona", JOptionPane.INFORMATION_MESSAGE);
-				                Clinica.getInstance().insertarPersona(aux);
-				                clean();
 				            }
-				        } else {
-				            Persona aux = null;
-				            String codigo = txtCodigo.getText();
-				            String cedula = txtCedula.getText();
-				            String nombre = txtNombre.getText();
-				            String apellidos = txtApellido.getText();
-				            Date fecNacim = dateChooser.getDate();
-				            String sexo = cbxSexo.getSelectedItem().toString();
-				            String userName = txtUser.getText();
-				            String password = txtpassword.getText();
+
+				            JOptionPane.showMessageDialog(null, "Usuario modificado con éxito", "Modificar Persona", JOptionPane.INFORMATION_MESSAGE);
+				            ListarPersona.loadPersona(ListarPersona.index);
+				            //Clinica.getInstance().actualizarPersona(aux);
 				            
-				            String userNameAntiguo = (p != null) ? p.getUser() : null;
+				            Clinica.getInstance().modificarDatosPersonaSQL(aux);
 				            
-				            if (!Objects.equals(userName, userNameAntiguo) && Clinica.getInstance().existUserName(userName)) {
-				                
-				                JOptionPane.showMessageDialog(null, "El nombre de usuario ya está en uso.", "Error", JOptionPane.ERROR_MESSAGE);
-				                
-				            } else {
-				                
-				                if (p instanceof Doctor) {
-				                    ((Doctor)p).setEspecialidad(txtEspecialidad.getText());
-				                    ((Doctor)p).setEnServicio(rdbtnSi.isSelected());
-				                } else if (p instanceof Paciente) {
-				                    ((Paciente)p).setTipoSangre(cbxTipoSangre.getSelectedItem().toString());
-				                }
-				                
-				                if (rdbtnAdministrador.isSelected()) {
-				                    aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 1);
-				                } 
-				                if (rdbtnSecretaria.isSelected()) {
-				                    aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 2);
-				                }
-				                if (rdbtnDoctor.isSelected()) {
-				                    String especialidad = txtEspecialidad.getText();
-				                    boolean disponible = rdbtnSi.isSelected();
-				                    aux = new Doctor(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 3, especialidad, disponible);
-				                }
-				                if (rdbtnPersona.isSelected()) {
-				                    aux = new Persona(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 5);
-				                }
-				                if (rdbtnPaciente.isSelected()) {
-				                    Vivienda v = ((Paciente)p).getMiVivienda();
-				                    String tipoSangre = cbxTipoSangre.getSelectedItem().toString();
-				                    aux = new Paciente(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 4, v, tipoSangre);
-				                    
-				                    String[] opciones = {"Sí", "No"};
-				                    int respuesta = JOptionPane.showOptionDialog(null, "Necesitas cambiar de vivienda?", "Modificar Vivienda", JOptionPane.YES_NO_OPTION, 
-				                                    JOptionPane.INFORMATION_MESSAGE, null, opciones, opciones[0]);
-				                    
-				                    if (respuesta == JOptionPane.YES_OPTION) {
-				                        RegistrarVivienda regVivienda = new RegistrarVivienda();
-				                        regVivienda.setModal(true);
-				                        regVivienda.setVisible(true);
-				                        //((Paciente)aux).setMiVivienda(regVivienda.getViviendaSeleccionada());
-				                    }    
-				                }
-				                JOptionPane.showMessageDialog(null, "Usuario modificado con éxito", "Modificar Persona", JOptionPane.INFORMATION_MESSAGE);
-				                ListarPersona.loadPersona(ListarPersona.index);
-				                Clinica.getInstance().actualizarPersona(aux); 
-				                dispose();
-				            }
-				        }   
+				            dispose();
+				        }
 				    }
+					
+					
+					
+					
 				});
 				
 				btnRegistar.setActionCommand("OK");
@@ -466,7 +471,7 @@ public class RegistrarNewUser extends JDialog {
 		loadPersonas();
 	}
 
-	private void usuarioLogged() {
+	private void usuarioLogged() { //MODIFICAR ESTO 
 	    if (Clinica.getInstance().loggedUser != null) {
 	        if (Clinica.getInstance().loggedUser.getRangoUser() == 1) {
 	            rdbtnPaciente.setEnabled(false);
@@ -498,7 +503,7 @@ public class RegistrarNewUser extends JDialog {
 	}
 	
 	private void clean() {
-	    txtCodigo.setText("" + Clinica.getInstance().codPersona);
+	    txtCodigo.setText("" + Clinica.getInstance().obtenerMaximoIdPersona());
 	    txtCedula.setText("");
 	    txtNombre.setText("");
 	    txtApellido.setText("");
@@ -589,8 +594,5 @@ public class RegistrarNewUser extends JDialog {
 	            
 	        }
 	    }
-	}
-	
-	
-	
+	}	
 }

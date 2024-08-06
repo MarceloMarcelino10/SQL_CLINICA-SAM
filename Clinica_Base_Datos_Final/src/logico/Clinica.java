@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,7 +21,9 @@ import java.util.Comparator;
 import java.util.Date;
 
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
+import seguridad.GestorUsuario;
 import sql.DatabaseConnection;
 
 public class Clinica implements Serializable  {//u
@@ -42,6 +45,7 @@ public class Clinica implements Serializable  {//u
 	public static int codDoctor = 1;
 	public static int codPaciente = 1;
 	public static int codPersona = 1;
+	public static int codCredencial = 1;
 	public static int codCita= 1;
 	public static int codVacuna = 1;
 	public static int codEnfermedad = 1;
@@ -217,6 +221,10 @@ public class Clinica implements Serializable  {//u
         guardarDatos();
     }
 
+    public void insertarDoctor(Doctor doctor) {
+        misPersonas.add(doctor);
+        guardarDatos();
+    }
     
     //METODOS PARA ACTUALIZAR EL ELEMENTO DE UNA LISTA:
 	
@@ -394,6 +402,7 @@ public class Clinica implements Serializable  {//u
 	}
 	
 	public boolean existUserName(String userName) {
+		Clinica.getInstance().cargarDatosPersonaSQL();
 		boolean exist = false;
 	    for (Persona user : misPersonas) {
 	        if (user.getUser().equals(userName)) {
@@ -402,6 +411,28 @@ public class Clinica implements Serializable  {//u
 	    }
 	    return exist;
 	}
+	
+	public boolean existUserNameSQL(String userName) {
+	    String query = "SELECT COUNT(*) FROM CREDENCIAL WHERE userName = ?";
+	    
+	    try (Connection conn = DatabaseConnection.getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(query)) {
+
+	        stmt.setString(1, userName);
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            if (rs.next()) {
+	                return rs.getInt(1) > 0;
+	            }
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    
+	    return false;
+	}
+
+	
 	
 	//METODO PARA GUARDAR:
 	
@@ -1010,7 +1041,7 @@ public class Clinica implements Serializable  {//u
     
     public void cargarDatosDoctorSQL() {
 
-    	Clinica.getInstance().getMisPersonas().clear();
+    	Clinica.getInstance().clearPersonasPorRango(obtenerRango("Doctor"));
     	
     	String query = "SELECT * " + 
 	    			   "FROM PERSONA AS p " + 
@@ -1063,7 +1094,7 @@ public class Clinica implements Serializable  {//u
     
     public void cargarDatosPacienteSQL() {
     	
-    	Clinica.getInstance().getMisPersonas().clear();
+    	Clinica.getInstance().clearPersonasPorRango(obtenerRango("Paciente"));
     	
     	String query = "SELECT * " + 
 	    			   "FROM PERSONA AS p " + 
@@ -1127,9 +1158,9 @@ public class Clinica implements Serializable  {//u
     
     // PERSONAS:
     
-    public void cargarDatosPersonaSQL() throws ParseException {
+    public void cargarDatosPersonaSQL() {
     	
-    	Clinica.getInstance().getMisPersonas().clear();
+    	Clinica.getInstance().clearPersonasPorRango(obtenerRango("Administrador"));
         
     	String query = "SELECT * " +
         		"FROM PERSONA AS p " +
@@ -1151,7 +1182,14 @@ public class Clinica implements Serializable  {//u
                 String sexo = rs.getString("sexo");
                 String fec_nacimSQL = rs.getString("fecha_nacimiento");
                 String user = rs.getString("userName");
-                String password = rs.getString("passwordUser");
+                
+                //String password = rs.getString("passwordUser");
+                
+               
+                byte[] passwordBytes = rs.getBytes("passwordUser"); // Obtener el campo de tipo VARBINARY y convertirlo a String
+                String password = new String(passwordBytes, StandardCharsets.UTF_8);
+                
+                
                 String rango = rs.getString("rango");
 
                 Date fec_nacim = null;
@@ -1165,19 +1203,19 @@ public class Clinica implements Serializable  {//u
                 }
 
                 // Imprimir los datos
-                System.out.println("Codigo: " + codigo);
-                System.out.println("Cedula: " + cedula);
-                System.out.println("Nombre: " + nombre);
-                System.out.println("Apellido: " + apellido);
-                System.out.println("Sexo: " + sexo);
-                System.out.println("Fecha de Nacimiento: " + (fec_nacim != null ? sdf.format(fec_nacim) : "Fecha invï¿½lida o no disponible"));
-                System.out.println("User: " + user);
-                System.out.println("Password: " + password);
-                System.out.println("Rango: " + rango);
-                System.out.println();
+               // System.out.println("Codigo: " + codigo);
+               // System.out.println("Cedula: " + cedula);
+               // System.out.println("Nombre: " + nombre);
+               // System.out.println("Apellido: " + apellido);
+               // System.out.println("Sexo: " + sexo);
+               // System.out.println("Fecha de Nacimiento: " + (fec_nacim != null ? sdf.format(fec_nacim) : "Fecha invalida no disponible"));
+               // System.out.println("User: " + user);
+               // System.out.println("Password: " + password);
+               // System.out.println("Rango: " + rango);
+                //System.out.println();
 
                 Persona persona = new Persona(codigo, cedula, nombre, apellido, fec_nacim, sexo, user, password, obtenerRango(rango));
-                clinica.getInstance().insertarPersona(persona);  
+                Clinica.getInstance().insertarPersona(persona);  
             }
             
         } catch (SQLException e) {
@@ -1200,108 +1238,308 @@ public class Clinica implements Serializable  {//u
                 return 5;
         }
     }
-
-
-    //ENFERMEDADES:
     
-    public void cargarDatosEnfermedadSQL() {
-
-        Clinica.getInstance().getMisEnfermedades().clear();
+    
+    public void insertarDatosPersonaSQL(Persona persona) {
         
-    	String query = "SELECT e.id_enfermedad, e.nombre, e.sintomas, e.tratamiento, e.id_gravedad_enfermedad " + 
-        			   "FROM ENFERMEDAD AS e ";
-
+    	//Clinica.getInstance().obtenerMaximoIdPersona();
+    	
+        String queryPersona = "INSERT INTO PERSONA (id_persona, cedula, nombre, apellido, sexo, fecha_nacimiento) " +
+        					  "VALUES (?, ?, ?, ?, ?, ?)";
+        int filas = 0;
+        
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
+             PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
 
-            while (rs.next()) {
-                String codigo = rs.getString("id_enfermedad");
-                String nombre = rs.getString("nombre");
-                String sintomas = rs.getString("sintomas");
-                String tratamiento = rs.getString("tratamiento");
-                String gravedad = rs.getString("id_gravedad_enfermedad");
+            stmtPersona.setInt(1, Clinica.getInstance().obtenerMaximoIdPersona());
+            stmtPersona.setString(2, persona.getCedula());
+            stmtPersona.setString(3, persona.getNombre());
+            stmtPersona.setString(4, persona.getApellidos());
+            stmtPersona.setString(5, obtenerSexoCorto(persona.getGenero()));
+           // stmtPersona.setDate(6, new java.sql.Date(persona.getFechaNacimiento().getDate()));
+            stmtPersona.setDate(6, new java.sql.Date(persona.getFechaNacimiento().getTime()));
 
-             //   System.out.println("Codigo: " + codigo);
-           //     System.out.println("Nombre: " + nombre);
-           //     System.out.println("Sintomas: " + sintomas);
-           //     System.out.println("Tratamiento: " + tratamiento);
-           //     System.out.println("Gravedad: " + gravedad);
-           //     System.out.println(); /
+            filas = stmtPersona.executeUpdate();
+                        
+            if (persona instanceof Paciente || persona.getRangoUser() == 4) {
+            	
+            	insertarDatosCredencialSQL((Paciente) persona, Integer.parseInt(persona.getCodigo()));
+                insertarDatosPacienteSQL((Paciente) persona, Integer.parseInt(persona.getCodigo()));
                 
-                Enfermedad enfermedad = new Enfermedad(codigo, nombre, sintomas, tratamiento, Integer.parseInt(gravedad));
-                Clinica.getInstance().insertarEnfermedad(enfermedad);
-                
+            } else if (persona instanceof Doctor || persona.getRangoUser() == 3) {
+            	
+                insertarDatosCredencialSQL((Doctor) persona, Integer.parseInt(persona.getCodigo()));
+                insertarDatosDoctorSQL((Doctor) persona, Integer.parseInt(persona.getCodigo()));
+            
+            } else {
+                insertarDatosCredencialSQL(persona, Integer.parseInt(persona.getCodigo()));
             }
+
+            System.out.println("Persona agregada: " + filas);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
     
-    public void insertarDatosEnfermedadSQL(Enfermedad enfermedad) {
+    public void insertarDatosCredencialSQL(Persona persona, int id_persona) {
     	
-    	Clinica.getInstance().obtenerMaximoIdEnfermedad();
-
-    	String query = "INSERT INTO ENFERMEDAD (id_enfermedad, nombre, sintomas, tratamiento, id_gravedad_enfermedad) VALUES (?, ?, ?, ?, ?)";
-    	int filas = 0;
-    
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            stmt.setInt(1, Integer.parseInt(enfermedad.getCodigo()));
-            stmt.setString(2, enfermedad.getNombre());
-            stmt.setString(3, enfermedad.getSintomas());
-            stmt.setString(4, enfermedad.getTratamiento());
-            stmt.setInt(5, enfermedad.getGravedad());
-            filas =+ stmt.executeUpdate();
-            System.out.println("Enfermedades agregadas: " + filas);
-            Clinica.getInstance().insertarEnfermedad(enfermedad);
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    
-
-    public void actualizarDatosEnfermedadSQL(Enfermedad enfermedad) {
-        String query = "UPDATE ENFERMEDAD SET nombre = ?, sintomas = ?, tratamiento = ?, id_gravedad_enfermedad = ? WHERE id_enfermedad = ?";
+    	int rango_persona = persona.getRangoUser();
+    	
+    	if (rango_persona != 1 && rango_persona != 2 && rango_persona != 3 && rango_persona != 4 && rango_persona != 5) {
+    		rango_persona = 1;
+    	}
+    	
+    	int fila = 0;
+ 
+    	String hashedPassword = GestorUsuario.hashPassword(persona.getPassword());
+    	
+        String query = "INSERT INTO CREDENCIAL (id_credencial, userName, passwordUser, id_persona, id_rango_persona) " +
+        			   "VALUES (?, ?, ?, ?, ?)";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
+        	
+            stmt.setInt(1, Clinica.getInstance().obtenerMaximoIdCredencial());
+            stmt.setString(2, persona.getUser());
+            stmt.setBytes(3, hashedPassword.getBytes());
+            stmt.setInt(4, id_persona);
+            stmt.setInt(5, rango_persona);
 
-   
-            stmt.setString(1, enfermedad.getNombre());
-            stmt.setString(2, enfermedad.getSintomas());
-            stmt.setString(3, enfermedad.getTratamiento());
-            stmt.setInt(4, enfermedad.getGravedad());
-            stmt.setString(5, enfermedad.getCodigo());
-            int filas = stmt.executeUpdate();
-            
-            System.out.println("Enfermedades actualizadas: " + filas);
-            Clinica.getInstance().actualizarEnfermedad(enfermedad);
+            fila = stmt.executeUpdate();
+            System.out.println("Credenciales agregadas: " + fila);
+            System.out.println("Verificacion del rango: " + rango_persona);
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
     
-    public void eliminarDatosEnfermedadSQL(String id_enfermedad) {
+    public void insertarDatosPacienteSQL(Persona persona, int id_persona) {
     	
-    	String query = "DELETE FROM ENFERMEDAD WHERE id_enfermedad = ? ";
+    	Paciente paciente = ((Paciente) persona);
+    	Clinica.getInstance().obtenerMaximoIdPaciente();
+    	int fila = 0;
     	
-    	try (Connection conn = DatabaseConnection.getConnection();
+        String query = "INSERT INTO PACIENTE (id_paciente, id_persona, tipoSangre, id_vivienda) " +
+        			   "VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
-    		 
-    		stmt.setString(1, id_enfermedad);
-    		System.out.println("Enfermedad con codigo " + id_enfermedad + " eliminada.");
-    		stmt.executeUpdate();
-            Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(id_enfermedad);
-            Clinica.getInstance().eliminarEnfermedad(enfermedad);
-    		
-    	} catch (SQLException e) {
-    		e.printStackTrace();
-    	}
+
+            stmt.setInt(1, codPaciente);
+            stmt.setInt(2, id_persona);
+            stmt.setString(3, paciente.getTipoSangre());
+            stmt.setObject(4, paciente.getMiVivienda() != null ? paciente.getMiVivienda().getCodigo() : null);
+
+            fila = stmt.executeUpdate();
+            System.out.println("Pacientes agregados: " + fila);
+            System.out.println("Paciente sangre: " + paciente.getTipoSangre());
+            
+            //Clinica.getInstance().insertarPaciente(paciente);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    	
     }
+    
+    public void insertarDatosDoctorSQL(Persona persona, int id_persona) {
+        
+    	Doctor doctor = ((Doctor) persona);
+        Clinica.getInstance().obtenerMaximoIdDoctor();
+        int fila = 0;
+        
+        String query = "INSERT INTO DOCTOR (id_doctor, id_persona, especialidad, enServicio) " +
+                       "VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, codDoctor);
+            stmt.setInt(2, id_persona);
+            stmt.setString(3, doctor.getEspecialidad());
+            stmt.setBoolean(4, doctor.isEnServicio());
+
+            fila = stmt.executeUpdate();
+            System.out.println("Doctores agregados: " + fila);
+            System.out.println("Doctor especialidad: " + doctor.getEspecialidad());
+
+            //Clinica.getInstance().insertarDoctor(doctor);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String obtenerSexoCorto(String sexo) {
+        
+    	String sexoLowerCase = sexo.toLowerCase();
+
+        switch (sexoLowerCase) {
+            case "masculino":
+                return "M";
+            default:
+                return "F";
+        }
+        
+    }
+    
+    public void clearPersonasPorRango(int rangoUser) {
+        
+    	if (rangoUser == 1 || rangoUser == 2 || rangoUser == 5) {
+            ArrayList<Persona> personasParaEliminar = new ArrayList<>();
+            for (Persona persona : misPersonas) {
+                if (persona.getRangoUser() == rangoUser) {
+                    personasParaEliminar.add(persona);
+                }
+            }
+            
+            misPersonas.removeAll(personasParaEliminar);
+        }
+        else if (rangoUser == 3) {
+            ArrayList<Persona> personasParaEliminar = new ArrayList<>();
+            for (Persona persona : misPersonas) {
+                if (persona.getRangoUser() == 3) {
+                    personasParaEliminar.add(persona);
+                }
+            }
+            misPersonas.removeAll(personasParaEliminar);
+        }
+        else if (rangoUser == 4) {
+            ArrayList<Persona> personasParaEliminar = new ArrayList<>();
+            for (Persona persona : misPersonas) {
+                if (persona.getRangoUser() == 4) {
+                    personasParaEliminar.add(persona);
+                }
+            }
+            misPersonas.removeAll(personasParaEliminar);
+        }
+    }
+    
+    
+
+    
+   // public void modificarDatosPersonaSQL(Persona persona) {
+    	
+    	
+//    }
+    
+    
+    public void modificarDatosPersonaSQL(Persona persona) {
+    	
+        String queryPersona = "UPDATE PERSONA SET cedula = ?, nombre = ?, apellido = ?, sexo = ?, fecha_nacimiento = ? WHERE id_persona = ?";
+        int filas = 0;
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
+
+            stmtPersona.setString(1, persona.getCedula());
+            stmtPersona.setString(2, persona.getNombre());
+            stmtPersona.setString(3, persona.getApellidos());
+            stmtPersona.setString(4, obtenerSexoCorto(persona.getGenero()));
+            stmtPersona.setDate(5, new java.sql.Date(persona.getFechaNacimiento().getTime()));
+            stmtPersona.setInt(6, Integer.parseInt(persona.getCodigo()));
+
+            filas = stmtPersona.executeUpdate();
+
+            if (persona instanceof Paciente) {
+                
+            	Clinica.getInstance().modificarDatosPacienteSQL((Paciente) persona);
+            } 
+
+            else if (persona instanceof Doctor) {
+                
+            	Clinica.getInstance().modificarDatosDoctorSQL((Doctor) persona);
+            } 
+
+            Clinica.getInstance().modificarDatosCredencialSQL(persona);
+
+            System.out.println("Persona modificada: " + filas);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void modificarDatosCredencialSQL(Persona persona) {
+    	
+    	if (existUserName(persona.getUser())) {
+            System.out.println("Error: El nombre de usuario ya existe. Elige otro nombre de usuario.");
+            return;
+        }
+    	
+        String query = "UPDATE CREDENCIAL SET userName = ?, passwordUser = ?, id_rango_persona = ? WHERE id_persona = ?";
+        int fila = 0;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, persona.getUser());
+            stmt.setBytes(2, persona.getPassword().getBytes()); // Debes aplicar el hash aqu� si es necesario
+            stmt.setInt(3, persona.getRangoUser());
+            stmt.setInt(4, Integer.parseInt(persona.getCodigo()));
+
+            fila = stmt.executeUpdate();
+            System.out.println("Credencial modificada: " + fila);
+            Clinica.getInstance().actualizarPersona(persona);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void modificarDatosPacienteSQL(Paciente paciente) {
+        String query = "UPDATE PACIENTE SET tipoSangre = ?, id_vivienda = ? WHERE id_persona = ?";
+        int fila = 0;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, paciente.getTipoSangre());
+            stmt.setObject(2, paciente.getMiVivienda() != null ? paciente.getMiVivienda().getCodigo() : null);
+            stmt.setInt(3, Integer.parseInt(paciente.getCodigo()));
+
+            fila = stmt.executeUpdate();
+            System.out.println("Paciente modificado: " + fila);
+            Clinica.getInstance().actualizarPersona(paciente);
+            
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void modificarDatosDoctorSQL(Doctor doctor) {
+        String query = "UPDATE DOCTOR SET especialidad = ?, enServicio = ? WHERE id_persona = ?";
+        int fila = 0;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, doctor.getEspecialidad());
+            stmt.setBoolean(2, doctor.isEnServicio());
+            stmt.setInt(3, Integer.parseInt(doctor.getCodigo()));
+
+            fila = stmt.executeUpdate();
+            System.out.println("Doctor modificado: " + fila);
+            
+            Clinica.getInstance().actualizarPersona(doctor);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    
+    
+    
+    
+     
+    
+
+
+   //// aqui enfermedad luego
     
     
     //VIVIENDAS:
@@ -1537,7 +1775,7 @@ public class Clinica implements Serializable  {//u
     }
 
  
- 
+/* 
     //VACUNAS:
 
     public void cargarDatosVacunaSQL() {
@@ -1593,7 +1831,8 @@ public class Clinica implements Serializable  {//u
         }
     }
     
-    
+*/
+ /*
     public void insertarDatosVacunaSQL(Vacuna vacuna) {
     	
     	Clinica.getInstance().obtenerMaximoIdVacuna();
@@ -1695,7 +1934,7 @@ public class Clinica implements Serializable  {//u
             e.printStackTrace();
         }
     } 
-    
+    */
     
     //MANEJO DE INDICES BASE DE DATOS:
     
@@ -1853,7 +2092,7 @@ public class Clinica implements Serializable  {//u
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
             
-            if (rs.next()) {
+            if (rs.next()) { 
                 codHistoriaClinica = rs.getInt("max_historia_consulta_id") + 1;
                 return codHistoriaClinica;
             }
@@ -1898,6 +2137,24 @@ public class Clinica implements Serializable  {//u
         return codCita;
     }
     
+    public int obtenerMaximoIdCredencial() {
+        String query = "SELECT MAX(id_credencial) AS max_credencial_id FROM CREDENCIAL";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+            	codCredencial = rs.getInt("max_credencial_id") + 1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return codCredencial;
+    }
+
+    
     public void cargarLastIdUsed() {
     	
     	//Metodo para cargar los id de la base de datos, al progrma debido a lo mucho que cuesta cargar toda la info!
@@ -1930,6 +2187,354 @@ public class Clinica implements Serializable  {//u
             e.printStackTrace();
         }
     }
+    
+    
+    
+    
+    
+    
+    //ENFERMEDADES SQL:
+    
+    public DefaultTableModel cargarDatosEnfermedadSQL() {
+        String query = "SELECT e.id_enfermedad, e.nombre, e.sintomas, e.tratamiento, e.id_gravedad_enfermedad " +
+                       "FROM ENFERMEDAD AS e";
+
+        DefaultTableModel model = new DefaultTableModel();
+        model.setColumnIdentifiers(new String[]{"Codigo", "Nombre", "Sintomas", "Tratamiento", "Gravedad"});
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Object[] row = new Object[5];
+                row[0] = rs.getString("id_enfermedad");
+                row[1] = rs.getString("nombre");
+                row[2] = rs.getString("sintomas");
+                row[3] = rs.getString("tratamiento");
+                row[4] = rs.getInt("id_gravedad_enfermedad");
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return model;
+    }
+
+    public void insertarDatosEnfermedadSQL(Enfermedad enfermedad) {
+    	
+    	Clinica.getInstance().obtenerMaximoIdEnfermedad();
+
+    	String query = "INSERT INTO ENFERMEDAD (id_enfermedad, nombre, sintomas, tratamiento, id_gravedad_enfermedad) VALUES (?, ?, ?, ?, ?)";
+    	int filas = 0;
+    
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, Integer.parseInt(enfermedad.getCodigo()));
+            stmt.setString(2, enfermedad.getNombre());
+            stmt.setString(3, enfermedad.getSintomas());
+            stmt.setString(4, enfermedad.getTratamiento());
+            stmt.setInt(5, enfermedad.getGravedad());
+            filas =+ stmt.executeUpdate();
+            System.out.println("Enfermedades agregadas: " + filas);
+            //Clinica.getInstance().insertarEnfermedad(enfermedad);
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public Enfermedad obtenerEnfermedadByIdSQL(String codigo) {
+        String query = "SELECT e.id_enfermedad, e.nombre, e.sintomas, e.tratamiento, e.id_gravedad_enfermedad " +
+                       "FROM ENFERMEDAD AS e WHERE e.id_enfermedad = ?";
+        
+        Enfermedad enfermedad = null;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, codigo);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                
+            	if (rs.next()) {
+            		
+                    String nombre = rs.getString("nombre");
+                    String sintomas = rs.getString("sintomas");
+                    String tratamiento = rs.getString("tratamiento");
+                    int gravedad = rs.getInt("id_gravedad_enfermedad");
+
+                    enfermedad = new Enfermedad(codigo, nombre, sintomas, tratamiento, gravedad);
+                }
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return enfermedad;
+    }
+
+    public void actualizarDatosEnfermedadSQL(Enfermedad enfermedad) {
+        String query = "UPDATE ENFERMEDAD SET nombre = ?, sintomas = ?, tratamiento = ?, id_gravedad_enfermedad = ? " +
+        		 	   "WHERE id_enfermedad = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+   
+            stmt.setString(1, enfermedad.getNombre());
+            stmt.setString(2, enfermedad.getSintomas());
+            stmt.setString(3, enfermedad.getTratamiento());
+            stmt.setInt(4, enfermedad.getGravedad());
+            stmt.setString(5, enfermedad.getCodigo());
+            int filas = stmt.executeUpdate();
+            
+            System.out.println("Enfermedades actualizadas: " + filas);
+            //Clinica.getInstance().actualizarEnfermedad(enfermedad);
+
+        } catch (SQLException e) {
+            e.printStackTrace(); 
+        }
+    }
+    
+    public void eliminarDatosEnfermedadSQL(String id_enfermedad) {
+    	
+    	String query = "DELETE FROM ENFERMEDAD " +
+    				   "WHERE id_enfermedad = ? ";
+    	
+    	try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+    		 
+    		stmt.setString(1, id_enfermedad);
+    		stmt.executeUpdate();
+    		System.out.println("Enfermedad con codigo " + id_enfermedad + " eliminada.");
+           
+    		//Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(id_enfermedad);
+            //Clinica.getInstance().eliminarEnfermedad(enfermedad);
+    		
+    	} catch (SQLException e) {
+    		e.printStackTrace();
+    	}
+    }
+    
+    //VACUNAS SQL:
+    
+    public DefaultTableModel cargarDatosVacunaSQL() {
+        String query = "SELECT v.id_vacuna, v.nombre, COUNT(ev.id_enfermedad) AS Cantidades_Enfermedades_Curadas " +
+        			   "FROM VACUNA AS v " +
+        			   "INNER JOIN ENFERMEDAD_VACUNA AS ev ON v.id_vacuna = ev.id_vacuna " +
+        		       "GROUP BY v.id_vacuna, v.nombre ";
+
+        DefaultTableModel model = new DefaultTableModel();
+        model.setColumnIdentifiers(new String[]{"Codigo", "Nombre Vacuna", "Enfermedades que cura (Cantidad)"});
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Object[] row = new Object[3];
+                row[0] = rs.getString("id_vacuna");
+                row[1] = rs.getString("nombre");
+                row[2] = rs.getString("Cantidades_Enfermedades_Curadas");
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return model;
+    }
+    
+    public Vacuna obtenerVacunaByIdSQL(String codigo) {
+        String queryVacuna = "SELECT v.id_vacuna, v.nombre " +
+                             "FROM VACUNA AS v WHERE v.id_vacuna = ?";
+
+        String queryEnfermedades = "SELECT e.id_enfermedad, e.nombre, e.sintomas, e.tratamiento, e.id_gravedad_enfermedad " +
+                                   "FROM ENFERMEDAD AS e " +
+                                   "INNER JOIN ENFERMEDAD_VACUNA AS ev ON e.id_enfermedad = ev.id_enfermedad " +
+                                   "WHERE ev.id_vacuna = ?";
+
+        Vacuna vacuna = null;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtVacuna = conn.prepareStatement(queryVacuna);
+             PreparedStatement stmtEnfermedades = conn.prepareStatement(queryEnfermedades)) {
+
+            stmtVacuna.setString(1, codigo);
+            
+            try (ResultSet rsVacuna = stmtVacuna.executeQuery()) {
+            	
+                if (rsVacuna.next()) {
+                	
+                    String nombreVacuna = rsVacuna.getString("nombre");
+                    vacuna = new Vacuna(codigo, nombreVacuna); 
+                }
+            }
+
+            if (vacuna != null) {
+                
+            	stmtEnfermedades.setString(1, codigo);
+                
+                try (ResultSet rsEnfermedades = stmtEnfermedades.executeQuery()) {
+                    
+                	while (rsEnfermedades.next()) {
+                        
+                    	String idEnfermedad = rsEnfermedades.getString("id_enfermedad");
+                        String nombreEnfermedad = rsEnfermedades.getString("nombre");
+                        String sintomas = rsEnfermedades.getString("sintomas");
+                        String tratamiento = rsEnfermedades.getString("tratamiento");
+                        int gravedad = rsEnfermedades.getInt("id_gravedad_enfermedad");
+
+                        Enfermedad enfermedad = new Enfermedad(idEnfermedad, nombreEnfermedad, sintomas, tratamiento, gravedad);
+                        vacuna.agregarEnfermedad(enfermedad);
+                    }
+                	
+                }
+                
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return vacuna;
+    }
+    
+    public void insertarDatosVacunaSQL(Vacuna vacuna) {
+    	
+    	//Clinica.getInstance().obtenerMaximoIdVacuna();
+
+        String queryVacuna = "INSERT INTO VACUNA (id_vacuna, nombre, id_historial_clinico) VALUES (?, ?, ?)";
+        String queryEnferemedad = "INSERT INTO ENFERMEDAD_VACUNA (id_vacuna, id_enfermedad) VALUES (?, ?)";
+        int filas = 0;
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement insertVacunaStmt = conn.prepareStatement(queryVacuna)) {
+
+            insertVacunaStmt.setString(1, vacuna.getCodigo());
+            insertVacunaStmt.setString(2, vacuna.getNombre());
+            insertVacunaStmt.setString(3, vacuna.getMiHistoriaClinica() != null ? vacuna.getMiHistoriaClinica().getCodigo() : null);
+
+            filas = insertVacunaStmt.executeUpdate();
+            System.out.println("Vacunas agregadas: " + filas);
+
+            try (PreparedStatement insertEnfermedadesStmt = conn.prepareStatement(queryEnferemedad)) {
+                for (Enfermedad enfermedad : vacuna.getMisEnfermedades()) {
+                    insertEnfermedadesStmt.setString(1, vacuna.getCodigo());
+                    insertEnfermedadesStmt.setString(2, enfermedad.getCodigo());
+                    insertEnfermedadesStmt.addBatch(); // Agrupamos todas las llamadas
+                }
+                insertEnfermedadesStmt.executeBatch(); // Ejecutamos todas las llamadas en batch
+            }
+            
+            //Clinica.getInstance().insertarVacuna(vacuna);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+
+
+    public void actualizarDatosVacunaSQL(Vacuna vacuna) {
+
+        String query = "UPDATE VACUNA SET nombre = ?, id_historial_clinico = ? " +
+        			   "WHERE id_vacuna = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, vacuna.getNombre());
+            stmt.setString(2, vacuna.getMiHistoriaClinica() != null ? vacuna.getMiHistoriaClinica().getCodigo() : null);
+            stmt.setString(3, vacuna.getCodigo());
+
+            int filas = stmt.executeUpdate();
+            System.out.println("Vacunas actualizadas: " + filas);
+
+            // Actualizar las enfermedades asociadas
+            // Primero eliminamos las enfermedades existentes asociadas a la vacuna
+            String deleteEnfermedadesQuery = "DELETE FROM ENFERMEDAD_VACUNA " +
+            								 "WHERE id_vacuna = ?";
+            
+            try (PreparedStatement deleteStmt = conn.prepareStatement(deleteEnfermedadesQuery)) {
+                deleteStmt.setString(1, vacuna.getCodigo());
+                deleteStmt.executeUpdate();
+            }
+
+            // Luego insertamos las nuevas asociaciones
+            String insertEnfermedadesQuery = "INSERT INTO ENFERMEDAD_VACUNA (id_vacuna, id_enfermedad) " +
+            								 "VALUES (?, ?)";
+            
+            try (PreparedStatement insertStmt = conn.prepareStatement(insertEnfermedadesQuery)) {
+                for (Enfermedad enfermedad : vacuna.getMisEnfermedades()) {
+                    insertStmt.setString(1, vacuna.getCodigo());
+                    insertStmt.setString(2, enfermedad.getCodigo());
+                    insertStmt.addBatch(); //Agrupamos todas las llamadas.
+                }
+                insertStmt.executeBatch(); //Ejecutamos todas las llamadas.
+            }
+            
+            //Clinica.getInstance().actualizarVacuna(vacuna);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void eliminarDatosVacunaSQL(String id_vacuna) {
+
+        String queryEnferemedadVacuna = "DELETE FROM ENFERMEDAD_VACUNA " +
+        								"WHERE id_vacuna = ?";
+        String queryVacuna = "DELETE FROM " +
+        					 "VACUNA WHERE id_vacuna = ?";
+        int filas = 0;
+        int filas_elim = 0;
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+        	
+            try (PreparedStatement deleteEnfermedadesStmt = conn.prepareStatement(queryEnferemedadVacuna)) {
+                deleteEnfermedadesStmt.setInt(1, Integer.parseInt(id_vacuna));
+                filas_elim = deleteEnfermedadesStmt.executeUpdate();
+            }
+
+            try (PreparedStatement deleteVacunaStmt = conn.prepareStatement(queryVacuna)) {
+                deleteVacunaStmt.setInt(1, Integer.parseInt(id_vacuna));
+                filas = deleteVacunaStmt.executeUpdate();
+                System.out.println(filas + " Vacuna eliminada con: " + filas_elim + " enfermedades en ella");
+            }
+            
+            //Vacuna vacuna = Clinica.getInstance().obtenerVacunaByIdSQL(id_vacuna);
+            //Clinica.getInstance().eliminarVacuna(vacuna);
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    } 
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
       
 } 

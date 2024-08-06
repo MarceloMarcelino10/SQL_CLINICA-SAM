@@ -13,8 +13,9 @@ public class VerMasEnfermedad extends JDialog {
 
     public VerMasEnfermedad(String sintomas, String tratamiento) {
         setIconImage(Toolkit.getDefaultToolkit().getImage(VerMasEnfermedad.class.getResource("/imagenes/fotoTituloDeVentana.png")));
-        setTitle("Detalles sintomas");
+        setTitle("Ver Mas");
         setBounds(100, 100, 511, 385);
+        setLocationRelativeTo(null);
         getContentPane().setLayout(new BorderLayout());
         contentPanel.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -55,11 +56,11 @@ public class VerMasEnfermedad extends JDialog {
         textAreaTratamiento.setEditable(false); // No editable
         scrollPane_1.setViewportView(textAreaTratamiento);
 
-        JLabel lblNewLabel = new JLabel(">Sintomas<");
+        JLabel lblNewLabel = new JLabel("Sintomas:");
         lblNewLabel.setBounds(83, 23, 76, 14);
         panel.add(lblNewLabel);
 
-        JLabel lblNewLabel_1 = new JLabel(">Tratamiento<");
+        JLabel lblNewLabel_1 = new JLabel("Tratamiento:");
         lblNewLabel_1.setBounds(328, 23, 93, 14);
         panel.add(lblNewLabel_1);
 
@@ -82,7 +83,7 @@ public class VerMasEnfermedad extends JDialog {
 
     public static void main(String[] args) {
         try {
-            VerMasEnfermedad dialog = new VerMasEnfermedad("Síntomas aquí", "Tratamiento aquí");
+            VerMasEnfermedad dialog = new VerMasEnfermedad("PRUEBA", "PRUEBA");
             dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
             dialog.setVisible(true);
         } catch (Exception e) {

@@ -22,6 +22,8 @@ import javax.swing.JTextField;
 
 import logico.Clinica;
 import logico.Persona;
+import seguridad.GestorUsuario;
+
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.ImageIcon;
@@ -96,6 +98,10 @@ public class Login_o_Registro extends JFrame {
 	                
 	            	// Inicializa la instancia de Clinica y carga los datos
 	                //Clinica.getInstance().cargarDatosDesdeSQL();
+	                //Clinica.getInstance().cargarDatosPersonaSQL();
+	                //Clinica.getInstance().cargarDatosPacienteSQL();
+	                //Clinica.getInstance().cargarDatosDoctorSQL();
+	                
 	                
 	                // Crea y muestra la ventana de login
 	                Login_o_Registro frame = new Login_o_Registro();
@@ -152,17 +158,24 @@ public class Login_o_Registro extends JFrame {
 		btnInicioSesion.setFont(new Font("Tahoma", Font.BOLD, 13));
 		btnInicioSesion.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
 				char[] temp = txtPassword.getPassword();
                 String password = new String(temp);
-				if (Clinica.getInstance().confirmLogin(txtUser.getText(),password)) {
-					PrincipalVisual visual = new PrincipalVisual();
-					visual.setVisible(true);
-					dispose();
+                String user = txtUser.getText();
+                
+                if (GestorUsuario.confirmLogin(user, password)) {
+					
+            		PrincipalVisual visual = new PrincipalVisual();
+    				visual.setVisible(true);
+    				dispose();
+    				
 				} else {
+					
 		            JOptionPane.showMessageDialog(null, "Credenciales incorrectas", "Error de inicio de sesi\u00F3n", JOptionPane.ERROR_MESSAGE);
+		            
 				}
 			}
-		});//
+		});
 		btnInicioSesion.setBounds(304, 101, 123, 23);
 		contentPane.add(btnInicioSesion);
 		
