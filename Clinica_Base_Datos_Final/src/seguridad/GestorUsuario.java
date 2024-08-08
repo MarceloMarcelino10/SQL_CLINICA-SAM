@@ -17,12 +17,12 @@ import sql.DatabaseConnection;
 
 public class GestorUsuario {
 
-    // Metodo para hashear la contraseï¿½a
+    // Metodo para hashear la contraseña
     public static String hashPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 	
-    // Metodo para verificar la contraseï¿½a
+    // Metodo para verificar la contraseña
     public static boolean checkPassword(String password, String hashed) {
         return BCrypt.checkpw(password, hashed);
     }
@@ -52,7 +52,7 @@ public class GestorUsuario {
                     
                     String storedHashStr = new String(storedHash, StandardCharsets.UTF_8); //Convertir a String
                     
-                    if (checkPassword(password, storedHashStr)) {// Verificar la contraseï¿½a
+                    if (checkPassword(password, storedHashStr)) {// Verificar la contraseña
                         
                         SetLoggedUser(rs);
                         login = true;

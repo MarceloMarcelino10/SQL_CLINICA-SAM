@@ -1037,7 +1037,7 @@ public class Clinica implements Serializable  {//u
 	
 	// METODOS SQL (CARGA DE DATOS):
     
-    //DOCTORES:
+  /*  //DOCTORES:
     
     public void cargarDatosDoctorSQL() {
 
@@ -1155,7 +1155,7 @@ public class Clinica implements Serializable  {//u
             e.printStackTrace();
         }
     }
-    
+    */
     // PERSONAS:
     
     public void cargarDatosPersonaSQL() {
@@ -1222,169 +1222,8 @@ public class Clinica implements Serializable  {//u
             e.printStackTrace();
         }
     }
-	  
-    public int obtenerRango(String rango) { // Corresponde al valor en la base de datos(nuevo) // EN EL PROGRMA DE JAVA: 4 ADMIN, 3 SECRETARIO, 2 DOCTOR, 1 PACIENTE, 0 PERSONA(viejo)
-        
-    	switch (rango) {
-        	case "Administrador":
-                return 1; 
-            case "Secretario":
-                return 2;
-            case "Doctor":
-                return 3;
-            case "Paciente":
-                return 4;
-            default: // Persona
-                return 5;
-        }
-    }
-    
-    
-    public void insertarDatosPersonaSQL(Persona persona) {
-        
-    	//Clinica.getInstance().obtenerMaximoIdPersona();
-    	
-        String queryPersona = "INSERT INTO PERSONA (id_persona, cedula, nombre, apellido, sexo, fecha_nacimiento) " +
-        					  "VALUES (?, ?, ?, ?, ?, ?)";
-        int filas = 0;
-        
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
+	 
 
-            stmtPersona.setInt(1, Clinica.getInstance().obtenerMaximoIdPersona());
-            stmtPersona.setString(2, persona.getCedula());
-            stmtPersona.setString(3, persona.getNombre());
-            stmtPersona.setString(4, persona.getApellidos());
-            stmtPersona.setString(5, obtenerSexoCorto(persona.getGenero()));
-           // stmtPersona.setDate(6, new java.sql.Date(persona.getFechaNacimiento().getDate()));
-            stmtPersona.setDate(6, new java.sql.Date(persona.getFechaNacimiento().getTime()));
-
-            filas = stmtPersona.executeUpdate();
-                        
-            if (persona instanceof Paciente || persona.getRangoUser() == 4) {
-            	
-            	insertarDatosCredencialSQL((Paciente) persona, Integer.parseInt(persona.getCodigo()));
-                insertarDatosPacienteSQL((Paciente) persona, Integer.parseInt(persona.getCodigo()));
-                
-            } else if (persona instanceof Doctor || persona.getRangoUser() == 3) {
-            	
-                insertarDatosCredencialSQL((Doctor) persona, Integer.parseInt(persona.getCodigo()));
-                insertarDatosDoctorSQL((Doctor) persona, Integer.parseInt(persona.getCodigo()));
-            
-            } else {
-                insertarDatosCredencialSQL(persona, Integer.parseInt(persona.getCodigo()));
-            }
-
-            System.out.println("Persona agregada: " + filas);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    public void insertarDatosCredencialSQL(Persona persona, int id_persona) {
-    	
-    	int rango_persona = persona.getRangoUser();
-    	
-    	if (rango_persona != 1 && rango_persona != 2 && rango_persona != 3 && rango_persona != 4 && rango_persona != 5) {
-    		rango_persona = 1;
-    	}
-    	
-    	int fila = 0;
- 
-    	String hashedPassword = GestorUsuario.hashPassword(persona.getPassword());
-    	
-        String query = "INSERT INTO CREDENCIAL (id_credencial, userName, passwordUser, id_persona, id_rango_persona) " +
-        			   "VALUES (?, ?, ?, ?, ?)";
-        
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-        	
-            stmt.setInt(1, Clinica.getInstance().obtenerMaximoIdCredencial());
-            stmt.setString(2, persona.getUser());
-            stmt.setBytes(3, hashedPassword.getBytes());
-            stmt.setInt(4, id_persona);
-            stmt.setInt(5, rango_persona);
-
-            fila = stmt.executeUpdate();
-            System.out.println("Credenciales agregadas: " + fila);
-            System.out.println("Verificacion del rango: " + rango_persona);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    public void insertarDatosPacienteSQL(Persona persona, int id_persona) {
-    	
-    	Paciente paciente = ((Paciente) persona);
-    	Clinica.getInstance().obtenerMaximoIdPaciente();
-    	int fila = 0;
-    	
-        String query = "INSERT INTO PACIENTE (id_paciente, id_persona, tipoSangre, id_vivienda) " +
-        			   "VALUES (?, ?, ?, ?)";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            stmt.setInt(1, codPaciente);
-            stmt.setInt(2, id_persona);
-            stmt.setString(3, paciente.getTipoSangre());
-            stmt.setObject(4, paciente.getMiVivienda() != null ? paciente.getMiVivienda().getCodigo() : null);
-
-            fila = stmt.executeUpdate();
-            System.out.println("Pacientes agregados: " + fila);
-            System.out.println("Paciente sangre: " + paciente.getTipoSangre());
-            
-            //Clinica.getInstance().insertarPaciente(paciente);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    	
-    }
-    
-    public void insertarDatosDoctorSQL(Persona persona, int id_persona) {
-        
-    	Doctor doctor = ((Doctor) persona);
-        Clinica.getInstance().obtenerMaximoIdDoctor();
-        int fila = 0;
-        
-        String query = "INSERT INTO DOCTOR (id_doctor, id_persona, especialidad, enServicio) " +
-                       "VALUES (?, ?, ?, ?)";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            stmt.setInt(1, codDoctor);
-            stmt.setInt(2, id_persona);
-            stmt.setString(3, doctor.getEspecialidad());
-            stmt.setBoolean(4, doctor.isEnServicio());
-
-            fila = stmt.executeUpdate();
-            System.out.println("Doctores agregados: " + fila);
-            System.out.println("Doctor especialidad: " + doctor.getEspecialidad());
-
-            //Clinica.getInstance().insertarDoctor(doctor);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public String obtenerSexoCorto(String sexo) {
-        
-    	String sexoLowerCase = sexo.toLowerCase();
-
-        switch (sexoLowerCase) {
-            case "masculino":
-                return "M";
-            default:
-                return "F";
-        }
-        
-    }
-    
     public void clearPersonasPorRango(int rangoUser) {
         
     	if (rangoUser == 1 || rangoUser == 2 || rangoUser == 5) {
@@ -1426,110 +1265,7 @@ public class Clinica implements Serializable  {//u
 //    }
     
     
-    public void modificarDatosPersonaSQL(Persona persona) {
-    	
-        String queryPersona = "UPDATE PERSONA SET cedula = ?, nombre = ?, apellido = ?, sexo = ?, fecha_nacimiento = ? WHERE id_persona = ?";
-        int filas = 0;
-        
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
-
-            stmtPersona.setString(1, persona.getCedula());
-            stmtPersona.setString(2, persona.getNombre());
-            stmtPersona.setString(3, persona.getApellidos());
-            stmtPersona.setString(4, obtenerSexoCorto(persona.getGenero()));
-            stmtPersona.setDate(5, new java.sql.Date(persona.getFechaNacimiento().getTime()));
-            stmtPersona.setInt(6, Integer.parseInt(persona.getCodigo()));
-
-            filas = stmtPersona.executeUpdate();
-
-            if (persona instanceof Paciente) {
-                
-            	Clinica.getInstance().modificarDatosPacienteSQL((Paciente) persona);
-            } 
-
-            else if (persona instanceof Doctor) {
-                
-            	Clinica.getInstance().modificarDatosDoctorSQL((Doctor) persona);
-            } 
-
-            Clinica.getInstance().modificarDatosCredencialSQL(persona);
-
-            System.out.println("Persona modificada: " + filas);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void modificarDatosCredencialSQL(Persona persona) {
-    	
-    	if (existUserName(persona.getUser())) {
-            System.out.println("Error: El nombre de usuario ya existe. Elige otro nombre de usuario.");
-            return;
-        }
-    	
-        String query = "UPDATE CREDENCIAL SET userName = ?, passwordUser = ?, id_rango_persona = ? WHERE id_persona = ?";
-        int fila = 0;
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            stmt.setString(1, persona.getUser());
-            stmt.setBytes(2, persona.getPassword().getBytes()); // Debes aplicar el hash aquí si es necesario
-            stmt.setInt(3, persona.getRangoUser());
-            stmt.setInt(4, Integer.parseInt(persona.getCodigo()));
-
-            fila = stmt.executeUpdate();
-            System.out.println("Credencial modificada: " + fila);
-            Clinica.getInstance().actualizarPersona(persona);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void modificarDatosPacienteSQL(Paciente paciente) {
-        String query = "UPDATE PACIENTE SET tipoSangre = ?, id_vivienda = ? WHERE id_persona = ?";
-        int fila = 0;
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            stmt.setString(1, paciente.getTipoSangre());
-            stmt.setObject(2, paciente.getMiVivienda() != null ? paciente.getMiVivienda().getCodigo() : null);
-            stmt.setInt(3, Integer.parseInt(paciente.getCodigo()));
-
-            fila = stmt.executeUpdate();
-            System.out.println("Paciente modificado: " + fila);
-            Clinica.getInstance().actualizarPersona(paciente);
-            
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void modificarDatosDoctorSQL(Doctor doctor) {
-        String query = "UPDATE DOCTOR SET especialidad = ?, enServicio = ? WHERE id_persona = ?";
-        int fila = 0;
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            stmt.setString(1, doctor.getEspecialidad());
-            stmt.setBoolean(2, doctor.isEnServicio());
-            stmt.setInt(3, Integer.parseInt(doctor.getCodigo()));
-
-            fila = stmt.executeUpdate();
-            System.out.println("Doctor modificado: " + fila);
-            
-            Clinica.getInstance().actualizarPersona(doctor);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+   
 
     
     
@@ -2283,7 +2019,6 @@ public class Clinica implements Serializable  {//u
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
-
    
             stmt.setString(1, enfermedad.getNombre());
             stmt.setString(2, enfermedad.getSintomas());
@@ -2311,9 +2046,6 @@ public class Clinica implements Serializable  {//u
     		stmt.setString(1, id_enfermedad);
     		stmt.executeUpdate();
     		System.out.println("Enfermedad con codigo " + id_enfermedad + " eliminada.");
-           
-    		//Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(id_enfermedad);
-            //Clinica.getInstance().eliminarEnfermedad(enfermedad);
     		
     	} catch (SQLException e) {
     		e.printStackTrace();
@@ -2514,11 +2246,523 @@ public class Clinica implements Serializable  {//u
         }
     } 
 
+    //PERSONAS SQL:
+    
+    public DefaultTableModel cargarDatosPersonaSQL(int byRango) {
+        String query = "SELECT p.id_persona, p.nombre, p.apellido, DATEDIFF(YEAR,p.fecha_nacimiento,GETDATE()) AS edad, c.id_rango_persona " +
+        			   "FROM PERSONA AS p " +
+        			   "INNER JOIN CREDENCIAL AS c ON p.id_persona = c.id_persona ";
+        
+        if (byRango == 0) {
+            query = "SELECT p.id_persona, p.nombre, p.apellido, DATEDIFF(YEAR, p.fecha_nacimiento, GETDATE()) AS edad " +
+                    "FROM PERSONA AS p";
+        } else {  // si se ha especificado un rango [1 = adm, 2 = sec, 5 = pers, 0 = todos]
+            query = "SELECT p.id_persona, p.nombre, p.apellido, DATEDIFF(YEAR, p.fecha_nacimiento, GETDATE()) AS edad, c.id_rango_persona " +
+                    "FROM PERSONA AS p " +
+                    "INNER JOIN CREDENCIAL AS c ON p.id_persona = c.id_persona " +
+                    "WHERE c.id_rango_persona = ?";
+        }
+
+        DefaultTableModel model = new DefaultTableModel();
+        model.setColumnIdentifiers(new String[]{"Codigo", "Nombre", "Apellidos", "Edad"});
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
+            if (byRango != 0) {
+                stmt.setInt(1, byRango);
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+
+                while (rs.next()) {
+                    Object[] row = new Object[4];
+                    row[0] = rs.getString("id_persona");
+                    row[1] = rs.getString("nombre");
+                    row[2] = rs.getString("apellido");
+                    row[3] = rs.getInt("edad");
+                    model.addRow(row);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return model;
+    }
+
+    public DefaultTableModel cargarDatosDoctorSQL() {
+        String query = "SELECT d.id_persona, p.nombre, p.apellido, DATEDIFF(YEAR,p.fecha_nacimiento,GETDATE()) AS edad, d.especialidad, d.enServicio " +
+        			   "FROM DOCTOR AS d " +
+        			   "INNER JOIN PERSONA AS p ON p.id_persona = d.id_persona ";
+
+        DefaultTableModel model = new DefaultTableModel();
+        model.setColumnIdentifiers(new String[]{"Codigo", "Nombre", "Apellidos", "Edad", "Especialidad", "Disponibilidad"});
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Object[] row = new Object[6];
+                row[0] = rs.getString("id_persona");
+                row[1] = rs.getString("nombre");
+                row[2] = rs.getString("apellido");
+                row[3] = rs.getInt("edad");
+                row[4] = rs.getString("especialidad");
+                row[5] = rs.getBoolean("enServicio") ? "Sí" : "No";
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return model;
+    }
+
+    public DefaultTableModel cargarDatosPacienteSQL() {
+        String query = "SELECT pa.id_persona, p.nombre, p.apellido, DATEDIFF(YEAR,p.fecha_nacimiento,GETDATE()) AS edad, pa.tipoSangre " +
+        			   "FROM PACIENTE AS pa " +
+        		       "INNER JOIN PERSONA AS p ON p.id_persona = pa.id_persona ";
+
+        DefaultTableModel model = new DefaultTableModel();
+        model.setColumnIdentifiers(new String[]{"Codigo", "Nombre", "Apellidos", "Edad", "Tipo de Sangre"});
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Object[] row = new Object[5];
+                row[0] = rs.getString("id_persona");
+                row[1] = rs.getString("nombre");
+                row[2] = rs.getString("apellido");
+                row[3] = rs.getInt("edad");
+                row[4] = rs.getString("tipoSangre");
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return model;
+    }
     
     
+    public void insertarDatosPersonaSQL(Persona persona) {
+    	
+        String queryPersona = "INSERT INTO PERSONA (id_persona, cedula, nombre, apellido, sexo, fecha_nacimiento) " +
+        					  "VALUES (?, ?, ?, ?, ?, ?)";
+        int filas = 0;
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
+
+            stmtPersona.setInt(1, Clinica.getInstance().obtenerMaximoIdPersona());
+            stmtPersona.setString(2, persona.getCedula());
+            stmtPersona.setString(3, persona.getNombre());
+            stmtPersona.setString(4, persona.getApellidos());
+            stmtPersona.setString(5, obtenerSexoCorto(persona.getGenero()));
+            stmtPersona.setDate(6, new java.sql.Date(persona.getFechaNacimiento().getTime()));
+
+            filas = stmtPersona.executeUpdate();
+                        
+            if (persona instanceof Paciente || persona.getRangoUser() == 4) {
+            	
+            	insertarDatosCredencialSQL((Paciente) persona, Integer.parseInt(persona.getCodigo()));
+                insertarDatosPacienteSQL((Paciente) persona, Integer.parseInt(persona.getCodigo()));
+                
+            } else if (persona instanceof Doctor || persona.getRangoUser() == 3) {
+            	
+                insertarDatosCredencialSQL((Doctor) persona, Integer.parseInt(persona.getCodigo()));
+                insertarDatosDoctorSQL((Doctor) persona, Integer.parseInt(persona.getCodigo()));
+            
+            } else {
+                insertarDatosCredencialSQL(persona, Integer.parseInt(persona.getCodigo()));
+            }
+
+            System.out.println("Persona agregada: " + filas);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     
+    public void insertarDatosCredencialSQL(Persona persona, int id_persona) {
+    	
+    	int rango_persona = persona.getRangoUser();
+    	
+    	if (rango_persona != 1 && rango_persona != 2 && rango_persona != 3 && rango_persona != 4 && rango_persona != 5) {
+    		rango_persona = 1;
+    	}
+    	
+    	int fila = 0;
+ 
+    	String hashedPassword = GestorUsuario.hashPassword(persona.getPassword());
+    	
+        String query = "INSERT INTO CREDENCIAL (id_credencial, userName, passwordUser, id_persona, id_rango_persona) " +
+        			   "VALUES (?, ?, ?, ?, ?)";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+        	
+            stmt.setInt(1, Clinica.getInstance().obtenerMaximoIdCredencial());
+            stmt.setString(2, persona.getUser());
+            stmt.setBytes(3, hashedPassword.getBytes());
+            stmt.setInt(4, id_persona);
+            stmt.setInt(5, rango_persona);
+
+            fila = stmt.executeUpdate();
+            System.out.println("Credenciales agregadas: " + fila);
+            System.out.println("Verificacion del rango: " + rango_persona);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     
+    public void insertarDatosPacienteSQL(Persona persona, int id_persona) {
+    	
+    	Paciente paciente = ((Paciente) persona);
+    	Clinica.getInstance().obtenerMaximoIdPaciente();
+    	int fila = 0;
+    	
+        String query = "INSERT INTO PACIENTE (id_paciente, id_persona, tipoSangre, id_vivienda) " +
+        			   "VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, codPaciente);
+            stmt.setInt(2, id_persona);
+            stmt.setString(3, paciente.getTipoSangre());
+            stmt.setObject(4, paciente.getMiVivienda() != null ? paciente.getMiVivienda().getCodigo() : null);
+
+            fila = stmt.executeUpdate();
+            System.out.println("Pacientes agregados: " + fila);
+            System.out.println("Paciente sangre: " + paciente.getTipoSangre());
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    	
+    }
     
+    public void insertarDatosDoctorSQL(Persona persona, int id_persona) {
+        
+    	Doctor doctor = ((Doctor) persona);
+        Clinica.getInstance().obtenerMaximoIdDoctor();
+        int fila = 0;
+        
+        String query = "INSERT INTO DOCTOR (id_doctor, id_persona, especialidad, enServicio) " +
+                       "VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, codDoctor);
+            stmt.setInt(2, id_persona);
+            stmt.setString(3, doctor.getEspecialidad());
+            stmt.setBoolean(4, doctor.isEnServicio());
+
+            fila = stmt.executeUpdate();
+            System.out.println("Doctores agregados: " + fila);
+            System.out.println("Doctor especialidad: " + doctor.getEspecialidad());
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String obtenerSexoCorto(String sexo) {
+        
+    	String sexoLowerCase = sexo.toLowerCase();
+
+        switch (sexoLowerCase) {
+            case "masculino":
+                return "M";
+            default:
+                return "F";
+        }
+        
+    }
+    
+    public int obtenerRango(String rango) { // Corresponde al valor en la base de datos(nuevo) // EN EL PROGRMA DE JAVA: 4 ADMIN, 3 SECRETARIO, 2 DOCTOR, 1 PACIENTE, 0 PERSONA(viejo)
+    	
+    	switch (rango) {
+        	case "Administrador":
+                return 1; 
+            case "Secretario":
+                return 2;
+            case "Doctor":
+                return 3;
+            case "Paciente":
+                return 4;
+            case "Todos":
+            	return 0;
+            default: // Persona
+                return 5;
+        }
+    }
+
+    public Persona buscarPersonaByIdSQL(String id_persona) {
+        Persona persona = null;
+
+        String query = "SELECT p.id_persona, p.cedula, p.nombre, p.apellido, p.sexo, p.fecha_nacimiento, " +
+                       "pa.tipoSangre, d.especialidad, d.enServicio, c.id_rango_persona, c.userName, c.passwordUser " +
+                       "FROM PERSONA AS p " +
+                       "LEFT JOIN PACIENTE AS pa ON p.id_persona = pa.id_persona " +
+                       "LEFT JOIN DOCTOR AS d ON p.id_persona = d.id_persona " +
+                       "LEFT JOIN CREDENCIAL AS c ON p.id_persona = c.id_persona " +
+                       "WHERE p.id_persona = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, id_persona);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+            	
+                if (rs.next()) {
+                	
+                    String codigo = rs.getString("id_persona");
+                    String cedula = rs.getString("cedula");
+                    String nombre = rs.getString("nombre");
+                    String apellidos = rs.getString("apellido");
+                    Date fechaNacimiento = rs.getDate("fecha_nacimiento");
+                    String sexo = rs.getString("sexo");
+                    String userName = rs.getString("userName");
+                    String password = new String(rs.getBytes("passwordUser"), StandardCharsets.UTF_8);
+                    int rangoUser = rs.getInt("id_rango_persona");
+
+                    switch (rangoUser) {
+                        case 3: // Doctor
+                            String especialidad = rs.getString("especialidad");
+                            boolean enServicio = rs.getBoolean("enServicio");
+                            persona = new Doctor(codigo, cedula, nombre, apellidos, fechaNacimiento, sexo, userName, password, rangoUser, especialidad, enServicio);
+                            break;
+                        case 4: // Paciente
+                            String tipoSangre = rs.getString("tipoSangre");
+                            persona = new Paciente(codigo, cedula, nombre, apellidos, fechaNacimiento, sexo, userName, password, rangoUser, null, tipoSangre);
+                            break;
+                        default: //[Admin, Secretario, Persona]
+                        	 persona = new Persona(codigo, cedula, nombre, apellidos, fechaNacimiento, sexo, userName, password, rangoUser);
+                            break;
+                    }
+                    
+                }
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return persona;
+    }
+
+    
+    public void eliminarDatosPersonaSQL(String id_persona) {
+        
+    	try (Connection conn = DatabaseConnection.getConnection()) {
+           
+    		String queryDoctorCheck = "SELECT id_persona FROM DOCTOR WHERE id_persona = ?";  //Si persona es un doctor
+            
+    		boolean isDoctor = false;
+            
+    		try (PreparedStatement stmtDoctorCheck = conn.prepareStatement(queryDoctorCheck)) {
+                
+    			stmtDoctorCheck.setString(1, id_persona);
+                
+                try (ResultSet rs = stmtDoctorCheck.executeQuery()) {
+                    if (rs.next()) {
+                        isDoctor = true;
+                    }
+                }
+                
+            }
+
+            if (isDoctor) {
+
+                String queryCita = "DELETE FROM CITA WHERE id_doctor = ?";
+                try (PreparedStatement stmtCita = conn.prepareStatement(queryCita)) {
+                    stmtCita.setString(1, id_persona);
+                    stmtCita.executeUpdate();
+                }
+
+                String queryConsulta = "DELETE FROM CONSULTA WHERE id_doctor = ?";
+                try (PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta)) {
+                    stmtConsulta.setString(1, id_persona);
+                    stmtConsulta.executeUpdate();
+                }
+
+                String queryDoctor = "DELETE FROM DOCTOR WHERE id_persona = ?";
+                try (PreparedStatement stmtDoctor = conn.prepareStatement(queryDoctor)) {
+                    stmtDoctor.setString(1, id_persona);
+                    stmtDoctor.executeUpdate();
+                }
+                
+            }
+
+            String queryPacienteCheck = "SELECT id_persona FROM PACIENTE WHERE id_persona = ?"; //Si persona es un paciente
+            
+            boolean isPaciente = false;
+            
+            try (PreparedStatement stmtPacienteCheck = conn.prepareStatement(queryPacienteCheck)) {
+                
+            	stmtPacienteCheck.setString(1, id_persona);
+               
+                try (ResultSet rs = stmtPacienteCheck.executeQuery()) {
+                    if (rs.next()) {
+                        isPaciente = true;
+                    }
+                }
+                
+            }
+
+            if (isPaciente) { 
+            	
+                String queryHistorialClinico = "DELETE FROM HISTORIAL_CLINICO WHERE id_paciente = ?";
+                try (PreparedStatement stmtHistorial = conn.prepareStatement(queryHistorialClinico)) {
+                    stmtHistorial.setString(1, id_persona);
+                    stmtHistorial.executeUpdate();
+                }
+
+                String queryPaciente = "DELETE FROM PACIENTE WHERE id_persona = ?";
+                try (PreparedStatement stmtPaciente = conn.prepareStatement(queryPaciente)) {
+                    stmtPaciente.setString(1, id_persona);
+                    stmtPaciente.executeUpdate();
+                }
+                
+            }
+
+            String queryAdmin = "DELETE FROM ADMINISTRADOR WHERE id_persona = ?"; //Si es administrador
+            try (PreparedStatement stmtAdmin = conn.prepareStatement(queryAdmin)) {
+                stmtAdmin.setString(1, id_persona);
+                stmtAdmin.executeUpdate();
+            }
+
+            String querySecretario = "DELETE FROM SECRETARIO WHERE id_persona = ?"; //Si es secretario
+            try (PreparedStatement stmtSec = conn.prepareStatement(querySecretario)) {
+                stmtSec.setString(1, id_persona);
+                stmtSec.executeUpdate();
+            }
+     
+            String queryCredencial = "DELETE FROM CREDENCIAL WHERE id_persona = ?";
+            try (PreparedStatement stmtCredencial = conn.prepareStatement(queryCredencial)) {
+                stmtCredencial.setString(1, id_persona);
+                stmtCredencial.executeUpdate();
+            }
+
+            String queryPersona = "DELETE FROM PERSONA WHERE id_persona = ?";
+            try (PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
+                stmtPersona.setString(1, id_persona);
+                stmtPersona.executeUpdate();
+            }
+
+            System.out.println("Persona con código " + id_persona + " eliminada.");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+   
+    public void modificarDatosPersonaSQL(Persona persona) {
+    	
+        String queryPersona = "UPDATE PERSONA SET cedula = ?, nombre = ?, apellido = ?, sexo = ?, fecha_nacimiento = ? WHERE id_persona = ?";
+        int filas = 0;
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
+
+            stmtPersona.setString(1, persona.getCedula());
+            stmtPersona.setString(2, persona.getNombre());
+            stmtPersona.setString(3, persona.getApellidos());
+            stmtPersona.setString(4, obtenerSexoCorto(persona.getGenero()));
+            stmtPersona.setDate(5, new java.sql.Date(persona.getFechaNacimiento().getTime()));
+            stmtPersona.setInt(6, Integer.parseInt(persona.getCodigo()));
+
+            filas = stmtPersona.executeUpdate();
+
+            if (persona instanceof Paciente || persona.getRangoUser() == 4) {
+                
+            	Clinica.getInstance().modificarDatosPacienteSQL((Paciente) persona);
+            } 
+
+            else if (persona instanceof Doctor || persona.getRangoUser() == 3) {
+                
+            	Clinica.getInstance().modificarDatosDoctorSQL((Doctor) persona);
+            } 
+
+            Clinica.getInstance().modificarDatosCredencialSQL(persona);
+
+            System.out.println("Persona modificada: " + filas);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void modificarDatosCredencialSQL(Persona persona) {
+    	
+        String query = "UPDATE CREDENCIAL SET userName = ?, passwordUser = ?, id_rango_persona = ? WHERE id_persona = ?";
+        int fila = 0;
+        
+    	String hashedPassword = GestorUsuario.hashPassword(persona.getPassword());
+    	
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, persona.getUser());
+            stmt.setBytes(2, hashedPassword.getBytes());
+            stmt.setInt(3, persona.getRangoUser());
+            stmt.setInt(4, Integer.parseInt(persona.getCodigo()));
+
+            fila = stmt.executeUpdate();
+            System.out.println("Credencial modificada: " + fila);
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void modificarDatosPacienteSQL(Paciente paciente) {
+        String query = "UPDATE PACIENTE SET tipoSangre = ?, id_vivienda = ? WHERE id_persona = ?";
+        int fila = 0;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, paciente.getTipoSangre());
+            stmt.setObject(2, paciente.getMiVivienda() != null ? paciente.getMiVivienda().getCodigo() : null);
+            stmt.setInt(3, Integer.parseInt(paciente.getCodigo()));
+
+            fila = stmt.executeUpdate();
+            System.out.println("Paciente modificado: " + fila);
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void modificarDatosDoctorSQL(Doctor doctor) {
+        String query = "UPDATE DOCTOR SET especialidad = ?, enServicio = ? WHERE id_persona = ?";
+        int fila = 0;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, doctor.getEspecialidad());
+            stmt.setBoolean(2, doctor.isEnServicio());
+            stmt.setInt(3, Integer.parseInt(doctor.getCodigo()));
+
+            fila = stmt.executeUpdate();
+            System.out.println("Doctor modificado: " + fila);
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     
     
     

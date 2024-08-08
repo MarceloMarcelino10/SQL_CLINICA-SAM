@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.JLabel;
@@ -15,10 +16,15 @@ import javax.swing.JRadioButton;
 import javax.swing.border.EtchedBorder;
 import java.awt.Color;
 import java.awt.event.ActionListener;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Random;
 import java.awt.event.ActionEvent;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.AbstractButton;
+import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.UIManager;
 import com.toedter.calendar.JDateChooser;
@@ -32,6 +38,10 @@ import seguridad.GestorUsuario;
 
 import java.awt.Toolkit;
 import javax.swing.ImageIcon;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class RegistrarNewUser extends JDialog {
 
@@ -59,6 +69,10 @@ public class RegistrarNewUser extends JDialog {
 	private JComboBox cbxSexo;
 	private JComboBox cbxTipoSangre;
 	private Persona p = null;
+	private JButton btnCambiarPassword;
+	private String tempPassword = "";
+	private JButton btnGenerarFecha;
+	private JPanel panelRegistro0123;
 
 	/**
 	 * Launch the application.
@@ -128,16 +142,36 @@ public class RegistrarNewUser extends JDialog {
 		txtCodigo.setColumns(10);
 		
 		txtCedula = new JTextField();
+		txtCedula.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				formatCedulaField(txtCedula, e);
+			}
+		});
 		txtCedula.setBounds(64, 57, 270, 20);
 		panelDatosGenerales.add(txtCedula);
 		txtCedula.setColumns(10);
 		
 		txtNombre = new JTextField();
+		txtNombre.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				
+				limitTextFieldLength(txtNombre, e, 30);
+			}
+		});
 		txtNombre.setBounds(64, 94, 270, 20);
 		panelDatosGenerales.add(txtNombre);
 		txtNombre.setColumns(10);
 		
 		txtApellido = new JTextField();
+		txtApellido.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				
+				limitTextFieldLength(txtApellido, e, 30);
+			}
+		});
 		txtApellido.setBounds(64, 131, 270, 20);
 		panelDatosGenerales.add(txtApellido);
 		txtApellido.setColumns(10);
@@ -147,6 +181,17 @@ public class RegistrarNewUser extends JDialog {
 		panelDatosGenerales.add(lblNewLabel_4);
 		
 		dateChooser = new JDateChooser();
+		dateChooser.addPropertyChangeListener(new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent evt) {
+				
+				Date selectedDate = dateChooser.getDate();
+		        if (selectedDate != null && selectedDate.after(new Date())) {
+		            JOptionPane.showMessageDialog(null, "La fecha seleccionada no puede ser mayor que la fecha actual.", "Error", JOptionPane.ERROR_MESSAGE);
+		            //SetRandomDate(dateChooser,18);
+		        }
+				
+			}
+		});
 		dateChooser.setBounds(384, 57, 148, 20);
 		panelDatosGenerales.add(dateChooser);
 		
@@ -159,7 +204,18 @@ public class RegistrarNewUser extends JDialog {
 		cbxSexo.setBounds(384, 131, 148, 20);
 		panelDatosGenerales.add(cbxSexo);
 		
-		JPanel panelRegistro0123 = new JPanel();
+		btnGenerarFecha = new JButton("Random");
+		btnGenerarFecha.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				showAgeInputDialog(dateChooser);
+
+			}
+		});
+		btnGenerarFecha.setBounds(542, 57, 89, 20);
+		panelDatosGenerales.add(btnGenerarFecha);
+		
+		panelRegistro0123 = new JPanel();
 		panelRegistro0123.setBorder(new TitledBorder(null, "Registrar:", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panelRegistro0123.setBounds(25, 205, 699, 68);
 		contentPanel.add(panelRegistro0123);
@@ -254,6 +310,13 @@ public class RegistrarNewUser extends JDialog {
 		panelCredenciales.add(lblNewLabel_6);
 		
 		txtUser = new JTextField();
+		txtUser.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				
+				limitTextFieldLength(txtUser, e, 30);
+			}
+		});
 		txtUser.setBounds(60, 50, 210, 20);
 		panelCredenciales.add(txtUser);
 		txtUser.setColumns(10);
@@ -276,6 +339,13 @@ public class RegistrarNewUser extends JDialog {
 		panelDoctor.add(lblNewLabel_9);
 		
 		txtEspecialidad = new JTextField();
+		txtEspecialidad.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				
+				limitTextFieldLength(txtUser, e, 64);
+			}
+		});
 		txtEspecialidad.setBounds(111, 37, 190, 20);
 		panelDoctor.add(txtEspecialidad);
 		txtEspecialidad.setColumns(10);
@@ -348,7 +418,7 @@ public class RegistrarNewUser extends JDialog {
 				        String apellidos = txtApellido.getText();
 				        Date fecNacim = dateChooser.getDate();
 				        String sexo = cbxSexo.getSelectedItem().toString();
-				        String userName = txtUser.getText();
+				        String userName = txtUser.getText();  
 				        String password = txtpassword.getText();
 
 				        if (codigo.isEmpty() || cedula.isEmpty() || nombre.isEmpty() || apellidos.isEmpty() || fecNacim == null || sexo.equals("<Seleccione>") || userName.isEmpty() || password.isEmpty()) {
@@ -372,7 +442,7 @@ public class RegistrarNewUser extends JDialog {
 				            }
 				        }
 
-				        if (GestorUsuario.existUserNameSQL(userName)) {
+				        if (GestorUsuario.existUserNameSQL(userName) && p == null) {
 				            JOptionPane.showMessageDialog(null, "El nombre de usuario ya está en uso.", "Error", JOptionPane.ERROR_MESSAGE);
 				            return;
 				        }
@@ -403,6 +473,11 @@ public class RegistrarNewUser extends JDialog {
 				            clean();
 				            
 				        } else {
+				        	
+				        	if (!tempPassword.isEmpty()) { //Cambiamos la password
+					        	password = tempPassword;
+					        }
+				        	
 				            if (p instanceof Doctor) {
 				                ((Doctor)p).setEspecialidad(txtEspecialidad.getText());
 				                ((Doctor)p).setEnServicio(rdbtnSi.isSelected());
@@ -437,19 +512,37 @@ public class RegistrarNewUser extends JDialog {
 				            }
 
 				            JOptionPane.showMessageDialog(null, "Usuario modificado con éxito", "Modificar Persona", JOptionPane.INFORMATION_MESSAGE);
-				            ListarPersona.loadPersona(ListarPersona.index);
-				            //Clinica.getInstance().actualizarPersona(aux);
-				            
 				            Clinica.getInstance().modificarDatosPersonaSQL(aux);
-				            
 				            dispose();
 				        }
 				    }
-					
-					
-					
-					
+
 				});
+				
+				btnCambiarPassword = new JButton("Nueva Contrase\u00F1a ");
+				btnCambiarPassword.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						
+						
+						JPasswordField newPasswordField = new JPasswordField();
+						//JTextField newPasswordField = new JTextField();
+		                int action = JOptionPane.showConfirmDialog(null, newPasswordField, "Ingrese la nueva contraseña", JOptionPane.OK_CANCEL_OPTION);
+		                if (action == JOptionPane.OK_OPTION) {
+		                    String newPassword = new String(newPasswordField.getPassword());
+		                	///String newPassword = new String(newPasswordField.getText());
+		                    
+		                    String temp = "";
+		                    
+		                    for (int i = 0; i < newPassword.length(); i++) {
+		                    	temp += "•";
+		                    }
+		                    txtpassword.setText(temp); //Visual
+		                    tempPassword = newPassword;
+		                }
+
+					}
+				});
+				buttonPane.add(btnCambiarPassword);
 				
 				btnRegistar.setActionCommand("OK");
 				buttonPane.add(btnRegistar);
@@ -469,8 +562,65 @@ public class RegistrarNewUser extends JDialog {
 		}
 		usuarioLogged();
 		loadPersonas();
+		loadCredenciales();
+		esUpdate();
 	}
 
+	private void esUpdate() {
+	
+		if (p != null) {
+			
+		deshabilitarComponentes(panelRegistro0123);
+		
+			if (p.getRangoUser() == 1) {
+	            rdbtnAdministrador.setSelected(true);
+	        } else if (p.getRangoUser() == 2) {
+	            rdbtnSecretaria.setSelected(true);
+	        } else if (p.getRangoUser() == 3) {
+	            rdbtnDoctor.setSelected(true);
+	            panelDoctor.setVisible(true);
+	        } else if (p.getRangoUser() == 4) {
+	            rdbtnPaciente.setSelected(true);
+	            panelPaciente.setVisible(true);
+	        } else if (p.getRangoUser() == 5) {
+	            rdbtnPersona.setSelected(true);
+	        }
+			
+	        activarPanel();
+		}
+	} 	
+
+	public void deshabilitarComponentes(JPanel panel) {
+	    for (java.awt.Component comp : panel.getComponents()) {
+	        if (comp instanceof JComponent) {
+	            comp.setEnabled(false);
+	            ;
+	        }
+	        if (comp instanceof JPanel) {
+	            deshabilitarComponentes((JPanel) comp);
+	        }
+	    }
+	}
+	
+	
+	private void loadCredenciales() {
+		
+		if (p == null) {
+			panelCredenciales.setEnabled(true);
+			txtUser.setEditable(true);
+			txtpassword.setEditable(true);
+			btnCambiarPassword.setEnabled(false);
+			
+		} else {
+			txtUser.setEditable(false);
+			txtpassword.setEditable(false);
+			txtpassword.setText("•••••••••••••••••••••••••••••");
+			btnCambiarPassword.setEnabled(true);
+		}
+	
+	}
+	
+	
 	private void usuarioLogged() { //MODIFICAR ESTO 
 	    if (Clinica.getInstance().loggedUser != null) {
 	        if (Clinica.getInstance().loggedUser.getRangoUser() == 1) {
@@ -511,9 +661,9 @@ public class RegistrarNewUser extends JDialog {
 	    txtpassword.setText("");
 	    txtEspecialidad.setText("");
 	    dateChooser.setDate(null);
-	    cbxTipoSangre.setSelectedItem("<Seleccione>");
+	    cbxTipoSangre.setSelectedItem("<Seleccione>");    
 	    cbxSexo.setSelectedItem("<Seleccione>");
-	    dateChooser.setDate(null);
+	    tempPassword = "";
 	}
 
 	private void loadPersonas() {
@@ -526,73 +676,141 @@ public class RegistrarNewUser extends JDialog {
 	        dateChooser.setDate(p.getFechaNacimiento());
 	        txtUser.setText(p.getUser());
 	        txtpassword.setText(p.getPassword());
-	        cbxSexo.setSelectedItem(p.getGenero());
 	        
-	        if (p instanceof Doctor) { //Doctor
-	            txtEspecialidad.setText(((Doctor)p).getEspecialidad());
-	            rdbtnSi.setSelected(((Doctor)p).isEnServicio());
-	            rdbtnNo.setSelected(!((Doctor)p).isEnServicio());
-	            
-	        } else if (p instanceof Paciente) { //Paciente
-	            cbxTipoSangre.setSelectedItem(((Paciente)p).getTipoSangre());
-	            panelPaciente.setVisible(true);
-	            panelDoctor.setVisible(false);
-	            
-	        } else if (p instanceof Persona) { //Persona
-	            rdbtnPersona.setSelected(true);
-	            rdbtnAdministrador.setSelected(false);
-	            rdbtnSecretaria.setSelected(false);
-	            rdbtnPaciente.setSelected(false);
-	            rdbtnDoctor.setSelected(false);
-	            panelPaciente.setVisible(false);
-	            panelDoctor.setVisible(false);
-	            
-	        } else if (p.getRangoUser() == 1) { //Administrador
-	            rdbtnAdministrador.setSelected(true);
-	            rdbtnSecretaria.setSelected(false);
-	            rdbtnPersona.setSelected(false);
-	            rdbtnPaciente.setSelected(false);
-	            rdbtnDoctor.setSelected(false);
-	            panelPaciente.setVisible(false);
-	            panelDoctor.setVisible(false);
-	            
-	        } else if (p.getRangoUser() == 2) { //Secretario
-	            rdbtnSecretaria.setSelected(true);
-	            rdbtnAdministrador.setSelected(false);
-	            rdbtnPersona.setSelected(false);
-	            rdbtnPaciente.setSelected(false);
-	            rdbtnDoctor.setSelected(false);
-	            panelPaciente.setVisible(false);
-	            panelDoctor.setVisible(false);
-	            
-	        } else if (p.getRangoUser() == 3) { //Doctor
-	            rdbtnDoctor.setSelected(true);
-	            rdbtnSecretaria.setSelected(false);
-	            rdbtnAdministrador.setSelected(false);
-	            rdbtnPersona.setSelected(false);
-	            rdbtnPaciente.setSelected(false);
-	            panelPaciente.setVisible(false);
-	            panelDoctor.setVisible(true);
-	            
-	        } else if (p.getRangoUser() == 4) { //Paciente
-	            rdbtnPaciente.setSelected(true);
-	            rdbtnAdministrador.setSelected(false);
-	            rdbtnSecretaria.setSelected(false);
-	            rdbtnPersona.setSelected(false);
-	            rdbtnDoctor.setSelected(false);
-	            panelPaciente.setVisible(true);
-	            panelDoctor.setVisible(false);
-	            
-	        } else if (p.getRangoUser() == 5) { //Persona
-	            rdbtnPersona.setSelected(true);
-	            rdbtnAdministrador.setSelected(false);
-	            rdbtnSecretaria.setSelected(false);
-	            rdbtnPaciente.setSelected(false);
-	            rdbtnDoctor.setSelected(false);
-	            panelPaciente.setVisible(false);
-	            panelDoctor.setVisible(false);
-	            
+	        if(p.getGenero().equalsIgnoreCase("M")) {
+	        	
+	        	cbxSexo.setSelectedItem("Masculino");
+	        	
+	        } else {
+	        	
+	        	cbxSexo.setSelectedItem("Femenino");
+	        }
+	        
+	        activarPanel();
+	    }
+	}
+	
+	private void activarPanel() {
+		
+		if (p != null) {
+			
+			rdbtnAdministrador.setSelected(false);
+			rdbtnSecretaria.setSelected(false);
+			rdbtnPersona.setSelected(false);
+			rdbtnPaciente.setSelected(false);
+			rdbtnDoctor.setSelected(false);
+			panelPaciente.setVisible(false);
+			panelDoctor.setVisible(false);
+
+			if (p.getRangoUser() == 3) { 
+				
+				txtEspecialidad.setText(((Doctor)p).getEspecialidad());
+			    rdbtnSi.setSelected(((Doctor)p).isEnServicio());
+			    rdbtnNo.setSelected(!((Doctor)p).isEnServicio());
+			
+			    rdbtnDoctor.setSelected(true);
+			    panelDoctor.setVisible(true);
+			    
+			} else if (p.getRangoUser() == 4) { 
+			    
+				cbxTipoSangre.setSelectedItem(((Paciente)p).getTipoSangre());
+			    
+			    rdbtnPaciente.setSelected(true);
+			    panelPaciente.setVisible(true);
+			    
+			} else if (p.getRangoUser() == 5) { 
+				
+			    rdbtnPersona.setSelected(true);
+			    
+			} else if (p.getRangoUser() == 1) { 
+				
+			    rdbtnAdministrador.setSelected(true);
+			    
+			} else if (p.getRangoUser() == 2) { 
+				
+			    rdbtnSecretaria.setSelected(true);
+			}
+		}
+	}
+	
+	private void SetRandomDate(JDateChooser dateChooser, int minAge, int maxAge) {
+	    try {
+	        if (minAge > maxAge) {
+	            throw new IllegalArgumentException("La edad mínima no puede ser mayor que la edad máxima.");
+	        }
+
+	        int FechaDefecto = 1900;
+	        Random random = new Random();
+	        Calendar calendar = Calendar.getInstance();
+	        
+	        int currentYear = calendar.get(Calendar.YEAR);
+	        int minYear = currentYear - maxAge;
+	        int maxYear = currentYear - minAge;
+
+	        if (minYear <= FechaDefecto) {
+	            throw new IllegalArgumentException("El rango de años es demasiado grande. Asegúrate de que 'maxAge' sea razonable.");
+	        }
+
+	        int randomYear = minYear + random.nextInt(maxYear - minYear + 1);
+	        
+	        int randomMonth = random.nextInt(12);
+	        
+	        calendar.set(randomYear, randomMonth, 1);
+	        int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+	        
+	        int randomDay = 1 + random.nextInt(maxDay);
+	        
+	        calendar.set(randomYear, randomMonth, randomDay);   
+	        dateChooser.setDate(calendar.getTime());
+	        
+	    } catch (IllegalArgumentException e) {
+	        JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+	    }
+	}
+	
+	private void showAgeInputDialog(JDateChooser dateChooser) {
+	    JTextField minAgeField = new JTextField(5);
+	    JTextField maxAgeField = new JTextField(5);
+	    
+	    JPanel panel = new JPanel();
+	    panel.add(new JLabel("Edad mínima:"));
+	    panel.add(minAgeField);
+	    panel.add(Box.createHorizontalStrut(15)); // Espacio entre campos
+	    panel.add(new JLabel("Edad máxima:"));
+	    panel.add(maxAgeField);
+	    
+	    int option = JOptionPane.showConfirmDialog(null, panel, "Ingrese las edades mínima y máxima:", JOptionPane.OK_CANCEL_OPTION);
+	    if (option == JOptionPane.OK_OPTION) {
+	        try {
+	            int minAge = Integer.parseInt(minAgeField.getText());
+	            int maxAge = Integer.parseInt(maxAgeField.getText());
+	            SetRandomDate(dateChooser, minAge, maxAge);
+	        } catch (NumberFormatException e) {
+	            JOptionPane.showMessageDialog(null, "Por favor, ingrese números válidos para las edades.", "Error", JOptionPane.ERROR_MESSAGE);
 	        }
 	    }
-	}	
+	}
+	
+	
+	private void limitTextFieldLength(JTextField textField, KeyEvent e, int maxLength) {
+        if (textField.getText().length() >= maxLength) {
+            e.consume();
+        }
+    }
+	
+    private void formatCedulaField(JTextField textField, KeyEvent e) {
+        String text = textField.getText();
+        int length = text.length();
+
+        if (Character.isDigit(e.getKeyChar())) {
+            if (length == 3 || length == 11) {
+                textField.setText(text + "-");
+            } else if (length >= 13) {
+                e.consume();
+            }
+        } else if (e.getKeyChar() != KeyEvent.VK_BACK_SPACE && e.getKeyChar() != KeyEvent.VK_DELETE) {
+            e.consume();
+        }
+    }
+	
 }

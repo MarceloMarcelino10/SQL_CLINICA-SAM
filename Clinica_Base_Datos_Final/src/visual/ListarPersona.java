@@ -28,20 +28,24 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.Toolkit;
 import javax.swing.ImageIcon;
+import javax.swing.ListSelectionModel;
 
 public class ListarPersona extends JDialog {
 
-    private static final long serialVersionUID = -3536538460360698934L;
-    private final JPanel contentPanel = new JPanel();
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private final JPanel contentPanel = new JPanel();
     private static DefaultTableModel model;
     private static Object[] rows;
-    private JTable table;
-    private static JComboBox cbxListar;
+    private static JTable table;
+    private static JComboBox<String> cbxListar;
     public static int index = -1;
     private JButton btnModificar;
     private JButton btnEliminar;
-    private String[] headers;
     private Persona selected;
+    public static String rangoSelected = "";
 
     public static void main(String[] args) {
         try {
@@ -67,7 +71,7 @@ public class ListarPersona extends JDialog {
         contentPanel.setLayout(null);
 
         JPanel panel = new JPanel();
-        panel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "SelecciÃ³n:", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+        panel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Seleccion:", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
         panel.setBounds(22, 351, 629, 59);
         contentPanel.add(panel);
         panel.setLayout(null);
@@ -76,17 +80,17 @@ public class ListarPersona extends JDialog {
         lblNewLabel.setBounds(60, 22, 46, 14);
         panel.add(lblNewLabel);
 
-        cbxListar = new JComboBox();
+        cbxListar = new JComboBox<>();
         cbxListar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                actualizarTitulo();
                 index = cbxListar.getSelectedIndex();
+                rangoSelected = cbxListar.getSelectedItem().toString();
                 if (index != -1) {
-                    loadPersona(index);
+                    loadPersona(cbxListar.getSelectedItem().toString());
                 }
             }
         });
-        cbxListar.setModel(new DefaultComboBoxModel(new String[] {"<Seleccione>", "Administrador", "Secretario", "Doctor", "Persona", "Paciente", "Todos"}));
+        cbxListar.setModel(new DefaultComboBoxModel<>(new String[] {"<Seleccione>", "Administrador", "Secretario", "Doctor", "Persona", "Paciente", "Todos"}));
         cbxListar.setBounds(116, 19, 125, 20);
         panel.add(cbxListar);
 
@@ -102,15 +106,15 @@ public class ListarPersona extends JDialog {
         panel_1.add(scrollPane);
 
         table = new JTable();
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int index = -1;
-                index = table.getSelectedRow();
+                int index = table.getSelectedRow();
                 if (index >= 0) {
                     btnEliminar.setEnabled(true);
                     btnModificar.setEnabled(true);
-                    selected = Clinica.getInstance().buscarPersonaById(table.getValueAt(index, 0).toString());
+                    selected = Clinica.getInstance().buscarPersonaByIdSQL(table.getValueAt(index, 0).toString());
                 }
             }
         });
@@ -127,188 +131,61 @@ public class ListarPersona extends JDialog {
             btnModificar = new JButton("Modificar");
             btnModificar.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    RegistrarNewUser regNue = new RegistrarNewUser(selected);
-                    regNue.setModal(true);
-                    regNue.setVisible(true);
-                    dispose();
+                	
+                	if (table.getSelectedRow() >= 0) {
+                        RegistrarNewUser regNue = new RegistrarNewUser(selected);
+                        regNue.setModal(true);
+                        regNue.setVisible(true);
+                	}
+                	
                 }
             });
             btnModificar.setEnabled(false);
             buttonPane.add(btnModificar);
-            {
-                btnEliminar = new JButton("Eliminar");
-                btnEliminar.setIcon(new ImageIcon(ListarPersona.class.getResource("/imagenes/eliminar16x16.png")));
-                btnEliminar.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        int Option = JOptionPane.showConfirmDialog(null,"Seguro desea eliminar la persona con cÃ³digo: " + selected.getCodigo(),"Eliminar Persona", JOptionPane.OK_CANCEL_OPTION);
-                        if (Option == JOptionPane.OK_OPTION && selected != null) {
-                            Clinica.getInstance().eliminarPersona(selected);
-                            btnEliminar.setEnabled(false);
-                            btnModificar.setEnabled(false);
-                        }
-                        loadPersona(index);
+
+            btnEliminar = new JButton("Eliminar");
+            btnEliminar.setIcon(new ImageIcon(ListarPersona.class.getResource("/imagenes/eliminar16x16.png")));
+            btnEliminar.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    
+                	int option = JOptionPane.showConfirmDialog(null,"Seguro desea eliminar la persona con código: " + selected.getCodigo(),"Eliminar Persona", JOptionPane.OK_CANCEL_OPTION);
+                    
+                    if (option == JOptionPane.OK_OPTION && selected != null) {
+                        
+                    	Clinica.getInstance().eliminarDatosPersonaSQL(table.getValueAt(index, 0).toString());
+                        btnEliminar.setEnabled(false);
+                        btnModificar.setEnabled(false);
                     }
-                });
-                btnEliminar.setEnabled(false);
-                btnEliminar.setActionCommand("OK");
-                buttonPane.add(btnEliminar);
-                getRootPane().setDefaultButton(btnEliminar);
-            }
-            {
-                JButton btnCancelar = new JButton("Cancelar");
-                btnCancelar.setIcon(new ImageIcon(ListarPersona.class.getResource("/imagenes/cancelarboton16x16.png")));
-                btnCancelar.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        dispose();
-                    }
-                });
-                btnCancelar.setActionCommand("Cancel");
-                buttonPane.add(btnCancelar);
-            }
+                    
+                    loadPersona(cbxListar.getSelectedItem().toString());
+                }
+            });
+            btnEliminar.setEnabled(false);
+            btnEliminar.setActionCommand("OK");
+            buttonPane.add(btnEliminar);
+            getRootPane().setDefaultButton(btnEliminar);
+
+            JButton btnCancelar = new JButton("Cancelar");
+            btnCancelar.setIcon(new ImageIcon(ListarPersona.class.getResource("/imagenes/cancelarboton16x16.png")));
+            btnCancelar.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    dispose();
+                }
+            });
+            btnCancelar.setActionCommand("Cancel");
+            buttonPane.add(btnCancelar);
         }
 
         usuarioLogged();
     }
 
-    private void actualizarTitulo() {
-    	
-    	
-        String selectedItem = cbxListar.getSelectedItem().toString();
-        switch (selectedItem) {
-            case "Administrador":
-                headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad"};
-                Clinica.getInstance().cargarDatosPersonaSQL();
-                
-                break;
-            case "Secretario":
-            	
-            	Clinica.getInstance().cargarDatosPersonaSQL();
-                headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad"};
-                break;
-            case "Doctor":
-            	
-            	Clinica.getInstance().cargarDatosDoctorSQL();
-                headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad", "Especialidad", "Disponibilidad"};
-                break;
-            case "Persona":
-            	
-            	Clinica.getInstance().cargarDatosPersonaSQL();
-                headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad"};
-                break;
-            case "Paciente":
-            	
-            	Clinica.getInstance().cargarDatosPacienteSQL();
-                headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad", "Tipo de Sangre"};
-                
-                break;               
-            case "Todos":
-            	Clinica.getInstance().cargarDatosDoctorSQL();
-            	Clinica.getInstance().cargarDatosPacienteSQL();
-                Clinica.getInstance().cargarDatosPersonaSQL();
-            	
-            	
-                headers = new String[]{"Codigo", "Nombre", "Apellidos", "Edad"};        
-                
-                break;
-            default:
-            	
-                Clinica.getInstance().cargarDatosPersonaSQL();
-            	Clinica.getInstance().cargarDatosDoctorSQL();
-            	Clinica.getInstance().cargarDatosPacienteSQL();
-            	
-                break; 
-        }
-
-        model.setColumnIdentifiers(headers);
-        table.setModel(model);
-    }
-
-    public static void loadPersona(int index) {
-        model.setRowCount(0);
-        rows = new Object[model.getColumnCount()];
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
-        String option = cbxListar.getModel().getElementAt(index).toString(); 
-
-        switch (option) {
-            case "Administrador":
-                for (Persona persona : Clinica.getInstance().getMisPersonas()) {
-                    if (persona.getRangoUser() == 1) {
-                        rows[0] = persona.getCodigo();
-                        rows[1] = persona.getNombre();
-                        rows[2] = persona.getApellidos();
-                        rows[3] = (persona.getFechaNacimiento() != null) ? dateFormatter.format(persona.getFechaNacimiento()) : "";
-                        model.addRow(rows);
-                    }
-                }
-                break;
-            case "Secretario":
-                for (Persona persona : Clinica.getInstance().getMisPersonas()) {
-                    if (persona.getRangoUser() == 2) {
-                        rows[0] = persona.getCodigo();
-                        rows[1] = persona.getNombre();
-                        rows[2] = persona.getApellidos();
-                        rows[3] = (persona.getFechaNacimiento() != null) ? dateFormatter.format(persona.getFechaNacimiento()) : "";
-                        model.addRow(rows);
-                    }
-                }
-                break;
-            case "Doctor":
-                for (Persona persona : Clinica.getInstance().getMisPersonas()) {
-                    if (persona instanceof Doctor) {
-                        rows[0] = persona.getCodigo();
-                        rows[1] = persona.getNombre();
-                        rows[2] = persona.getApellidos();
-                        rows[3] = (persona.getFechaNacimiento() != null) ? dateFormatter.format(persona.getFechaNacimiento()) : "";
-                        rows[4] = ((Doctor) persona).getEspecialidad();
-                        rows[5] = ((Doctor) persona).isEnServicio() ? "Sí" : "No";
-                        model.addRow(rows);
-                    }
-                }
-                break;
-            case "Persona":
-                for (Persona persona : Clinica.getInstance().getMisPersonas()) {
-                    if (persona.getRangoUser() == 5 && !(persona instanceof Paciente)) {
-                        rows[0] = persona.getCodigo();
-                        rows[1] = persona.getNombre();
-                        rows[2] = persona.getApellidos();
-                        rows[3] = (persona.getFechaNacimiento() != null) ? dateFormatter.format(persona.getFechaNacimiento()) : "";
-                        model.addRow(rows);
-                    }
-                }
-                break;
-            case "Paciente":
-                for (Persona persona : Clinica.getInstance().getMisPersonas()) {
-                    if (persona instanceof Paciente) {
-                        rows[0] = persona.getCodigo();
-                        rows[1] = persona.getNombre();
-                        rows[2] = persona.getApellidos();
-                        rows[3] = (persona.getFechaNacimiento() != null) ? dateFormatter.format(persona.getFechaNacimiento()) : "";
-                        rows[4] = ((Paciente) persona).getTipoSangre();
-                        model.addRow(rows);
-                    }
-                }
-                break;
-            case "Todos":
-                for (Persona persona : Clinica.getInstance().getMisPersonas()) {
-                    rows[0] = persona.getCodigo();
-                    rows[1] = persona.getNombre();
-                    rows[2] = persona.getApellidos();
-                    rows[3] = (persona.getFechaNacimiento() != null) ? dateFormatter.format(persona.getFechaNacimiento()) : "";
-                    model.addRow(rows);
-                }
-                break;
-            default:
-                System.out.println("Opción no reconocida: " + option);
-                break;
-        }
-    }
-
-    
-    
     private void usuarioLogged() {
-        if (Clinica.getInstance().loggedUser != null) {
-            int rango = Clinica.getInstance().loggedUser.getRangoUser();
-            switch (rango) {
+        
+    	if (Clinica.getInstance().loggedUser != null) {
+            
+    		int rango = Clinica.getInstance().loggedUser.getRangoUser();
+            
+    		switch (rango) {
                 case 1: // Administrador
                     cbxListar.setModel(new DefaultComboBoxModel<>(new String[] {"<Seleccione>", "Administrador", "Secretario", "Doctor", "Paciente", "Persona", "Todos"}));
                     btnModificar.setEnabled(true);
@@ -339,27 +216,25 @@ public class ListarPersona extends JDialog {
             }
         }
     }
+    
+    public static void loadPersona(String rangoCbx) {
+        
+    	int rango = Clinica.getInstance().obtenerRango(rangoCbx);
+        model.setRowCount(0);
 
+        if (rango == 3) { // Doctor
+            model = Clinica.getInstance().cargarDatosDoctorSQL();
+        } else if (rango == 4) { // Paciente
+            model = Clinica.getInstance().cargarDatosPacienteSQL();
+        } else {
+            model = Clinica.getInstance().cargarDatosPersonaSQL(rango);
+        }
+        
+        table.setModel(model);
+    }
 
     public JTable getTable(String modo) {
-        int temp = buscarIndexByTexto(modo);
-        cbxListar.setSelectedIndex(temp);
-        actualizarTitulo();
-        loadPersona(temp);
+        loadPersona(modo);
         return table;
-    }
-    
-    private static int buscarIndexByTexto(String modo) {
-        int indice = 0;
-        int i = 0;
-        boolean  encontrado = false;
-        while(!encontrado&& i  <cbxListar.getItemCount()) {
-            if(cbxListar.getItemAt(i).toString().equalsIgnoreCase(modo)) {
-                indice = i;
-                encontrado =  true;
-            }
-            i++;
-        }
-        return indice;
-    }
+    }  
 }
