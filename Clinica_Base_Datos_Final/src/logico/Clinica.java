@@ -401,17 +401,6 @@ public class Clinica implements Serializable  {//u
 		return login;
 	}
 	
-	public boolean existUserName(String userName) {
-		Clinica.getInstance().cargarDatosPersonaSQL();
-		boolean exist = false;
-	    for (Persona user : misPersonas) {
-	        if (user.getUser().equals(userName)) {
-	            exist = true;
-	        }
-	    }
-	    return exist;
-	}
-	
 	public boolean existUserNameSQL(String userName) {
 	    String query = "SELECT COUNT(*) FROM CREDENCIAL WHERE userName = ?";
 	    
@@ -1020,333 +1009,13 @@ public class Clinica implements Serializable  {//u
 		return cita;
 	}
 	
-    public void cargarDatosDesdeSQL() throws ParseException {
-        
-    	// Ver metodos de carga:
-    	
-    	cargarDatosViviendaSQL();
-    	cargarDatosEnfermedadSQL();
-    	cargarDatosDoctorSQL();
-    	cargarDatosPacienteSQL();
-    	cargarDatosPersonaSQL();
-    	cargarDatosCitaSQL();
-    	cargarDatosHistoriaClinicaSQL();
-    	cargarDatosConsultaSQL();
-    	cargarDatosVacunaSQL();
-    } 
-	
-	// METODOS SQL (CARGA DE DATOS):
-    
-  /*  //DOCTORES:
-    
-    public void cargarDatosDoctorSQL() {
-
-    	Clinica.getInstance().clearPersonasPorRango(obtenerRango("Doctor"));
-    	
-    	String query = "SELECT * " + 
-	    			   "FROM PERSONA AS p " + 
-	    			   "INNER JOIN DOCTOR AS d ON p.id_persona = d.id_persona " + 
-	    			   "INNER JOIN CREDENCIAL AS c ON d.id_persona = c.id_persona " + 
-	    			   "INNER JOIN RANGO_PERSONA AS ra ON c.id_rango_persona = ra.id_rango_persona " + 
-	    			   "WHERE ra.rango = 'Doctor' ";
-    	
-    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                String codigo = rs.getString("id_persona");
-                String cedula = rs.getString("cedula");
-                String nombre = rs.getString("nombre");
-                String apellido = rs.getString("apellido");
-                String sexo = rs.getString("sexo");
-                String fec_nacimSQL = rs.getString("fecha_nacimiento");
-                String user = rs.getString("userName");
-                String password = rs.getString("passwordUser");
-                String rango = rs.getString("rango");
-                
-                String codigo_doctor = rs.getString("id_doctor");
-                String especialidad = rs.getString("especialidad");
-                Boolean enServicio = rs.getBoolean("enServicio");
-                
-                Date fec_nacim = null;
-
-                try {
-                    if (fec_nacimSQL != null && !fec_nacimSQL.isEmpty()) {
-                        fec_nacim = sdf.parse(fec_nacimSQL);
-                    }
-                } catch (ParseException e) {
-                    System.out.println("Error parsing date: " + fec_nacimSQL);
-                }
-                
-                Doctor doctor = new Doctor(codigo, cedula, nombre, apellido, fec_nacim, sexo, user, password, obtenerRango(rango), especialidad, enServicio);
-                Clinica.getInstance().insertarPersona(doctor);    
-            }
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    // PACIENTES:
-    
-    public void cargarDatosPacienteSQL() {
-    	
-    	Clinica.getInstance().clearPersonasPorRango(obtenerRango("Paciente"));
-    	
-    	String query = "SELECT * " + 
-	    			   "FROM PERSONA AS p " + 
-	    			   "INNER JOIN PACIENTE AS pc ON p.id_persona = pc.id_persona " + 
-	    			   "INNER JOIN CREDENCIAL AS c ON pc.id_persona = c.id_persona " + 
-	    			   "INNER JOIN RANGO_PERSONA AS ra ON c.id_rango_persona = ra.id_rango_persona " + 
-	    			   "INNER JOIN VIVIENDA AS v ON pc.id_vivienda = v.id_vivienda " +
-	    			   "WHERE ra.rango = 'Paciente' ";
-    	
-    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                String codigo = rs.getString("id_persona");
-                String cedula = rs.getString("cedula");
-                String nombre = rs.getString("nombre");
-                String apellido = rs.getString("apellido");
-                String sexo = rs.getString("sexo");
-                String fec_nacimSQL = rs.getString("fecha_nacimiento");
-                String user = rs.getString("userName");
-                String password = rs.getString("passwordUser");
-                String rango = rs.getString("rango");
-                
-                String codigo_paciente = rs.getString("id_paciente");
-                String tipoSangre = rs.getString("tipoSangre");
-                Boolean dirreccion = rs.getBoolean("direccion");
-                
-                String id_vivienda = rs.getString("id_vivienda");
-                
-                Date fec_nacim = null;
-
-                try {
-                    if (fec_nacimSQL != null && !fec_nacimSQL.isEmpty()) {
-                        fec_nacim = sdf.parse(fec_nacimSQL);
-                    }
-                } catch (ParseException e) {
-                    System.out.println("Error parsing date: " + fec_nacimSQL);
-                }
-                
-                Vivienda vivienda = null;
-                
-                if (id_vivienda != null) {
-                    vivienda = Clinica.getInstance().buscarViviendaById(id_vivienda);
-                }
-
-                Paciente paciente = new Paciente(codigo, cedula, nombre, apellido, fec_nacim, sexo, user, password, obtenerRango(rango), vivienda, tipoSangre);
-                Clinica.getInstance().insertarPersona(paciente);
-
-                if (vivienda != null) {
-                    vivienda.insertarPersona(paciente);
-                }
-            }
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    */
-    // PERSONAS:
-    
-    public void cargarDatosPersonaSQL() {
-    	
-    	Clinica.getInstance().clearPersonasPorRango(obtenerRango("Administrador"));
-        
-    	String query = "SELECT * " +
-        		"FROM PERSONA AS p " +
-        		"INNER JOIN CREDENCIAL AS c ON p.id_persona = c.id_persona " +
-        		"INNER JOIN RANGO_PERSONA AS rp ON c.id_rango_persona = rp.id_rango_persona " +
-        		"WHERE rp.rango NOT IN ('Paciente', 'Doctor') ";
-        
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                String codigo = rs.getString("id_persona");
-                String cedula = rs.getString("cedula");
-                String nombre = rs.getString("nombre");
-                String apellido = rs.getString("apellido");
-                String sexo = rs.getString("sexo");
-                String fec_nacimSQL = rs.getString("fecha_nacimiento");
-                String user = rs.getString("userName");
-                
-                //String password = rs.getString("passwordUser");
-                
-               
-                byte[] passwordBytes = rs.getBytes("passwordUser"); // Obtener el campo de tipo VARBINARY y convertirlo a String
-                String password = new String(passwordBytes, StandardCharsets.UTF_8);
-                
-                
-                String rango = rs.getString("rango");
-
-                Date fec_nacim = null;
-
-                try {
-                    if (fec_nacimSQL != null && !fec_nacimSQL.isEmpty()) {
-                        fec_nacim = sdf.parse(fec_nacimSQL);
-                    }
-                } catch (ParseException e) {
-                    System.out.println("Error parsing date: " + fec_nacimSQL);
-                }
-
-                // Imprimir los datos
-               // System.out.println("Codigo: " + codigo);
-               // System.out.println("Cedula: " + cedula);
-               // System.out.println("Nombre: " + nombre);
-               // System.out.println("Apellido: " + apellido);
-               // System.out.println("Sexo: " + sexo);
-               // System.out.println("Fecha de Nacimiento: " + (fec_nacim != null ? sdf.format(fec_nacim) : "Fecha invalida no disponible"));
-               // System.out.println("User: " + user);
-               // System.out.println("Password: " + password);
-               // System.out.println("Rango: " + rango);
-                //System.out.println();
-
-                Persona persona = new Persona(codigo, cedula, nombre, apellido, fec_nacim, sexo, user, password, obtenerRango(rango));
-                Clinica.getInstance().insertarPersona(persona);  
-            }
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-	 
-
-    public void clearPersonasPorRango(int rangoUser) {
-        
-    	if (rangoUser == 1 || rangoUser == 2 || rangoUser == 5) {
-            ArrayList<Persona> personasParaEliminar = new ArrayList<>();
-            for (Persona persona : misPersonas) {
-                if (persona.getRangoUser() == rangoUser) {
-                    personasParaEliminar.add(persona);
-                }
-            }
-            
-            misPersonas.removeAll(personasParaEliminar);
-        }
-        else if (rangoUser == 3) {
-            ArrayList<Persona> personasParaEliminar = new ArrayList<>();
-            for (Persona persona : misPersonas) {
-                if (persona.getRangoUser() == 3) {
-                    personasParaEliminar.add(persona);
-                }
-            }
-            misPersonas.removeAll(personasParaEliminar);
-        }
-        else if (rangoUser == 4) {
-            ArrayList<Persona> personasParaEliminar = new ArrayList<>();
-            for (Persona persona : misPersonas) {
-                if (persona.getRangoUser() == 4) {
-                    personasParaEliminar.add(persona);
-                }
-            }
-            misPersonas.removeAll(personasParaEliminar);
-        }
-    }
-    
-    
-
-    
-   // public void modificarDatosPersonaSQL(Persona persona) {
-    	
-    	
-//    }
-    
-    
-   
-
-    
-    
-    
-    
-     
-    
+	/*** IMPLEMENTACIONES SQL ***/
 
 
    //// aqui enfermedad luego
     
     
-    //VIVIENDAS:
-
-    public void cargarDatosViviendaSQL() {
-    	
-    	Clinica.getInstance().getMisViviendas().clear();
-    	
-        String query = "SELECT v.* " +
-        			   "FROM VIVIENDA AS v " +
-        			   "LEFT JOIN PACIENTE AS p ON v.id_vivienda = p.id_vivienda ";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
-        	
-            while (rs.next()) {
-                String codigo_vivienda = rs.getString("id_vivienda");
-                String direccion = rs.getString("direccion");
-                
-                Vivienda vivienda = new Vivienda(codigo_vivienda, direccion);
-                Clinica.getInstance().insertarVivienda(vivienda);
-            }
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
     
-    
-    public void insertarDatosViviendaSQL(Vivienda vivienda) {
-    	
-    	Clinica.getInstance().obtenerMaximoIdVivienda();
-    	
-        String query = "INSERT INTO VIVIENDA (id_vivienda, direccion) VALUES (?, ?)";
-        int filas = 0;
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-        	stmt.setInt(1, Integer.parseInt(vivienda.getCodigo()));
-            stmt.setString(2, vivienda.getDireccion());
-            
-            filas = stmt.executeUpdate();
-            System.out.println("Viviendas agregadas: " + filas);
-
-            Clinica.getInstance().insertarVivienda(vivienda);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    public void eliminarDatosViviendaSQL(String id_vivienda) {
-
-        String query = "DELETE FROM VIVIENDA WHERE id_vivienda = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            stmt.setInt(1, Integer.parseInt(id_vivienda));
-    		System.out.println("Vivienda con codigo " + id_vivienda + " eliminada.");
-            stmt.executeUpdate();
-            Vivienda vivienda = Clinica.getInstance().buscarViviendaById(id_vivienda);
-            Clinica.getInstance().eliminarVivienda(vivienda);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
 
 
     
@@ -2290,7 +1959,7 @@ public class Clinica implements Serializable  {//u
 
         return model;
     }
-
+ 
     public DefaultTableModel cargarDatosDoctorSQL() {
         String query = "SELECT d.id_persona, p.nombre, p.apellido, DATEDIFF(YEAR,p.fecha_nacimiento,GETDATE()) AS edad, d.especialidad, d.enServicio " +
         			   "FROM DOCTOR AS d " +
@@ -2559,114 +2228,194 @@ public class Clinica implements Serializable  {//u
 
         return persona;
     }
-
     
-    public void eliminarDatosPersonaSQL(String id_persona) {
+    public void eliminarDatosPacienteSQL(String id_persona) {
         
     	try (Connection conn = DatabaseConnection.getConnection()) {
-           
-    		String queryDoctorCheck = "SELECT id_persona FROM DOCTOR WHERE id_persona = ?";  //Si persona es un doctor
+    		
+    		//Eliminacion en cadena para evitar errores con las claves foraneas
+    		
+            String queryEnfermedadVacuna = "DELETE FROM ENFERMEDAD_VACUNA WHERE id_vacuna IN  "+
+            		 					   "(SELECT id_vacuna FROM VACUNA WHERE id_historial_clinico IN " +
+					            		   "(SELECT id_historial_clinico FROM HISTORIAL_CLINICO " +
+					            		   "WHERE id_paciente = (SELECT id_paciente FROM PACIENTE WHERE id_persona = ?)))";
+            try (PreparedStatement stmtEnfermedadVacuna = conn.prepareStatement(queryEnfermedadVacuna)) {
+                stmtEnfermedadVacuna.setString(1, id_persona);
+                stmtEnfermedadVacuna.executeUpdate();
+            }
+
+            String queryVacuna = "DELETE FROM VACUNA WHERE id_historial_clinico IN " +
+			            		 "(SELECT id_historial_clinico FROM HISTORIAL_CLINICO " +
+			            		 "WHERE id_paciente = (SELECT id_paciente FROM PACIENTE WHERE id_persona = ?))";
+            try (PreparedStatement stmtVacuna = conn.prepareStatement(queryVacuna)) {
+                stmtVacuna.setString(1, id_persona);
+                stmtVacuna.executeUpdate();
+            }
+
+            String queryEnfermedadConsulta = "DELETE FROM ENFERMEDAD_CONSULTA WHERE id_consulta IN " +
+            								 "(SELECT id_consulta FROM CONSULTA WHERE id_historial_clinico IN " +
+            								 "(SELECT id_historial_clinico FROM HISTORIAL_CLINICO " +
+            								 "WHERE id_paciente = (SELECT id_paciente FROM PACIENTE WHERE id_persona = ?)))";
+            try (PreparedStatement stmtEnfermedadConsulta = conn.prepareStatement(queryEnfermedadConsulta)) {
+                stmtEnfermedadConsulta.setString(1, id_persona);
+                stmtEnfermedadConsulta.executeUpdate();
+            }
+
+            String queryConsulta = "DELETE FROM CONSULTA WHERE id_historial_clinico IN " +
+            	  	               "(SELECT id_historial_clinico FROM HISTORIAL_CLINICO " +
+            	  	               "WHERE id_paciente = (SELECT id_paciente FROM PACIENTE WHERE id_persona = ?))";
+            try (PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta)) {
+                stmtConsulta.setString(1, id_persona);
+                stmtConsulta.executeUpdate();
+            }
+
+            String queryCita = "DELETE FROM CITA " +
+            				   "WHERE id_persona = ? OR id_creador_cita = ?";
+            try (PreparedStatement stmtCita = conn.prepareStatement(queryCita)) {
+                stmtCita.setString(1, id_persona);
+                stmtCita.setString(2, id_persona);
+                stmtCita.executeUpdate();
+            }
+
+            String queryHistorialClinico = "DELETE FROM HISTORIAL_CLINICO " +
+            		                       "WHERE id_paciente = (SELECT id_paciente FROM PACIENTE WHERE id_persona = ?)";
+            try (PreparedStatement stmtHistorialClinico = conn.prepareStatement(queryHistorialClinico)) {
+                stmtHistorialClinico.setString(1, id_persona);
+                stmtHistorialClinico.executeUpdate();
+            }
             
-    		boolean isDoctor = false;
+            String queryCredencial = "DELETE FROM CREDENCIAL " +
+					 				 "WHERE id_persona = ?";
+			try (PreparedStatement stmtCredencial = conn.prepareStatement(queryCredencial)) {
+				stmtCredencial.setString(1, id_persona);
+				stmtCredencial.executeUpdate();
+			}
+
             
-    		try (PreparedStatement stmtDoctorCheck = conn.prepareStatement(queryDoctorCheck)) {
-                
-    			stmtDoctorCheck.setString(1, id_persona);
-                
-                try (ResultSet rs = stmtDoctorCheck.executeQuery()) {
-                    if (rs.next()) {
-                        isDoctor = true;
-                    }
-                }
-                
+            String queryPaciente = "DELETE FROM PACIENTE " + 
+            		               "WHERE id_persona = ?";
+            try (PreparedStatement stmtPaciente = conn.prepareStatement(queryPaciente)) {
+                stmtPaciente.setString(1, id_persona);
+                stmtPaciente.executeUpdate();
             }
-
-            if (isDoctor) {
-
-                String queryCita = "DELETE FROM CITA WHERE id_doctor = ?";
-                try (PreparedStatement stmtCita = conn.prepareStatement(queryCita)) {
-                    stmtCita.setString(1, id_persona);
-                    stmtCita.executeUpdate();
-                }
-
-                String queryConsulta = "DELETE FROM CONSULTA WHERE id_doctor = ?";
-                try (PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta)) {
-                    stmtConsulta.setString(1, id_persona);
-                    stmtConsulta.executeUpdate();
-                }
-
-                String queryDoctor = "DELETE FROM DOCTOR WHERE id_persona = ?";
-                try (PreparedStatement stmtDoctor = conn.prepareStatement(queryDoctor)) {
-                    stmtDoctor.setString(1, id_persona);
-                    stmtDoctor.executeUpdate();
-                }
-                
-            }
-
-            String queryPacienteCheck = "SELECT id_persona FROM PACIENTE WHERE id_persona = ?"; //Si persona es un paciente
             
-            boolean isPaciente = false;
+            String queryPersona = "DELETE FROM PERSONA " +
+					  			  "WHERE id_persona = ?";
+			try (PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
+				  stmtPersona.setString(1, id_persona);
+				  stmtPersona.executeUpdate();
+			}
+
+            System.out.println("Datos del paciente con código " + id_persona + " eliminados.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void eliminarDatosDoctorSQL(String id_persona) {
+        
+    	try (Connection conn = DatabaseConnection.getConnection()) {
+        	
+    		//Eliminacion en cadena para evitar errores con las claves foraneas
+    		
+            String queryEnfermedadConsulta = "DELETE FROM ENFERMEDAD_CONSULTA WHERE id_consulta IN " +
+            								 "(SELECT id_consulta FROM CONSULTA " +
+            		                         "WHERE id_doctor IN (SELECT id_doctor FROM DOCTOR WHERE id_persona = ?))";
+            try (PreparedStatement stmtEnfermedadConsulta = conn.prepareStatement(queryEnfermedadConsulta)) {
+                stmtEnfermedadConsulta.setString(1, id_persona);
+                stmtEnfermedadConsulta.executeUpdate();
+            }
             
-            try (PreparedStatement stmtPacienteCheck = conn.prepareStatement(queryPacienteCheck)) {
-                
-            	stmtPacienteCheck.setString(1, id_persona);
-               
-                try (ResultSet rs = stmtPacienteCheck.executeQuery()) {
-                    if (rs.next()) {
-                        isPaciente = true;
-                    }
-                }
-                
+            String queryConsulta = "DELETE FROM CONSULTA " +
+        			   			   "WHERE id_doctor IN (SELECT id_doctor FROM DOCTOR WHERE id_persona = ?)";
+			try (PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta)) {
+				stmtConsulta.setString(1, id_persona);
+				stmtConsulta.executeUpdate();
+			}
+            
+            String queryCita = "DELETE FROM CITA " +
+            		 		   "WHERE id_doctor IN (SELECT id_doctor FROM DOCTOR WHERE id_persona = ?)";
+            try (PreparedStatement stmtCita = conn.prepareStatement(queryCita)) {
+                stmtCita.setString(1, id_persona);
+                stmtCita.executeUpdate();
             }
-
-            if (isPaciente) { 
-            	
-                String queryHistorialClinico = "DELETE FROM HISTORIAL_CLINICO WHERE id_paciente = ?";
-                try (PreparedStatement stmtHistorial = conn.prepareStatement(queryHistorialClinico)) {
-                    stmtHistorial.setString(1, id_persona);
-                    stmtHistorial.executeUpdate();
-                }
-
-                String queryPaciente = "DELETE FROM PACIENTE WHERE id_persona = ?";
-                try (PreparedStatement stmtPaciente = conn.prepareStatement(queryPaciente)) {
-                    stmtPaciente.setString(1, id_persona);
-                    stmtPaciente.executeUpdate();
-                }
-                
-            }
-
-            String queryAdmin = "DELETE FROM ADMINISTRADOR WHERE id_persona = ?"; //Si es administrador
-            try (PreparedStatement stmtAdmin = conn.prepareStatement(queryAdmin)) {
-                stmtAdmin.setString(1, id_persona);
-                stmtAdmin.executeUpdate();
-            }
-
-            String querySecretario = "DELETE FROM SECRETARIO WHERE id_persona = ?"; //Si es secretario
-            try (PreparedStatement stmtSec = conn.prepareStatement(querySecretario)) {
-                stmtSec.setString(1, id_persona);
-                stmtSec.executeUpdate();
-            }
-     
-            String queryCredencial = "DELETE FROM CREDENCIAL WHERE id_persona = ?";
+			
+            String queryCredencial = "DELETE FROM CREDENCIAL " +
+            						 "WHERE id_persona = ?";
             try (PreparedStatement stmtCredencial = conn.prepareStatement(queryCredencial)) {
-                stmtCredencial.setString(1, id_persona);
-                stmtCredencial.executeUpdate();
+            	stmtCredencial.setString(1, id_persona);
+            	stmtCredencial.executeUpdate();
+			}
+								
+            String queryDoctor = "DELETE FROM DOCTOR " +
+            		      		 "WHERE id_persona = ?";
+            try (PreparedStatement stmtDoctor = conn.prepareStatement(queryDoctor)) {
+                stmtDoctor.setString(1, id_persona);
+                stmtDoctor.executeUpdate();
             }
+            
+            String queryPersona = "DELETE FROM PERSONA " +
+					  			  "WHERE id_persona = ?";
+			try (PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
+				  stmtPersona.setString(1, id_persona);
+				  stmtPersona.executeUpdate();
+			}
 
-            String queryPersona = "DELETE FROM PERSONA WHERE id_persona = ?";
-            try (PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
-                stmtPersona.setString(1, id_persona);
-                stmtPersona.executeUpdate();
-            }
 
-            System.out.println("Persona con código " + id_persona + " eliminada.");
-
+            System.out.println("Datos del doctor con código " + id_persona + " eliminados.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-   
+    public void eliminarDatosPersonaSQL(String id_persona) {
+       
+    	try (Connection conn = DatabaseConnection.getConnection()) {
+            
+    		//Eliminacion en cadena para evitar errores con las claves foraneas
+    		
+            String queryCita = "DELETE FROM CITA " +
+            				  "WHERE id_persona = ? OR id_creador_cita = ?";
+            try (PreparedStatement stmtCita = conn.prepareStatement(queryCita)) {
+                stmtCita.setString(1, id_persona);
+                stmtCita.setString(2, id_persona);
+                stmtCita.executeUpdate();
+            }
+
+            String queryAdmin = "DELETE FROM ADMINISTRADOR " +
+            					"WHERE id_persona = ?";
+            try (PreparedStatement stmtAdmin = conn.prepareStatement(queryAdmin)) {
+                stmtAdmin.setString(1, id_persona);
+                stmtAdmin.executeUpdate();
+            }
+
+            String querySecretario = "DELETE FROM SECRETARIO " +
+            		                 "WHERE id_persona = ?";
+            try (PreparedStatement stmtSecretario = conn.prepareStatement(querySecretario)) {
+                stmtSecretario.setString(1, id_persona);
+                stmtSecretario.executeUpdate();
+            }
+            
+            String queryCredencial = "DELETE FROM CREDENCIAL " +
+					                 "WHERE id_persona = ?";
+			try (PreparedStatement stmtCredencial = conn.prepareStatement(queryCredencial)) {
+				stmtCredencial.setString(1, id_persona);
+				stmtCredencial.executeUpdate();
+			}
+            
+            String queryPersona = "DELETE FROM PERSONA " +
+            					  "WHERE id_persona = ?";
+            try (PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
+                stmtPersona.setString(1, id_persona);
+                stmtPersona.executeUpdate();
+            }
+
+            System.out.println("Datos de la persona con código " + id_persona + " eliminados.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
     public void modificarDatosPersonaSQL(Persona persona) {
     	
         String queryPersona = "UPDATE PERSONA SET cedula = ?, nombre = ?, apellido = ?, sexo = ?, fecha_nacimiento = ? WHERE id_persona = ?";
@@ -2764,7 +2513,128 @@ public class Clinica implements Serializable  {//u
         }
     }
     
+    //VIVIENDA SQL:
     
+    public DefaultTableModel cargarDatosViviendaSQL() {
+        String query = "SELECT v.id_vivienda, v.direccion " +
+                       "FROM VIVIENDA AS v " +
+                       "LEFT JOIN PACIENTE AS p ON v.id_vivienda = p.id_vivienda";
+
+        DefaultTableModel model = new DefaultTableModel();
+        model.setColumnIdentifiers(new String[]{"Código Vivienda", "Dirección"});
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Object[] row = new Object[2];
+                row[0] = rs.getString("id_vivienda");
+                row[1] = rs.getString("direccion");
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return model;
+    }
+
+    public void insertarDatosViviendaSQL(Vivienda vivienda) {
+    	
+        String query = "INSERT INTO VIVIENDA (id_vivienda, direccion) " + 
+        			   "VALUES (?, ?)";
+        int filas = 0;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+        	stmt.setInt(1, Clinica.getInstance().obtenerMaximoIdVivienda());
+            stmt.setString(2, vivienda.getDireccion());
+            
+            filas = stmt.executeUpdate();
+            System.out.println("Viviendas agregadas: " + filas);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Vivienda buscarViviendaByIdSQL(String id_vivienda) {
+        
+    	String query = "SELECT id_vivienda, direccion " + 
+        			   "FROM VIVIENDA " + 
+        			   "WHERE id_vivienda = ?";
+        
+        Vivienda vivienda = null;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, id_vivienda);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                
+            	if (rs.next()) {
+                    String codigo_vivienda = rs.getString("id_vivienda");
+                    String direccion = rs.getString("direccion");
+
+                    vivienda = new Vivienda(codigo_vivienda, direccion);
+                }
+            	
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return vivienda;
+    }
+    
+    public void modificarDatosViviendaSQL(Vivienda vivienda) {
+        
+    	String query = "UPDATE VIVIENDA SET direccion = ? " +
+    				   "WHERE id_vivienda = ?";
+        int fila = 0;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, vivienda.getDireccion());
+            stmt.setString(2, vivienda.getCodigo());
+
+            fila = stmt.executeUpdate();
+            System.out.println("Vivienda modificada: " + fila);
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    
+    public void eliminarDatosViviendaSQL(String id_vivienda) {
+        String updatePaciente = "UPDATE PACIENTE SET id_vivienda = NULL WHERE id_vivienda = ?";
+        String deleteVivienda = "DELETE FROM VIVIENDA WHERE id_vivienda = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement updateStmt = conn.prepareStatement(updatePaciente);
+             PreparedStatement deleteStmt = conn.prepareStatement(deleteVivienda)) {
+
+        	updateStmt.setInt(1, Integer.parseInt(id_vivienda));
+            
+        	int sin_vivienda = updateStmt.executeUpdate();
+            System.out.println(sin_vivienda + " pacientes actualizados sin vivienda");
+
+            deleteStmt.setInt(1, Integer.parseInt(id_vivienda));
+            
+            int fila = deleteStmt.executeUpdate();
+            System.out.println("Vivienda con código " + fila + " eliminada.");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     
     
     

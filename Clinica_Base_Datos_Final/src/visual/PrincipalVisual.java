@@ -118,7 +118,7 @@ public class PrincipalVisual extends JFrame {
 		btnRegVivienda = new JButton("Registar");
 		btnRegVivienda.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				CrearVivienda regVivienda = new CrearVivienda(null);
+				RegistrarVivienda regVivienda = new RegistrarVivienda(null);
 				regVivienda.setModal(true);
 				regVivienda.setVisible(true);
 			}

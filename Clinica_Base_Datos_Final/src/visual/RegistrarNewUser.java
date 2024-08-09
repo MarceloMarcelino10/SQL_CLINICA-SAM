@@ -430,7 +430,7 @@ public class RegistrarNewUser extends JDialog {
 				            String especialidad = txtEspecialidad.getText();
 				            if (especialidad.isEmpty()) {
 				                JOptionPane.showMessageDialog(null, "Debe ingresar la especialidad del doctor.", "Error", JOptionPane.ERROR_MESSAGE);
-				                return;
+				                return; 
 				            }
 				        }
 
@@ -499,21 +499,13 @@ public class RegistrarNewUser extends JDialog {
 				                Vivienda v = ((Paciente)p).getMiVivienda();
 				                String tipoSangre = cbxTipoSangre.getSelectedItem().toString();
 				                aux = new Paciente(codigo, cedula, nombre, apellidos, fecNacim, sexo, userName, password, 4, v, tipoSangre);
-
-				                String[] opciones = {"Sí", "No"};
-				                int respuesta = JOptionPane.showOptionDialog(null, "Necesitas cambiar de vivienda?", "Modificar Vivienda", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opciones, opciones[0]);
-
-				                if (respuesta == JOptionPane.YES_OPTION) {
-				                    RegistrarVivienda regVivienda = new RegistrarVivienda();
-				                    regVivienda.setModal(true);
-				                    regVivienda.setVisible(true);
-				                    // ((Paciente)aux).setMiVivienda(regVivienda.getViviendaSeleccionada());
-				                }
 				            }
 
 				            JOptionPane.showMessageDialog(null, "Usuario modificado con éxito", "Modificar Persona", JOptionPane.INFORMATION_MESSAGE);
 				            Clinica.getInstance().modificarDatosPersonaSQL(aux);
-				            dispose();
+				            String load = ListarPersona.cbxListar.getSelectedItem().toString();
+				            ListarPersona.loadPersona(load);
+				            dispose(); 
 				        }
 				    }
 

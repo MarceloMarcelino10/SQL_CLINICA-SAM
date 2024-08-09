@@ -58,7 +58,7 @@ public class GestorUsuario {
                         login = true;
                         
                     }
-                }
+                } 
             }
         } catch (SQLException e) {
             e.printStackTrace();

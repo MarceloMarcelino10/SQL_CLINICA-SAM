@@ -22,11 +22,12 @@ import logico.Vivienda;
 public class ListarVivienda extends JDialog {
 
     private final JPanel contentPanel = new JPanel();
-    private JTable table;
-    private DefaultTableModel model;
+    private static JTable table;
+    private static DefaultTableModel model;
     private Object[] rows;
     private JButton btnModificar;
     private JButton btnCancelar;
+    private JButton btnEliminar;
 
     /**
      * Launch the application.
@@ -64,14 +65,12 @@ public class ListarVivienda extends JDialog {
         panel.add(scrollPane, BorderLayout.CENTER);
 
         model = new DefaultTableModel();
-        String[] headers = {"CÃ³digo", "DirecciÃ³n"};
+        String[] headers = {"Codigo", "Direccion"};
         model.setColumnIdentifiers(headers);
         table = new JTable();
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setModel(model);
         scrollPane.setViewportView(table);
-
-        loadViviendas();
         
         JPanel buttonPane = new JPanel();
         buttonPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -81,49 +80,86 @@ public class ListarVivienda extends JDialog {
         btnModificar = new JButton("Modificar");
         btnModificar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int selectedRow = table.getSelectedRow();
+            	
+            	int selectedRow = table.getSelectedRow();
+                
                 if (selectedRow >= 0) {
-                    String codigo = (String) model.getValueAt(selectedRow, 0);
-                    Vivienda vivienda = Clinica.getInstance().buscarViviendaById(codigo);
-                    if (vivienda != null) {
-                        // Crear y mostrar el diÃ¡logo de modificaciÃ³n como modal
-                        CrearVivienda dialog = new CrearVivienda(vivienda);
-                        dialog.setModal(true); // Establecer como modal
-                        dialog.setVisible(true);
 
-                        if (dialog.isConfirmed()) {
-                            // Guardar los cambios en la base de datos
-                            Clinica.getInstance().actualizarViviendaSQL(vivienda);
-                            JOptionPane.showMessageDialog(null, "Vivienda modificada exitosamente");
-                            loadViviendas(); // Recargar los datos despuÃ©s de modificar
-                        }
+                	String id_vivienda = (String) model.getValueAt(selectedRow, 0);
+                    Vivienda vivienda = Clinica.getInstance().buscarViviendaByIdSQL(id_vivienda);
+                    
+                    if (vivienda != null) {
+
+                    	RegistrarVivienda dialog = new RegistrarVivienda(vivienda);
+                        dialog.setModal(true); 
+                        dialog.setVisible(true);
+                        
+                        JOptionPane.showMessageDialog(null, "Vivienda modificada exitosamente");
+                        
+                        loadVivienda();
+                        
+                    } else {
+                    	
+                        JOptionPane.showMessageDialog(null, "No se encontró la vivienda para modificar.");
                     }
+                    
+                } else {
+                	
+                    JOptionPane.showMessageDialog(null, "Por favor, selecciona una vivienda para modificar.");
                 }
+                
             }
         });
+        
+        btnEliminar = new JButton("Eliminar");
+        btnEliminar.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		
+        		 int selectedRow = table.getSelectedRow();
+        	        
+        		 if (selectedRow >= 0) {
+        			 
+        			 String id_vivienda = (String) model.getValueAt(selectedRow, 0);
+
+        			 int confirm = JOptionPane.showConfirmDialog(null, "¿Estás seguro de que deseas eliminar esta vivienda?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
+        	            
+	    	             if (confirm == JOptionPane.YES_OPTION) {
+
+	    	            	 Clinica.getInstance().eliminarDatosViviendaSQL(id_vivienda);
+	    	            	 
+	    	            	 JOptionPane.showMessageDialog(null, "Vivienda eliminada exitosamente");
+	    	            	 
+	    	            	 loadVivienda();
+	    	             }
+	    	             
+        	         } else {
+        	        	 
+        	            JOptionPane.showMessageDialog(null, "Por favor, selecciona una vivienda para eliminar.");
+        	         }
+        		
+        	}
+        });
+        buttonPane.add(btnEliminar);
         buttonPane.add(btnModificar);
         
         btnCancelar = new JButton("Cancelar");
         btnCancelar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
+        	public void actionPerformed(ActionEvent e) {
+        		dispose();
+        	}
         });
         buttonPane.add(btnCancelar);
         
+        loadVivienda();
     }
-
-    public void loadViviendas() {
-        Clinica.getInstance().cargarDatosViviendaSQL();
-        model.setRowCount(0);
-        rows = new Object[model.getColumnCount()];
-        for (Vivienda vivienda : Clinica.getInstance().getMisViviendas()) {
-            rows[0] = vivienda.getCodigo();
-            rows[1] = vivienda.getDireccion();
-            model.addRow(rows);
-        }
+    
+    public static void loadVivienda() {
+    	
+    	model = Clinica.getInstance().cargarDatosViviendaSQL();
+        table.setModel(model);	
     }
-
+    
+    
     public JTable getTable() {
         return table;
     }

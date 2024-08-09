@@ -40,7 +40,7 @@ public class ListarPersona extends JDialog {
     private static DefaultTableModel model;
     private static Object[] rows;
     private static JTable table;
-    private static JComboBox<String> cbxListar;
+    public static JComboBox<String> cbxListar;
     public static int index = -1;
     private JButton btnModificar;
     private JButton btnEliminar;
@@ -114,8 +114,14 @@ public class ListarPersona extends JDialog {
                 if (index >= 0) {
                     btnEliminar.setEnabled(true);
                     btnModificar.setEnabled(true);
-                    selected = Clinica.getInstance().buscarPersonaByIdSQL(table.getValueAt(index, 0).toString());
+                } else {
+                    btnEliminar.setEnabled(false);
+                    btnModificar.setEnabled(false);
+                	
                 }
+                //System.out.println("Posicion tabla: " + table.getSelectedRow() + " Mi codigo: " + table.getValueAt(index, 0).toString()  );
+                //Persona p = Clinica.getInstance().buscarPersonaByIdSQL(table.getValueAt(index, 0).toString());
+                //System.out.println(p.getCodigo() + " " + p.getNombre());
             }
         });
         model = new DefaultTableModel();
@@ -131,11 +137,12 @@ public class ListarPersona extends JDialog {
             btnModificar = new JButton("Modificar");
             btnModificar.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                	
-                	if (table.getSelectedRow() >= 0) {
-                        RegistrarNewUser regNue = new RegistrarNewUser(selected);
-                        regNue.setModal(true);
-                        regNue.setVisible(true);
+                    int index = table.getSelectedRow();
+                	if (index >= 0) {
+                        selected = Clinica.getInstance().buscarPersonaByIdSQL(table.getValueAt(index, 0).toString());
+                		RegistrarNewUser regNue = new RegistrarNewUser(selected);
+                		regNue.setModal(true);
+                		regNue.setVisible(true);
                 	}
                 	
                 }
@@ -147,17 +154,40 @@ public class ListarPersona extends JDialog {
             btnEliminar.setIcon(new ImageIcon(ListarPersona.class.getResource("/imagenes/eliminar16x16.png")));
             btnEliminar.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    
-                	int option = JOptionPane.showConfirmDialog(null,"Seguro desea eliminar la persona con código: " + selected.getCodigo(),"Eliminar Persona", JOptionPane.OK_CANCEL_OPTION);
-                    
-                    if (option == JOptionPane.OK_OPTION && selected != null) {
+                	int index = table.getSelectedRow();
+                	
+                    if (index >= 0) {
                         
-                    	Clinica.getInstance().eliminarDatosPersonaSQL(table.getValueAt(index, 0).toString());
-                        btnEliminar.setEnabled(false);
-                        btnModificar.setEnabled(false);
+                    	selected = Clinica.getInstance().buscarPersonaByIdSQL(table.getValueAt(index, 0).toString());
+                        
+                        if (selected != null) {
+                            
+                        	int option = JOptionPane.showConfirmDialog(null, "Seguro desea eliminar la persona con código: " + selected.getCodigo(), "Eliminar Persona", JOptionPane.OK_CANCEL_OPTION);
+                            
+                            if (option == JOptionPane.OK_OPTION) {
+                            	
+                            	if (selected.getRangoUser() == 3) { //Doctor
+                            		
+                            		Clinica.getInstance().eliminarDatosDoctorSQL(selected.getCodigo());
+                            		loadPersona(cbxListar.getSelectedItem().toString());
+                            		
+                            	} else if (selected.getRangoUser() == 4) { //Paciente
+                            		
+                            		Clinica.getInstance().eliminarDatosPacienteSQL(selected.getCodigo());
+                            		loadPersona(cbxListar.getSelectedItem().toString());
+                            	
+                            	} else { //Administrador, Secretario, Persona
+                            		
+                            		Clinica.getInstance().eliminarDatosPersonaSQL(selected.getCodigo());
+                            		loadPersona(cbxListar.getSelectedItem().toString());
+                            	} 
+                            }
+                            
+                        } else {
+                        	
+                            JOptionPane.showMessageDialog(null, "No se pudo encontrar la persona seleccionada.", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
                     }
-                    
-                    loadPersona(cbxListar.getSelectedItem().toString());
                 }
             });
             btnEliminar.setEnabled(false);
@@ -175,7 +205,7 @@ public class ListarPersona extends JDialog {
             btnCancelar.setActionCommand("Cancel");
             buttonPane.add(btnCancelar);
         }
-
+        
         usuarioLogged();
     }
 
@@ -218,9 +248,10 @@ public class ListarPersona extends JDialog {
     }
     
     public static void loadPersona(String rangoCbx) {
-        
+    	
     	int rango = Clinica.getInstance().obtenerRango(rangoCbx);
-        model.setRowCount(0);
+    	System.out.println(rango);
+    	model.setRowCount(0);
 
         if (rango == 3) { // Doctor
             model = Clinica.getInstance().cargarDatosDoctorSQL();
@@ -228,10 +259,10 @@ public class ListarPersona extends JDialog {
             model = Clinica.getInstance().cargarDatosPacienteSQL();
         } else {
             model = Clinica.getInstance().cargarDatosPersonaSQL(rango);
-        }
+        } 
         
         table.setModel(model);
-    }
+    } 
 
     public JTable getTable(String modo) {
         loadPersona(modo);
