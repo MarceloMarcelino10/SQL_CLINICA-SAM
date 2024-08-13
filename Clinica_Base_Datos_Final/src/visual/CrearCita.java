@@ -32,7 +32,11 @@ import java.awt.FlowLayout;
 
 public class CrearCita extends JDialog {
 
-    private final JPanel panelPrincipal = new JPanel();
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private final JPanel panelPrincipal = new JPanel();
     private JTextField txtCodigoCita;
     private JComboBox<Doctor> comboBoxDoctor;
     private JComboBox<Persona> comboBoxPersona;
@@ -54,24 +58,24 @@ public class CrearCita extends JDialog {
 
     public CrearCita() {
         setIconImage(Toolkit.getDefaultToolkit().getImage(CrearCita.class.getResource("/imagenes/fotoTituloDeVentana.png")));
-        setTitle("Crear cita");
-        setBounds(100, 100, 450, 300);
+        setTitle("Registrar cita");
+        setBounds(100, 100, 600, 335);
         setLocationRelativeTo(null);
         getContentPane().setLayout(new BorderLayout());
         panelPrincipal.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         getContentPane().add(panelPrincipal, BorderLayout.CENTER);
 
-        JLabel lblCodigoCita = new JLabel("Código de cita:");
+        JLabel lblCodigoCita = new JLabel("Codigo de cita:");
         txtCodigoCita = new JTextField();
         txtCodigoCita.setEditable(false);
         txtCodigoCita.setText(String.valueOf(Clinica.getCodCita()));
         txtCodigoCita.setColumns(10);
 
-        JLabel lblFecha = new JLabel("Día de la cita:");
+        JLabel lblFecha = new JLabel("Dia:");
         dateChooser = new JDateChooser();
         dateChooser.setPreferredSize(new java.awt.Dimension(150, 22));
 
-        JLabel lblHoraCita = new JLabel("Hora de la cita:");
+        JLabel lblHoraCita = new JLabel("Hora");
         spnHoraCita = new JSpinner();
         spnHoraCita.setModel(new SpinnerDateModel(new Date(), null, null, Calendar.MINUTE));
         JSpinner.DateEditor de_spnHoraCita = new JSpinner.DateEditor(spnHoraCita, "HH:mm");
@@ -222,7 +226,7 @@ public class CrearCita extends JDialog {
             if (cita == null) {
                 cita = new Cita(codigo, selectedPersona, selectedDoctor, fechaHora.getTime(), new Time(fechaHora.getTimeInMillis()));
                 Clinica.getInstance().insertarCita(cita);
-                Clinica.setCodCita(Clinica.getCodCita() + 1); // Incrementar el código de cita después de insertar una nueva cita
+                Clinica.setCodCita(Clinica.getCodCita() + 1); // Incrementar el codigo de cita despues de insertar una nueva cita
                 JOptionPane.showMessageDialog(null, "Operación satisfactoria", "Registro", JOptionPane.INFORMATION_MESSAGE);
                 limpiarCampos();
             } else {

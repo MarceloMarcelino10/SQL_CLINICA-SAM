@@ -220,9 +220,9 @@ public class PrincipalVisual extends JFrame {
 		btnRegistrarCita.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
-				CrearCita creaci = new CrearCita();
-				creaci.setModal(true);
-				creaci.setVisible(true);
+				RegistrarCita regCita = new RegistrarCita(null);
+				regCita.setModal(true);
+				regCita.setVisible(true);
 				
 			}
 		});
@@ -232,8 +232,9 @@ public class PrincipalVisual extends JFrame {
 		btnListarCitas = new JButton("Listar");
 		btnListarCitas.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				ListarCita listci = new ListarCita();
-				listci.setVisible(true);
+				ListarCita listCita = new ListarCita();
+				listCita.setModal(true);
+				listCita.setVisible(true);
 			}
 		});
 		btnListarCitas.setBounds(100, 169, 89, 23);

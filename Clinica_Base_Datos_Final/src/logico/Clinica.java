@@ -14,6 +14,9 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -1025,7 +1028,7 @@ public class Clinica implements Serializable  {//u
     
     
     // CITAS:
-    
+/*    
     public void cargarDatosCitaSQL() {
     	
     	Clinica.getInstance().getMisCitas().clear();
@@ -1070,7 +1073,7 @@ public class Clinica implements Serializable  {//u
             e.printStackTrace();
         }
     }
-    
+    */
     //HISTORIAL CLINICA:
     
     public void cargarDatosHistoriaClinicaSQL() {
@@ -1578,26 +1581,6 @@ public class Clinica implements Serializable  {//u
     	obtenerMaximoIdCita();
     }
     
-    public void actualizarViviendaSQL(Vivienda vivienda) {
-        String query = "UPDATE VIVIENDA SET direccion = ? WHERE id_vivienda = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            stmt.setString(1, vivienda.getDireccion());
-            stmt.setString(2, vivienda.getCodigo());
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    
-    
-    
-    
-    
     //ENFERMEDADES SQL:
     
     public DefaultTableModel cargarDatosEnfermedadSQL() {
@@ -1644,7 +1627,6 @@ public class Clinica implements Serializable  {//u
             stmt.setInt(5, enfermedad.getGravedad());
             filas =+ stmt.executeUpdate();
             System.out.println("Enfermedades agregadas: " + filas);
-            //Clinica.getInstance().insertarEnfermedad(enfermedad);
             
         } catch (SQLException e) {
             e.printStackTrace();
@@ -1697,7 +1679,6 @@ public class Clinica implements Serializable  {//u
             int filas = stmt.executeUpdate();
             
             System.out.println("Enfermedades actualizadas: " + filas);
-            //Clinica.getInstance().actualizarEnfermedad(enfermedad);
 
         } catch (SQLException e) {
             e.printStackTrace(); 
@@ -1807,8 +1788,6 @@ public class Clinica implements Serializable  {//u
     
     public void insertarDatosVacunaSQL(Vacuna vacuna) {
     	
-    	//Clinica.getInstance().obtenerMaximoIdVacuna();
-
         String queryVacuna = "INSERT INTO VACUNA (id_vacuna, nombre, id_historial_clinico) VALUES (?, ?, ?)";
         String queryEnferemedad = "INSERT INTO ENFERMEDAD_VACUNA (id_vacuna, id_enfermedad) VALUES (?, ?)";
         int filas = 0;
@@ -1832,14 +1811,10 @@ public class Clinica implements Serializable  {//u
                 insertEnfermedadesStmt.executeBatch(); // Ejecutamos todas las llamadas en batch
             }
             
-            //Clinica.getInstance().insertarVacuna(vacuna);
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-    
-
 
     public void actualizarDatosVacunaSQL(Vacuna vacuna) {
 
@@ -1854,9 +1829,7 @@ public class Clinica implements Serializable  {//u
 
             int filas = stmt.executeUpdate();
             System.out.println("Vacunas actualizadas: " + filas);
-
-            // Actualizar las enfermedades asociadas
-            // Primero eliminamos las enfermedades existentes asociadas a la vacuna
+            
             String deleteEnfermedadesQuery = "DELETE FROM ENFERMEDAD_VACUNA " +
             								 "WHERE id_vacuna = ?";
             
@@ -1865,7 +1838,6 @@ public class Clinica implements Serializable  {//u
                 deleteStmt.executeUpdate();
             }
 
-            // Luego insertamos las nuevas asociaciones
             String insertEnfermedadesQuery = "INSERT INTO ENFERMEDAD_VACUNA (id_vacuna, id_enfermedad) " +
             								 "VALUES (?, ?)";
             
@@ -1878,8 +1850,6 @@ public class Clinica implements Serializable  {//u
                 insertStmt.executeBatch(); //Ejecutamos todas las llamadas.
             }
             
-            //Clinica.getInstance().actualizarVacuna(vacuna);
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1906,10 +1876,7 @@ public class Clinica implements Serializable  {//u
                 filas = deleteVacunaStmt.executeUpdate();
                 System.out.println(filas + " Vacuna eliminada con: " + filas_elim + " enfermedades en ella");
             }
-            
-            //Vacuna vacuna = Clinica.getInstance().obtenerVacunaByIdSQL(id_vacuna);
-            //Clinica.getInstance().eliminarVacuna(vacuna);
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -2635,20 +2602,253 @@ public class Clinica implements Serializable  {//u
         }
     }
 
+    //CITA SQL:
     
+    public DefaultTableModel cargarDatosCitaSQL() {
+        
+    	 DateTimeFormatter fecha = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+         DateTimeFormatter hora = DateTimeFormatter.ofPattern("hh:mm a");
+    	
+    	String query = "SELECT c.id_cita, p.nombre AS nombre_paciente, p.apellido AS apellido_paciente, d.nombre AS nombre_doctor, d.apellido AS apellido_doctor, " +
+    				   "c.fecha_cita, c.hora_cita, crea_cita.nombre AS nombre_creador, crea_cita.apellido AS apellido_creador, c.completada " +
+		    		   "FROM CITA AS c " +
+		    		   "INNER JOIN PERSONA AS p ON c.id_persona = p.id_persona " +
+		    		   "INNER JOIN DOCTOR AS doc ON c.id_doctor = doc.id_doctor " +
+		    		   "INNER JOIN PERSONA AS d ON doc.id_persona = d.id_persona " +
+		    		   "LEFT JOIN PERSONA AS crea_cita ON c.id_creador_cita = crea_cita.id_persona ";
+    			
+        DefaultTableModel model = new DefaultTableModel();
+        model.setColumnIdentifiers(new String[]{"Codigo", "Paciente", "Doctor", "Fecha/Hora", "Atendido por", "Completado"});
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Object[] row = new Object[6];
+                row[0] = rs.getString("id_cita");
+                row[1] = rs.getString("nombre_paciente") + " " + rs.getString("apellido_paciente");
+                row[2] = rs.getString("nombre_doctor") + " " + rs.getString("apellido_doctor");
+               
+                LocalDate fechaCita = rs.getDate("fecha_cita").toLocalDate();
+                LocalTime horaCita = rs.getTime("hora_cita").toLocalTime();
+                String fechaHora = fechaCita.format(fecha) + " a las " + horaCita.format(hora);
+                row[3] = fechaHora;
+
+                String nombreCreador = rs.getString("nombre_creador");
+                String apellidoCreador = rs.getString("apellido_creador");
+                String atendidoPor = (nombreCreador != null && apellidoCreador != null) ? nombreCreador + " " + apellidoCreador : "Desconocido";
+                row[4] = atendidoPor;
+                
+                row[5] = rs.getBoolean("completada") ? "Sí" : "No";
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return model;
+    }
     
+    public void insertarDatosCitaSQL(Cita cita) {
+        
+    	String queryDoctor = "SELECT id_doctor " + 
+    					     "FROM DOCTOR " + 
+    					     "WHERE id_persona = ?";
+        
+    	String queryInsert = "INSERT INTO CITA (id_cita, fecha_cita, hora_cita, fecha_cita_creacion, completada, id_doctor, id_persona, id_creador_cita) " +
+                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        int filas = 0;
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtDoctor = conn.prepareStatement(queryDoctor);
+             PreparedStatement stmtInsert = conn.prepareStatement(queryInsert)) {
+
+            stmtDoctor.setInt(1, Integer.parseInt(cita.getMiDoctor().getCodigo()));
+            ResultSet rs = stmtDoctor.executeQuery();
+
+            if (rs.next()) {
+                int id_doctor = rs.getInt("id_doctor");
+
+                stmtInsert.setInt(1, Clinica.getInstance().obtenerMaximoIdCita());
+                stmtInsert.setDate(2, new java.sql.Date(cita.getFechaCita().getTime()));
+                stmtInsert.setTime(3, cita.getHoraCita());
+                stmtInsert.setTimestamp(4, new java.sql.Timestamp(cita.getFechacreacion().getTime()));
+                stmtInsert.setBoolean(5, cita.isRealizada());
+                stmtInsert.setInt(6, id_doctor);
+                stmtInsert.setInt(7, Integer.parseInt(cita.getMiPersona().getCodigo()));
+                stmtInsert.setObject(8, Clinica.getInstance().getLoggedUser() != null ? Clinica.getInstance().getLoggedUser().getCodigo() : null);
+
+                filas += stmtInsert.executeUpdate();
+                System.out.println("Citas agregadas: " + filas);
+                
+            } else {
+                System.out.println("Error: El id_persona proporcionado no está asociado con ningún doctor.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     
+    public Cita obtenerCitaByIdSQL(String id_cita) {
+        
+    	String query = "SELECT c.id_cita, c.fecha_cita, c.hora_cita, c.fecha_cita_creacion, c.completada, c.id_persona, c.id_creador_cita, d.id_persona AS id_persona_doctor " +
+    				   "FROM CITA AS c " +
+    			       "INNER JOIN DOCTOR AS d ON c.id_doctor = d.id_doctor " +
+    			       "WHERE c.id_cita = ? ";
+        
+        Cita cita = null;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, id_cita);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                
+            	if (rs.next()) {
+            		
+            		
+            		String codigo = rs.getString("id_cita");
+                    Date fechaCita = rs.getDate("fecha_cita");
+                    Time horaCita = rs.getTime("hora_cita");
+                    Date fechaCreacion = rs.getTimestamp("fecha_cita_creacion");
+                    boolean realizada = rs.getBoolean("completada");
+                    String id_persona_doctor = rs.getString("id_persona_doctor");
+                    String id_persona = rs.getString("id_persona");
+
+                    Persona miDoctor = Clinica.getInstance().buscarPersonaByIdSQL(id_persona_doctor);
+                    Persona miPersona = Clinica.getInstance().buscarPersonaByIdSQL(id_persona);
+
+
+                    cita = new Cita(codigo, miPersona, ((Doctor) miDoctor), fechaCita, horaCita);
+                    cita.setFechacreacion(fechaCreacion);
+                    cita.setRealizada(realizada);
+                    
+                }
+            }
+            
+        } catch (SQLException e) {
+        	
+            e.printStackTrace();
+        }
+
+        return cita;
+    }
+/*
+    public void modificarDatosCitaSQL(Cita cita) {
+        
+        String queryDoctor = "SELECT id_doctor " + 
+        					 "FROM DOCTOR " + 
+        					 "WHERE id_persona = ?";
+        
+        String queryUpdate = "UPDATE CITA SET fecha_cita = ?, hora_cita = ?, id_doctor = ?, id_persona = ? " +
+                             "WHERE id_cita = ?";
+        int filas = 0;
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtDoctor = conn.prepareStatement(queryDoctor);
+             PreparedStatement stmtUpdate = conn.prepareStatement(queryUpdate)) {
+
+            stmtDoctor.setInt(1, Integer.parseInt(cita.getMiDoctor().getCodigo()));
+            
+            ResultSet rs = stmtDoctor.executeQuery();
+
+            if (rs.next()) {
+                
+            	int id_doctor = rs.getInt("id_doctor");
+
+                stmtUpdate.setDate(1, new java.sql.Date(cita.getFechaCita().getTime()));
+                stmtUpdate.setTime(2, cita.getHoraCita());
+                stmtUpdate.setInt(4, id_doctor);
+                stmtUpdate.setInt(5, Integer.parseInt(cita.getMiPersona().getCodigo()));
+                stmtUpdate.setInt(6, Integer.parseInt(cita.getCodigo())); 
+
+                filas += stmtUpdate.executeUpdate();
+                System.out.println("Citas actualizadas: " + filas);
+                
+            } else {
+                System.out.println("Error: El id_persona proporcionado no está asociado con ningún doctor.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+*/
     
+    public void modificarDatosCitaSQL(Cita cita) {
+        
+    	String queryDoctor = "SELECT id_doctor " + 
+        					  "FROM DOCTOR " + 
+        					  "WHERE id_persona = ?";
+    	
+        String queryUpdate = "UPDATE CITA SET fecha_cita = ?, hora_cita = ?, id_doctor = ?, id_persona = ? WHERE id_cita = ?";
+
+        int filas = 0;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtDoctor = conn.prepareStatement(queryDoctor);
+             PreparedStatement stmtUpdate = conn.prepareStatement(queryUpdate)) {
+
+            stmtDoctor.setInt(1, Integer.parseInt(cita.getMiDoctor().getCodigo()));
+            ResultSet rs = stmtDoctor.executeQuery();
+
+            if (rs.next()) {
+                
+            	int id_doctor = rs.getInt("id_doctor");
+
+                stmtUpdate.setDate(1, new java.sql.Date(cita.getFechaCita().getTime()));
+                stmtUpdate.setTime(2, cita.getHoraCita());
+                stmtUpdate.setInt(3, id_doctor);
+                stmtUpdate.setInt(4, Integer.parseInt(cita.getMiPersona().getCodigo()));
+                stmtUpdate.setInt(5, Integer.parseInt(cita.getCodigo()));
+
+                filas = stmtUpdate.executeUpdate();
+                System.out.println("Citas actualizadas: " + filas);
+
+            } else {
+                System.out.println("Error: El id_persona proporcionado no está asociado con ningún doctor.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    public void eliminarDatosCitaSQL(String id_cita) {
+        
+    	try (Connection conn = DatabaseConnection.getConnection()) {
+                        
+    		//Eliminacion en cadena para evitar errores con las claves foraneas
+
+        	String queryEnfermedadConsulta = "DELETE FROM ENFERMEDAD_CONSULTA WHERE id_consulta IN " +
+                                             "(SELECT id_consulta FROM CONSULTA WHERE id_cita_solicitada = ?)";
+            try (PreparedStatement stmtEnfermedadConsulta = conn.prepareStatement(queryEnfermedadConsulta)) {
+                stmtEnfermedadConsulta.setString(1, id_cita);
+                stmtEnfermedadConsulta.executeUpdate();
+            }
+            
+            String queryConsulta = "DELETE FROM CONSULTA WHERE id_cita_solicitada = ?";
+            try (PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta)) {
+                stmtConsulta.setString(1, id_cita);
+                stmtConsulta.executeUpdate();
+            }
+            
+            String queryCita = "DELETE FROM CITA WHERE id_cita = ?";
+            try (PreparedStatement stmtCita = conn.prepareStatement(queryCita)) {
+                stmtCita.setString(1, id_cita);
+                stmtCita.executeUpdate();
+            }
+
+            System.out.println("Datos de la cita con código " + id_cita + " eliminados.");
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     
       
 } 
