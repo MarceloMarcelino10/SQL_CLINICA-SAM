@@ -212,7 +212,7 @@ public class PrincipalVisual extends JFrame {
 		panel_Cita = new JPanel();
 		panel_Cita.setBackground(new Color(255, 255, 255));
 		panel_Cita.setVisible(false);
-		panel_Cita.setBounds(74, 107, 290, 282);
+		panel_Cita.setBounds(74, 107, 290, 282); 
 		panel.add(panel_Cita);
 		panel_Cita.setLayout(null);
 		
@@ -267,9 +267,9 @@ public class PrincipalVisual extends JFrame {
 		btnListarConsulta = new JButton("Listar");
 		btnListarConsulta.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				ListarConsulta crealist = new ListarConsulta();
-				crealist.setModal(true);
-				crealist.setVisible(true);
+				ListarConsulta listarConsulta = new ListarConsulta();
+				listarConsulta.setModal(true);
+				listarConsulta.setVisible(true);
 				
 			}
 		});
@@ -362,9 +362,11 @@ public class PrincipalVisual extends JFrame {
 		btnListarHistoriaClinica = new JButton("Listar");
 		btnListarHistoriaClinica.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				HistorialClinico histcli = new HistorialClinico();
-				histcli.setModal(true);
-				histcli.setVisible(true);
+				
+				VerHistorialClinico historial = new VerHistorialClinico();
+				historial.setModal(true);
+				historial.setVisible(true);
+				
 			}
 		});
 		btnListarHistoriaClinica.setBounds(100, 129, 89, 23);

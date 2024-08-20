@@ -173,7 +173,7 @@ public class RegistrarNewUser extends JDialog {
 			}
 		});
 		txtApellido.setBounds(64, 131, 270, 20);
-		panelDatosGenerales.add(txtApellido);
+		panelDatosGenerales.add(txtApellido); 
 		txtApellido.setColumns(10);
 		
 		JLabel lblNewLabel_4 = new JLabel("Fecha de Nacimiento:");
@@ -182,7 +182,7 @@ public class RegistrarNewUser extends JDialog {
 		
 		dateChooser = new JDateChooser();
 		dateChooser.addPropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
+			public void propertyChange(PropertyChangeEvent evt) { 
 				
 				Date selectedDate = dateChooser.getDate();
 		        if (selectedDate != null && selectedDate.after(new Date())) {
@@ -193,6 +193,7 @@ public class RegistrarNewUser extends JDialog {
 			}
 		});
 		dateChooser.setBounds(384, 57, 148, 20);
+		dateChooser.setMaxSelectableDate(new Date()); // Deshabilitar fechas posteriores a hoy
 		panelDatosGenerales.add(dateChooser);
 		
 		JLabel lblNewLabel_8 = new JLabel("Sexo:");
@@ -389,7 +390,7 @@ public class RegistrarNewUser extends JDialog {
 		
 		cbxTipoSangre = new JComboBox();
 		cbxTipoSangre.setBounds(102, 67, 126, 20);
-		cbxTipoSangre.setModel(new DefaultComboBoxModel(new String[] {"<Seleccione>", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"}));
+		cbxTipoSangre.setModel(new DefaultComboBoxModel(new String[] {"<Seleccione>", "+A", "+B", "+AB", "+O", "-A", "-B", "-AB", "-O"}));
 		panelPaciente.add(cbxTipoSangre);
 		{
 			JPanel buttonPane = new JPanel();

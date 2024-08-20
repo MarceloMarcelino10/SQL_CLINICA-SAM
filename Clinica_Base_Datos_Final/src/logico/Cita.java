@@ -25,59 +25,61 @@ public class Cita implements Serializable {
         this.fechacreacion = new Date();
     }
 
-    public Date getFechacreacion() {
-        return fechacreacion;
-    }
+	public String getCodigo() {
+		return codigo;
+	}
 
-    public void setFechacreacion(Date fechacreacion) {
-        this.fechacreacion = fechacreacion;
-    }
+	public void setCodigo(String codigo) {
+		this.codigo = codigo;
+	}
 
-    public Time getHoraCita() {
-        return horaCita;
-    }
+	public Persona getMiPersona() {
+		return miPersona;
+	}
 
-    public void setHoraCita(Time horaCita) {
-        this.horaCita = horaCita;
-    }
+	public void setMiPersona(Persona miPersona) {
+		this.miPersona = miPersona;
+	}
 
-    public boolean isRealizada() {
-        return realizada;
-    }
+	public Doctor getMiDoctor() {
+		return miDoctor;
+	}
 
-    public void setRealizada(boolean realizada) {
-        this.realizada = realizada;
-    }
+	public void setMiDoctor(Doctor miDoctor) {
+		this.miDoctor = miDoctor;
+	}
 
-    public String getCodigo() {
-        return codigo;
-    }
+	public Date getFechaCita() {
+		return fechaCita;
+	}
 
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
+	public void setFechaCita(Date fechaCita) {
+		this.fechaCita = fechaCita;
+	}
 
-    public Persona getMiPersona() {
-        return miPersona;
-    }
+	public Date getFechacreacion() {
+		return fechacreacion;
+	}
 
-    public void setMiPersona(Persona miPersona) {
-        this.miPersona = miPersona;
-    }
+	public void setFechacreacion(Date fechacreacion) {
+		this.fechacreacion = fechacreacion;
+	}
 
-    public Doctor getMiDoctor() {
-        return miDoctor;
-    }
+	public Time getHoraCita() {
+		return horaCita;
+	}
 
-    public void setMiDoctor(Doctor miDoctor) {
-        this.miDoctor = miDoctor;
-    }
+	public void setHoraCita(Time horaCita) {
+		this.horaCita = horaCita;
+	}
 
-    public Date getFechaCita() {
-        return fechaCita;
-    }
+	public boolean isRealizada() {
+		return realizada;
+	}
 
-    public void setFechaCita(Date fechaCita) {
-        this.fechaCita = fechaCita;
-    }
+	public void setRealizada(boolean realizada) {
+		this.realizada = realizada;
+	}
+
+    
 }

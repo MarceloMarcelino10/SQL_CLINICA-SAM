@@ -2,6 +2,7 @@ package visual;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -23,6 +24,7 @@ import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.SpinnerDateModel;
 import java.util.Date;
+import java.util.ArrayList;
 import java.util.Calendar;
 import com.toedter.components.JSpinField;
 import java.awt.event.ActionListener;
@@ -71,7 +73,7 @@ public class RegistrarCita extends JDialog {
 	 * Create the dialog.
 	 */
 	public RegistrarCita(Cita cita) {
-		
+		setIconImage(Toolkit.getDefaultToolkit().getImage(PrincipalVisual.class.getResource("/imagenes/fotoTituloDeVentana.png")));
 		miCita = cita;
 		
 		if (miCita != null) {
@@ -312,10 +314,10 @@ public class RegistrarCita extends JDialog {
 	    
 	    return true;
 	}
-
+	/*
 	private void loadSolicitante() {
 	    
-		DefaultTableModel model = Clinica.getInstance().cargarDatosPersonaSQL(5); //Persona
+		DefaultTableModel model = Clinica.getInstance().cargarDatosPersonaSQL(5); 
 	    
 	    cbxPersona.removeAllItems();
 	    cbxPersona.addItem("<Seleccione>");
@@ -327,6 +329,37 @@ public class RegistrarCita extends JDialog {
 	        cbxPersona.addItem("P-" + codigo + " " + nombre + " " + apellido);
 	    }
 	}
+	*/
+	private void loadSolicitante() { // Personas y pacientes pueden hacer citas
+
+	    DefaultTableModel modelPersona = Clinica.getInstance().cargarDatosPersonaSQL(5); // Persona
+	    DefaultTableModel modelPaciente = Clinica.getInstance().cargarDatosPacienteSQL(); // Paciente
+
+	    cbxPersona.removeAllItems();
+	    cbxPersona.addItem("<Seleccione>");
+
+	    ArrayList<String> codigosPacientes = new ArrayList<>();
+
+	    for (int i = 0; i < modelPaciente.getRowCount(); i++) {
+	        String codigo = modelPaciente.getValueAt(i, 0).toString();
+	        String nombre = modelPaciente.getValueAt(i, 1).toString();
+	        String apellido = modelPaciente.getValueAt(i, 2).toString();
+
+	        codigosPacientes.add(codigo);
+	        cbxPersona.addItem("P-" + codigo + " " + nombre + " " + apellido);
+	    }
+
+	    for (int i = 0; i < modelPersona.getRowCount(); i++) {
+	        String codigo = modelPersona.getValueAt(i, 0).toString();
+	        String nombre = modelPersona.getValueAt(i, 1).toString();
+	        String apellido = modelPersona.getValueAt(i, 2).toString();
+	        
+	        if (!codigosPacientes.contains(codigo)) {
+	            cbxPersona.addItem("S-" + codigo + " " + nombre + " " + apellido);
+	        }
+	    }
+	}
+
 	
 	private void loadDoctor() {
 		

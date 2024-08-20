@@ -52,12 +52,12 @@ public class VerPacientesVivienda extends JDialog {
      * Create the dialog.
      */
     public VerPacientesVivienda(Vivienda vivienda) {
-        this.vivienda = vivienda;
-
+    	setIconImage(Toolkit.getDefaultToolkit().getImage(PrincipalVisual.class.getResource("/imagenes/fotoTituloDeVentana.png")));
+    	this.vivienda = vivienda;
         setTitle("Lista de Pacientes en la Vivienda");
-        setSize(600, 400); // Establecer tamaño fijo
-        setResizable(false); // No permitir redimensionar
-        setLocationRelativeTo(null); // Centrar en la pantalla
+        setSize(600, 400); 
+        setResizable(false); 
+        setLocationRelativeTo(null);
         getContentPane().setLayout(new BorderLayout());
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -99,7 +99,6 @@ public class VerPacientesVivienda extends JDialog {
             }
         }
 
-        // Cargar los pacientes automáticamente
         loadPacientes();
     }
 

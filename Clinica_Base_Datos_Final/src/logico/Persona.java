@@ -30,7 +30,7 @@ public class Persona implements Serializable {
 		this.genero = genero;
 		this.user = user;
 		this.password = password;
-		this.rangoUser = rangoUser;
+		this.rangoUser = rangoUser; 
 	}
 	
 	public String getCodigo() {

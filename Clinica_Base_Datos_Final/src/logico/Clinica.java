@@ -1014,66 +1014,6 @@ public class Clinica implements Serializable  {//u
 	
 	/*** IMPLEMENTACIONES SQL ***/
 
-
-   //// aqui enfermedad luego
-    
-    
-    
-
-
-    
-    
-    
-    
-    
-    
-    // CITAS:
-/*    
-    public void cargarDatosCitaSQL() {
-    	
-    	Clinica.getInstance().getMisCitas().clear();
-        
-    	String query = "SELECT c.id_cita, c.fecha_cita, c.hora_cita, c.fecha_cita_creacion, c.completada, " +
-        			   "c.id_doctor, c.id_persona, c.id_creador_cita, d.id_persona AS id_doctor_persona " +
-        			   "FROM CITA AS c " +
-        			   "INNER JOIN DOCTOR AS d ON c.id_doctor = d.id_doctor ";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                String codigo = rs.getString("id_cita");
-                String codigo_doctor = rs.getString("id_doctor_persona");
-                String codigo_persona = rs.getString("id_persona");
-                String codigo_creador_cita = rs.getString("id_creador_cita");
-                Boolean esRealizada = rs.getBoolean("completada");
-
-                Date fechaCita = rs.getDate("fecha_cita");
-                Time horaCita = rs.getTime("hora_cita");
-                Date fechaCreacion = rs.getDate("fecha_cita_creacion");
-
-                Persona persona = Clinica.getInstance().buscarPersonaById(codigo_persona);
-                Doctor doctor = (Doctor) Clinica.getInstance().buscarPersonaById(codigo_doctor);
-
-                Cita cita = new Cita(codigo, persona, doctor, fechaCita, horaCita);
-                cita.setFechacreacion(fechaCreacion);
-                cita.setRealizada(esRealizada);
-
-                Clinica.getInstance().insertarCita(cita);
-
-                System.out.println("Codigo: " + codigo);
-                System.out.println("FechaC: " + fechaCita);
-                System.out.println("HoraC: " + horaCita);
-                System.out.println("FechaCrea: " + fechaCreacion);
-                System.out.println();
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    */
     //HISTORIAL CLINICA:
     
     public void cargarDatosHistoriaClinicaSQL() {
@@ -1109,240 +1049,6 @@ public class Clinica implements Serializable  {//u
             e.printStackTrace();
         }
     }
-    
-    // CONSULTAS:
-   
-    public void cargarDatosConsultaSQL() {
-    	
-    	Clinica.getInstance().getMisConsultas().clear();
-        
-        String queryConsulta = "SELECT c.id_consulta, c.fecha_consulta, c.id_historial_clinico, c.id_doctor, c.diagnostico, " +
-                               "c.id_cita_solicitada, d.id_persona AS id_doctor_persona " +
-                               "FROM CONSULTA AS c " +
-                               "INNER JOIN DOCTOR AS d ON c.id_doctor = d.id_doctor " +
-                               "INNER JOIN PERSONA AS p ON p.id_persona = d.id_persona ";
-        
-        String queryEnfermedad = "SELECT ec.id_enfermedad " +
-                                 "FROM ENFERMEDAD_CONSULTA AS ec " +
-                                 "WHERE ec.id_consulta = ?"; // "?", Es un parametro
-        
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta);
-             PreparedStatement stmtEnfermedades = conn.prepareStatement(queryEnfermedad);
-             ResultSet rsConsulta = stmtConsulta.executeQuery()) {
-            
-            while (rsConsulta.next()) {
-                
-                String codigo = rsConsulta.getString("id_consulta");
-                Date fechaConsulta = rsConsulta.getDate("fecha_consulta");
-                String id_historial_clinico = rsConsulta.getString("id_historial_clinico");
-                String id_doctor = rsConsulta.getString("id_doctor_persona");
-                String id_cita_solicitada = rsConsulta.getString("id_cita_solicitada");
-                String diagnostico = rsConsulta.getString("diagnostico") != null ? rsConsulta.getString("diagnostico") : "No tiene";
-
-                Doctor doctor = (Doctor) Clinica.getInstance().buscarPersonaById(id_doctor);
-                Cita cita = Clinica.getInstance().buscarCitaById(id_cita_solicitada);
-                
-                Consulta consulta = new Consulta(codigo, cita);
-                consulta.setDiagnostico(diagnostico);
-                consulta.setFechaConsulta(fechaConsulta);
-
-                stmtEnfermedades.setString(1, codigo); // "?" cambia el parametro, segun el codigo
-                
-                try (ResultSet rsEnfermedades = stmtEnfermedades.executeQuery()) {
-                    while (rsEnfermedades.next()) {
-                        String id_enfermedad = rsEnfermedades.getString("id_enfermedad");
-                        Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(id_enfermedad);
-                        if (enfermedad != null) {
-                            consulta.insertarEnfermedad(enfermedad);
-                        }
-                    }
-                }
-                
-                HistoriaClinica historiaClinica = Clinica.getInstance().buscarHistorialClinicaById(id_historial_clinico);
-                
-                if (historiaClinica != null) {
-                    consulta.setMiHistoriaClinica(historiaClinica);
-                    historiaClinica.getMisConsultas().add(consulta);
-                }
-                
-                Clinica.getInstance().insertarConsulta(consulta);
-
-            //    System.out.println("Consulta ID: " + codigo);
-             //   System.out.println("Fecha Consulta: " + fechaConsulta);
-             //   System.out.println("Historial ClÃ¯Â¿Â½nico ID: " + id_historial_clinico);
-             //   System.out.println("Doctor ID: " + id_doctor);
-             //   System.out.println("Cita Solicitada ID: " + id_cita_solicitada);
-             //   System.out.println("Enfermedades: " + consulta.getMisEnfermedades().size());
-             //   System.out.println();
-            }
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
- 
-/* 
-    //VACUNAS:
-
-    public void cargarDatosVacunaSQL() {
-        
-    	Clinica.getInstance().getMisVacunas().clear();
-    	
-        String queryVacuna = "SELECT v.id_vacuna, v.nombre, v.id_historial_clinico FROM VACUNA AS v";
-        
-        String queryEnfermedades = "SELECT ev.id_enfermedad FROM ENFERMEDAD_VACUNA AS ev WHERE ev.id_vacuna = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmtVacuna = conn.prepareStatement(queryVacuna);
-             PreparedStatement stmtEnfermedades = conn.prepareStatement(queryEnfermedades);
-             ResultSet rsVacuna = stmtVacuna.executeQuery()) {
-
-            while (rsVacuna.next()) {
-                
-                String codigo = rsVacuna.getString("id_vacuna");
-                String nombre = rsVacuna.getString("nombre");
-                String id_historial_clinico = rsVacuna.getString("id_historial_clinico");
-
-                Vacuna vacuna = new Vacuna(codigo, nombre);
-
-                HistoriaClinica historiaClinica = Clinica.getInstance().buscarHistorialClinicaById(id_historial_clinico);
-                if (historiaClinica != null) {
-                    vacuna.setMiHistoriaClinica(historiaClinica);
-                    historiaClinica.getVacunasAplicadas().add(vacuna);
-                }
-
-                stmtEnfermedades.setString(1, codigo);
-                
-                try (ResultSet rsEnfermedades = stmtEnfermedades.executeQuery()) {
-                    while (rsEnfermedades.next()) {
-                        String idEnfermedad = rsEnfermedades.getString("id_enfermedad");
-                        Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(idEnfermedad);
-                        if (enfermedad != null) {
-                            vacuna.agregarEnfermedad(enfermedad);
-                        }
-                    }
-                }
-
-                Clinica.getInstance().insertarVacuna(vacuna);
-
-                //System.out.println("Vacuna ID: " + codigo);
-              //  System.out.println("Nombre: " + nombre);
-               // System.out.println("Historia ClÃ¯Â¿Â½nica ID: " + (historiaClinica != null ? historiaClinica.getCodigo() : "No asociada"));
-               // System.out.println("NÃ¯Â¿Â½mero de Enfermedades: " + vacuna.getMisEnfermedades().size());
-               // System.out.println();
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    
-*/
- /*
-    public void insertarDatosVacunaSQL(Vacuna vacuna) {
-    	
-    	Clinica.getInstance().obtenerMaximoIdVacuna();
-
-        String queryVacuna = "INSERT INTO VACUNA (id_vacuna, nombre, id_historial_clinico) VALUES (?, ?, ?)";
-        String queryEnferemedad = "INSERT INTO ENFERMEDAD_VACUNA (id_vacuna, id_enfermedad) VALUES (?, ?)";
-        int filas = 0;
-        
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement insertVacunaStmt = conn.prepareStatement(queryVacuna)) {
-
-            insertVacunaStmt.setString(1, vacuna.getCodigo());
-            insertVacunaStmt.setString(2, vacuna.getNombre());
-            insertVacunaStmt.setString(3, vacuna.getMiHistoriaClinica() != null ? vacuna.getMiHistoriaClinica().getCodigo() : null);
-
-            // Ejecutar la inserciÃ³n de la vacuna
-            filas = insertVacunaStmt.executeUpdate();
-            System.out.println("Vacunas agregadas: " + filas);
-
-            try (PreparedStatement insertEnfermedadesStmt = conn.prepareStatement(queryEnferemedad)) {
-                for (Enfermedad enfermedad : vacuna.getMisEnfermedades()) {
-                    insertEnfermedadesStmt.setString(1, vacuna.getCodigo());
-                    insertEnfermedadesStmt.setString(2, enfermedad.getCodigo());
-                    insertEnfermedadesStmt.addBatch(); // Agrupamos todas las llamadas
-                }
-                insertEnfermedadesStmt.executeBatch(); // Ejecutamos todas las llamadas en batch
-            }
-            
-            Clinica.getInstance().insertarVacuna(vacuna);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    
-    public void actualizarDatosVacunaSQL(Vacuna vacuna) {
-
-        String query = "UPDATE VACUNA SET nombre = ?, id_historial_clinico = ? WHERE id_vacuna = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, vacuna.getNombre());
-            stmt.setString(2, vacuna.getMiHistoriaClinica() != null ? vacuna.getMiHistoriaClinica().getCodigo() : null);
-            stmt.setString(3, vacuna.getCodigo());
-
-            int filas = stmt.executeUpdate();
-            System.out.println("Vacunas actualizadas: " + filas);
-
-            // Actualizar las enfermedades asociadas
-            // Primero eliminamos las enfermedades existentes asociadas a la vacuna
-            String deleteEnfermedadesQuery = "DELETE FROM ENFERMEDAD_VACUNA WHERE id_vacuna = ?";
-            try (PreparedStatement deleteStmt = conn.prepareStatement(deleteEnfermedadesQuery)) {
-                deleteStmt.setString(1, vacuna.getCodigo());
-                deleteStmt.executeUpdate();
-            }
-
-            // Luego insertamos las nuevas asociaciones
-            String insertEnfermedadesQuery = "INSERT INTO ENFERMEDAD_VACUNA (id_vacuna, id_enfermedad) VALUES (?, ?)";
-            try (PreparedStatement insertStmt = conn.prepareStatement(insertEnfermedadesQuery)) {
-                for (Enfermedad enfermedad : vacuna.getMisEnfermedades()) {
-                    insertStmt.setString(1, vacuna.getCodigo());
-                    insertStmt.setString(2, enfermedad.getCodigo());
-                    insertStmt.addBatch(); //Agrupamos todas las llamadas.
-                }
-                insertStmt.executeBatch(); //Ejecutamos todas las llamadas.
-            }
-            
-            Clinica.getInstance().actualizarVacuna(vacuna);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void eliminarDatosVacunaSQL(String id_vacuna) {
-
-        String queryEnferemedadVacuna = "DELETE FROM ENFERMEDAD_VACUNA WHERE id_vacuna = ?";
-        String queryVacuna = "DELETE FROM VACUNA WHERE id_vacuna = ?";
-        int filas = 0;
-
-        try (Connection conn = DatabaseConnection.getConnection()) {
-        	
-            try (PreparedStatement deleteEnfermedadesStmt = conn.prepareStatement(queryEnferemedadVacuna)) {
-                deleteEnfermedadesStmt.setInt(1, Integer.parseInt(id_vacuna));
-                deleteEnfermedadesStmt.executeUpdate();
-            }
-
-            try (PreparedStatement deleteVacunaStmt = conn.prepareStatement(queryVacuna)) {
-                deleteVacunaStmt.setInt(1, Integer.parseInt(id_vacuna));
-                filas = deleteVacunaStmt.executeUpdate();
-                System.out.println(filas + " Vacunas eliminada.");
-            }
- 
-            Vacuna vacuna = Clinica.getInstance().buscarVacunaById(id_vacuna);
-            Clinica.getInstance().eliminarVacuna(vacuna);
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    } 
-    */
     
     //MANEJO DE INDICES BASE DE DATOS:
     
@@ -1707,7 +1413,7 @@ public class Clinica implements Serializable  {//u
     public DefaultTableModel cargarDatosVacunaSQL() {
         String query = "SELECT v.id_vacuna, v.nombre, COUNT(ev.id_enfermedad) AS Cantidades_Enfermedades_Curadas " +
         			   "FROM VACUNA AS v " +
-        			   "INNER JOIN ENFERMEDAD_VACUNA AS ev ON v.id_vacuna = ev.id_vacuna " +
+        			   "LEFT JOIN ENFERMEDAD_VACUNA AS ev ON v.id_vacuna = ev.id_vacuna " +
         		       "GROUP BY v.id_vacuna, v.nombre ";
 
         DefaultTableModel model = new DefaultTableModel();
@@ -1788,7 +1494,7 @@ public class Clinica implements Serializable  {//u
     
     public void insertarDatosVacunaSQL(Vacuna vacuna) {
     	
-        String queryVacuna = "INSERT INTO VACUNA (id_vacuna, nombre, id_historial_clinico) VALUES (?, ?, ?)";
+        String queryVacuna = "INSERT INTO VACUNA (id_vacuna, nombre) VALUES (?, ?)";
         String queryEnferemedad = "INSERT INTO ENFERMEDAD_VACUNA (id_vacuna, id_enfermedad) VALUES (?, ?)";
         int filas = 0;
         
@@ -1797,7 +1503,6 @@ public class Clinica implements Serializable  {//u
 
             insertVacunaStmt.setString(1, vacuna.getCodigo());
             insertVacunaStmt.setString(2, vacuna.getNombre());
-            insertVacunaStmt.setString(3, vacuna.getMiHistoriaClinica() != null ? vacuna.getMiHistoriaClinica().getCodigo() : null);
 
             filas = insertVacunaStmt.executeUpdate();
             System.out.println("Vacunas agregadas: " + filas);
@@ -1818,14 +1523,13 @@ public class Clinica implements Serializable  {//u
 
     public void actualizarDatosVacunaSQL(Vacuna vacuna) {
 
-        String query = "UPDATE VACUNA SET nombre = ?, id_historial_clinico = ? " +
+        String query = "UPDATE VACUNA SET nombre = ? " +
         			   "WHERE id_vacuna = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, vacuna.getNombre());
-            stmt.setString(2, vacuna.getMiHistoriaClinica() != null ? vacuna.getMiHistoriaClinica().getCodigo() : null);
-            stmt.setString(3, vacuna.getCodigo());
+            stmt.setString(2, vacuna.getCodigo());
 
             int filas = stmt.executeUpdate();
             System.out.println("Vacunas actualizadas: " + filas);
@@ -1858,29 +1562,38 @@ public class Clinica implements Serializable  {//u
     public void eliminarDatosVacunaSQL(String id_vacuna) {
 
         String queryEnferemedadVacuna = "DELETE FROM ENFERMEDAD_VACUNA " +
-        								"WHERE id_vacuna = ?";
-        String queryVacuna = "DELETE FROM " +
-        					 "VACUNA WHERE id_vacuna = ?";
+                                        "WHERE id_vacuna = ?";
+        String queryConsultaVacuna = "DELETE FROM CONSULTA_VACUNA " +
+                                     "WHERE id_vacuna_aplicada = ?";
+        String queryVacuna = "DELETE FROM VACUNA " +
+                             "WHERE id_vacuna = ?";
         int filas = 0;
-        int filas_elim = 0;
+        int filas_elim_enfermedades = 0;
+        int filas_elim_consultas = 0;
 
         try (Connection conn = DatabaseConnection.getConnection()) {
-        	
+            
             try (PreparedStatement deleteEnfermedadesStmt = conn.prepareStatement(queryEnferemedadVacuna)) {
                 deleteEnfermedadesStmt.setInt(1, Integer.parseInt(id_vacuna));
-                filas_elim = deleteEnfermedadesStmt.executeUpdate();
+                filas_elim_enfermedades = deleteEnfermedadesStmt.executeUpdate();
+            }
+
+            try (PreparedStatement deleteConsultaStmt = conn.prepareStatement(queryConsultaVacuna)) {
+                deleteConsultaStmt.setInt(1, Integer.parseInt(id_vacuna));
+                filas_elim_consultas = deleteConsultaStmt.executeUpdate();
             }
 
             try (PreparedStatement deleteVacunaStmt = conn.prepareStatement(queryVacuna)) {
                 deleteVacunaStmt.setInt(1, Integer.parseInt(id_vacuna));
                 filas = deleteVacunaStmt.executeUpdate();
-                System.out.println(filas + " Vacuna eliminada con: " + filas_elim + " enfermedades en ella");
+                System.out.println(filas + " Vacuna eliminada con: " + filas_elim_enfermedades + " enfermedades eliminadas y " + filas_elim_consultas + " consultas eliminadas.");
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    } 
+    }
+ 
 
     //PERSONAS SQL:
     
@@ -2060,7 +1773,6 @@ public class Clinica implements Serializable  {//u
     public void insertarDatosPacienteSQL(Persona persona, int id_persona) {
     	
     	Paciente paciente = ((Paciente) persona);
-    	Clinica.getInstance().obtenerMaximoIdPaciente();
     	int fila = 0;
     	
         String query = "INSERT INTO PACIENTE (id_paciente, id_persona, tipoSangre, id_vivienda) " +
@@ -2069,7 +1781,7 @@ public class Clinica implements Serializable  {//u
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, codPaciente);
+            stmt.setInt(1, Clinica.getInstance().obtenerMaximoIdPaciente());
             stmt.setInt(2, id_persona);
             stmt.setString(3, paciente.getTipoSangre());
             stmt.setObject(4, paciente.getMiVivienda() != null ? paciente.getMiVivienda().getCodigo() : null);
@@ -2087,7 +1799,6 @@ public class Clinica implements Serializable  {//u
     public void insertarDatosDoctorSQL(Persona persona, int id_persona) {
         
     	Doctor doctor = ((Doctor) persona);
-        Clinica.getInstance().obtenerMaximoIdDoctor();
         int fila = 0;
         
         String query = "INSERT INTO DOCTOR (id_doctor, id_persona, especialidad, enServicio) " +
@@ -2096,7 +1807,7 @@ public class Clinica implements Serializable  {//u
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, codDoctor);
+            stmt.setInt(1, Clinica.getInstance().obtenerMaximoIdDoctor());
             stmt.setInt(2, id_persona);
             stmt.setString(3, doctor.getEspecialidad());
             stmt.setBoolean(4, doctor.isEnServicio());
@@ -2168,7 +1879,18 @@ public class Clinica implements Serializable  {//u
                     Date fechaNacimiento = rs.getDate("fecha_nacimiento");
                     String sexo = rs.getString("sexo");
                     String userName = rs.getString("userName");
-                    String password = new String(rs.getBytes("passwordUser"), StandardCharsets.UTF_8);
+                    String password = "";
+                    
+                    if (rs.getBytes("passwordUser") == null) {
+                    	
+                    	password = "123";
+                    
+                    } else {
+                        
+                    	password = new String(rs.getBytes("passwordUser"), StandardCharsets.UTF_8);
+                    
+                    }                    
+                    
                     int rangoUser = rs.getInt("id_rango_persona");
 
                     switch (rangoUser) {
@@ -2195,7 +1917,7 @@ public class Clinica implements Serializable  {//u
 
         return persona;
     }
-    
+/*
     public void eliminarDatosPacienteSQL(String id_persona) {
         
     	try (Connection conn = DatabaseConnection.getConnection()) {
@@ -2279,6 +2001,104 @@ public class Clinica implements Serializable  {//u
         }
     }
     
+    */
+    
+    public void eliminarDatosPacienteSQL(String id_persona) {
+        Connection conn = null;
+        try {
+            conn = DatabaseConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            // Eliminación en cadena para evitar errores con las claves foráneas
+
+            String queryConsultaVacuna = "DELETE FROM CONSULTA_VACUNA WHERE id_consulta IN " +
+                                         "(SELECT id_consulta FROM CONSULTA WHERE id_historial_clinico IN " +
+                                         "(SELECT id_historial_clinico FROM HISTORIAL_CLINICO " +
+                                         "WHERE id_paciente = (SELECT id_paciente FROM PACIENTE WHERE id_persona = ?)))";
+            try (PreparedStatement stmtConsultaVacuna = conn.prepareStatement(queryConsultaVacuna)) {
+                stmtConsultaVacuna.setString(1, id_persona);
+                stmtConsultaVacuna.executeUpdate();
+            }
+
+            String queryEnfermedadConsulta = "DELETE FROM ENFERMEDAD_CONSULTA WHERE id_consulta IN " +
+                                             "(SELECT id_consulta FROM CONSULTA WHERE id_historial_clinico IN " +
+                                             "(SELECT id_historial_clinico FROM HISTORIAL_CLINICO " +
+                                             "WHERE id_paciente = (SELECT id_paciente FROM PACIENTE WHERE id_persona = ?)))";
+            try (PreparedStatement stmtEnfermedadConsulta = conn.prepareStatement(queryEnfermedadConsulta)) {
+                stmtEnfermedadConsulta.setString(1, id_persona);
+                stmtEnfermedadConsulta.executeUpdate();
+            }
+
+            String queryConsulta = "DELETE FROM CONSULTA WHERE id_historial_clinico IN " +
+                                   "(SELECT id_historial_clinico FROM HISTORIAL_CLINICO " +
+                                   "WHERE id_paciente = (SELECT id_paciente FROM PACIENTE WHERE id_persona = ?))";
+            try (PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta)) {
+                stmtConsulta.setString(1, id_persona);
+                stmtConsulta.executeUpdate();
+            }
+
+            String queryCita = "DELETE FROM CITA " +
+                               "WHERE id_persona = ? OR id_creador_cita = ?";
+            try (PreparedStatement stmtCita = conn.prepareStatement(queryCita)) {
+                stmtCita.setString(1, id_persona);
+                stmtCita.setString(2, id_persona);
+                stmtCita.executeUpdate();
+            }
+
+            String queryHistorialClinico = "DELETE FROM HISTORIAL_CLINICO " +
+                                           "WHERE id_paciente = (SELECT id_paciente FROM PACIENTE WHERE id_persona = ?)";
+            try (PreparedStatement stmtHistorialClinico = conn.prepareStatement(queryHistorialClinico)) {
+                stmtHistorialClinico.setString(1, id_persona);
+                stmtHistorialClinico.executeUpdate();
+            }
+
+            String queryCredencial = "DELETE FROM CREDENCIAL " +
+                                     "WHERE id_persona = ?";
+            try (PreparedStatement stmtCredencial = conn.prepareStatement(queryCredencial)) {
+                stmtCredencial.setString(1, id_persona);
+                stmtCredencial.executeUpdate();
+            }
+
+            String queryPaciente = "DELETE FROM PACIENTE " + 
+                                   "WHERE id_persona = ?";
+            try (PreparedStatement stmtPaciente = conn.prepareStatement(queryPaciente)) {
+                stmtPaciente.setString(1, id_persona);
+                stmtPaciente.executeUpdate();
+            }
+
+            String queryPersona = "DELETE FROM PERSONA " +
+                                  "WHERE id_persona = ?";
+            try (PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
+                stmtPersona.setString(1, id_persona);
+                stmtPersona.executeUpdate();
+            }
+
+            conn.commit();
+            System.out.println("Datos del paciente con código " + id_persona + " eliminados.");
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    System.err.print("Transaction is being rolled back");
+                    conn.rollback();
+                } catch (SQLException excep) {
+                    excep.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    
+
+    /*
     public void eliminarDatosDoctorSQL(String id_persona) {
         
     	try (Connection conn = DatabaseConnection.getConnection()) {
@@ -2334,7 +2154,91 @@ public class Clinica implements Serializable  {//u
             e.printStackTrace();
         }
     }
+*/   
+    
+    public void eliminarDatosDoctorSQL(String id_persona) {
 
+        Connection conn = null;
+        
+        try {
+            
+        	conn = DatabaseConnection.getConnection();
+            conn.setAutoCommit(false); // Iniciar la transacción
+
+            // Eliminacion en cadena para evitar errores con las claves foráneas
+            
+            String queryEnfermedadConsulta = "DELETE FROM ENFERMEDAD_CONSULTA WHERE id_consulta IN " +
+                                             "(SELECT id_consulta FROM CONSULTA WHERE id_doctor IN " +
+                                             "(SELECT id_doctor FROM DOCTOR WHERE id_persona = ?))";
+            try (PreparedStatement stmtEnfermedadConsulta = conn.prepareStatement(queryEnfermedadConsulta)) {
+                stmtEnfermedadConsulta.setString(1, id_persona);
+                stmtEnfermedadConsulta.executeUpdate();
+            }
+
+            String queryConsultaVacuna = "DELETE FROM CONSULTA_VACUNA WHERE id_consulta IN " +
+                                         "(SELECT id_consulta FROM CONSULTA WHERE id_doctor IN " +
+                                         "(SELECT id_doctor FROM DOCTOR WHERE id_persona = ?))";
+            try (PreparedStatement stmtConsultaVacuna = conn.prepareStatement(queryConsultaVacuna)) {
+                stmtConsultaVacuna.setString(1, id_persona);
+                stmtConsultaVacuna.executeUpdate();
+            }
+
+            String queryConsulta = "DELETE FROM CONSULTA WHERE id_doctor IN " +
+                                   "(SELECT id_doctor FROM DOCTOR WHERE id_persona = ?)";
+            try (PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta)) {
+                stmtConsulta.setString(1, id_persona);
+                stmtConsulta.executeUpdate();
+            }
+
+            String queryCita = "DELETE FROM CITA WHERE id_doctor IN " +
+                               "(SELECT id_doctor FROM DOCTOR WHERE id_persona = ?)";
+            try (PreparedStatement stmtCita = conn.prepareStatement(queryCita)) {
+                stmtCita.setString(1, id_persona);
+                stmtCita.executeUpdate();
+            }
+
+            String queryCredencial = "DELETE FROM CREDENCIAL WHERE id_persona = ?";
+            try (PreparedStatement stmtCredencial = conn.prepareStatement(queryCredencial)) {
+                stmtCredencial.setString(1, id_persona);
+                stmtCredencial.executeUpdate();
+            }
+
+            String queryDoctor = "DELETE FROM DOCTOR WHERE id_persona = ?";
+            try (PreparedStatement stmtDoctor = conn.prepareStatement(queryDoctor)) {
+                stmtDoctor.setString(1, id_persona);
+                stmtDoctor.executeUpdate();
+            }
+
+            String queryPersona = "DELETE FROM PERSONA WHERE id_persona = ?";
+            try (PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
+                stmtPersona.setString(1, id_persona);
+                stmtPersona.executeUpdate();
+            }
+
+            conn.commit(); // Confirmar la transacción
+            System.out.println("Datos del doctor con código " + id_persona + " eliminados.");
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException closeEx) {
+                    closeEx.printStackTrace();
+                }
+            }
+        }
+    }
+
+/*
     public void eliminarDatosPersonaSQL(String id_persona) {
        
     	try (Connection conn = DatabaseConnection.getConnection()) {
@@ -2382,6 +2286,179 @@ public class Clinica implements Serializable  {//u
             e.printStackTrace();
         }
     }
+*/
+/*
+    public void eliminarDatosPersonaSQL(String id_persona) {
+        
+    	try (Connection conn = DatabaseConnection.getConnection()) {
+        	
+        	//Eliminacion en cadena para evitar errores con las claves foraneas
+
+        	String queryEnfermedadConsulta = "DELETE FROM ENFERMEDAD_CONSULTA " +
+                                             "WHERE id_consulta IN (SELECT id_consulta FROM CONSULTA WHERE id_cita_solicitada IN (SELECT id_cita FROM CITA WHERE id_persona = ? OR id_creador_cita = ?))";
+            try (PreparedStatement stmtEnfermedadConsulta = conn.prepareStatement(queryEnfermedadConsulta)) {
+                stmtEnfermedadConsulta.setString(1, id_persona);
+                stmtEnfermedadConsulta.setString(2, id_persona);
+                stmtEnfermedadConsulta.executeUpdate();
+            }
+
+            String queryConsulta = "DELETE FROM CONSULTA WHERE id_cita_solicitada IN (SELECT id_cita FROM CITA WHERE id_persona = ? OR id_creador_cita = ?)";
+            try (PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta)) {
+                stmtConsulta.setString(1, id_persona);
+                stmtConsulta.setString(2, id_persona);
+                stmtConsulta.executeUpdate();
+            }
+
+            String queryCita = "DELETE FROM CITA WHERE id_persona = ? OR id_creador_cita = ?";
+            try (PreparedStatement stmtCita = conn.prepareStatement(queryCita)) {
+                stmtCita.setString(1, id_persona);
+                stmtCita.setString(2, id_persona);
+                stmtCita.executeUpdate();
+            }
+
+            String queryAdmin = "DELETE FROM ADMINISTRADOR WHERE id_persona = ?";
+            try (PreparedStatement stmtAdmin = conn.prepareStatement(queryAdmin)) {
+                stmtAdmin.setString(1, id_persona);
+                stmtAdmin.executeUpdate();
+            }
+
+            String querySecretario = "DELETE FROM SECRETARIO WHERE id_persona = ?";
+            try (PreparedStatement stmtSecretario = conn.prepareStatement(querySecretario)) {
+                stmtSecretario.setString(1, id_persona);
+                stmtSecretario.executeUpdate();
+            }
+
+            String queryCredencial = "DELETE FROM CREDENCIAL WHERE id_persona = ?";
+            try (PreparedStatement stmtCredencial = conn.prepareStatement(queryCredencial)) {
+                stmtCredencial.setString(1, id_persona);
+                stmtCredencial.executeUpdate();
+            }
+            
+            if (esUnPacienteSQL(id_persona)) {
+            	
+            	eliminarDatosPacienteSQL(id_persona);
+            }
+
+            String queryPersona = "DELETE FROM PERSONA WHERE id_persona = ?";
+            try (PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
+                stmtPersona.setString(1, id_persona);
+                stmtPersona.executeUpdate();
+            }
+
+            System.out.println("Datos de la persona con código " + id_persona + " eliminados.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    */
+    
+    public void eliminarDatosPersonaSQL(String id_persona) {
+        
+    	Connection conn = null;
+        
+        try {
+           
+        	conn = DatabaseConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            // Eliminacion en cadena para evitar errores con las claves foráneas
+            
+            String queryEnfermedadConsulta = "DELETE FROM ENFERMEDAD_CONSULTA " +
+                                             "WHERE id_consulta IN (SELECT id_consulta FROM CONSULTA WHERE id_cita_solicitada IN " + 
+                                             "(SELECT id_cita FROM CITA WHERE id_persona = ? OR id_creador_cita = ?))";
+            try (PreparedStatement stmtEnfermedadConsulta = conn.prepareStatement(queryEnfermedadConsulta)) {
+                stmtEnfermedadConsulta.setString(1, id_persona);
+                stmtEnfermedadConsulta.setString(2, id_persona);
+                stmtEnfermedadConsulta.executeUpdate();
+            }
+
+            String queryConsultaVacuna = "DELETE FROM CONSULTA_VACUNA WHERE id_consulta IN " + 
+            							 "(SELECT id_consulta FROM CONSULTA WHERE id_cita_solicitada IN " + 
+            							 "(SELECT id_cita FROM CITA WHERE id_persona = ? OR id_creador_cita = ?))";
+            try (PreparedStatement stmtConsultaVacuna = conn.prepareStatement(queryConsultaVacuna)) {
+                stmtConsultaVacuna.setString(1, id_persona);
+                stmtConsultaVacuna.setString(2, id_persona);
+                stmtConsultaVacuna.executeUpdate();
+            }
+
+            String queryConsulta = "DELETE FROM CONSULTA WHERE id_cita_solicitada IN " + 
+            					   "(SELECT id_cita FROM CITA WHERE id_persona = ? OR id_creador_cita = ?)";
+            try (PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta)) {
+                stmtConsulta.setString(1, id_persona);
+                stmtConsulta.setString(2, id_persona);
+                stmtConsulta.executeUpdate();
+            }
+
+            String queryCita = "DELETE FROM CITA " + 
+            				   "WHERE id_persona = ? OR id_creador_cita = ?";
+            try (PreparedStatement stmtCita = conn.prepareStatement(queryCita)) {
+                stmtCita.setString(1, id_persona);
+                stmtCita.setString(2, id_persona);
+                stmtCita.executeUpdate();
+            }
+
+            if (esUnPacienteSQL(id_persona)) {
+                eliminarDatosPacienteSQL(id_persona);
+            }
+
+            String queryAdmin = "DELETE FROM ADMINISTRADOR " + 
+            					"WHERE id_persona = ?";
+            try (PreparedStatement stmtAdmin = conn.prepareStatement(queryAdmin)) {
+                stmtAdmin.setString(1, id_persona);
+                stmtAdmin.executeUpdate();
+            }
+
+            String querySecretario = "DELETE FROM SECRETARIO " + 
+            						 "WHERE id_persona = ?";
+            try (PreparedStatement stmtSecretario = conn.prepareStatement(querySecretario)) {
+                stmtSecretario.setString(1, id_persona);
+                stmtSecretario.executeUpdate();
+            }
+
+            String queryDoctor = "DELETE FROM DOCTOR " + 
+            					 "WHERE id_persona = ?";
+            try (PreparedStatement stmtDoctor = conn.prepareStatement(queryDoctor)) {
+                stmtDoctor.setString(1, id_persona);
+                stmtDoctor.executeUpdate();
+            }
+
+            String queryCredencial = "DELETE FROM CREDENCIAL " +
+            						 "WHERE id_persona = ?";
+            try (PreparedStatement stmtCredencial = conn.prepareStatement(queryCredencial)) {
+                stmtCredencial.setString(1, id_persona);
+                stmtCredencial.executeUpdate();
+            }
+
+            String queryPersona = "DELETE FROM PERSONA " +
+            					  "WHERE id_persona = ?";
+            try (PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
+                stmtPersona.setString(1, id_persona);
+                stmtPersona.executeUpdate();
+            }
+
+            conn.commit();
+            System.out.println("Datos de la persona con código " + id_persona + " eliminados.");
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException closeEx) {
+                    closeEx.printStackTrace();
+                }
+            }
+        }
+    }   
     
     public void modificarDatosPersonaSQL(Persona persona) {
     	
@@ -2484,8 +2561,7 @@ public class Clinica implements Serializable  {//u
     
     public DefaultTableModel cargarDatosViviendaSQL() {
         String query = "SELECT v.id_vivienda, v.direccion " +
-                       "FROM VIVIENDA AS v " +
-                       "LEFT JOIN PACIENTE AS p ON v.id_vivienda = p.id_vivienda";
+                       "FROM VIVIENDA AS v ";
 
         DefaultTableModel model = new DefaultTableModel();
         model.setColumnIdentifiers(new String[]{"Código Vivienda", "Dirección"});
@@ -2610,7 +2686,7 @@ public class Clinica implements Serializable  {//u
          DateTimeFormatter hora = DateTimeFormatter.ofPattern("hh:mm a");
     	
     	String query = "SELECT c.id_cita, p.nombre AS nombre_paciente, p.apellido AS apellido_paciente, d.nombre AS nombre_doctor, d.apellido AS apellido_doctor, " +
-    				   "c.fecha_cita, c.hora_cita, crea_cita.nombre AS nombre_creador, crea_cita.apellido AS apellido_creador, c.completada " +
+    				   "c.fecha_cita, c.hora_cita, c.fecha_cita_creacion, crea_cita.nombre AS nombre_creador, crea_cita.apellido AS apellido_creador, c.completada " +
 		    		   "FROM CITA AS c " +
 		    		   "INNER JOIN PERSONA AS p ON c.id_persona = p.id_persona " +
 		    		   "INNER JOIN DOCTOR AS doc ON c.id_doctor = doc.id_doctor " +
@@ -2618,14 +2694,14 @@ public class Clinica implements Serializable  {//u
 		    		   "LEFT JOIN PERSONA AS crea_cita ON c.id_creador_cita = crea_cita.id_persona ";
     			
         DefaultTableModel model = new DefaultTableModel();
-        model.setColumnIdentifiers(new String[]{"Codigo", "Paciente", "Doctor", "Fecha/Hora", "Atendido por", "Completado"});
+        model.setColumnIdentifiers(new String[]{"Codigo", "Paciente", "Doctor", "Fecha/Hora", "Atendido por", "Completado", "Creacion"});
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                Object[] row = new Object[6];
+                Object[] row = new Object[7];
                 row[0] = rs.getString("id_cita");
                 row[1] = rs.getString("nombre_paciente") + " " + rs.getString("apellido_paciente");
                 row[2] = rs.getString("nombre_doctor") + " " + rs.getString("apellido_doctor");
@@ -2641,6 +2717,10 @@ public class Clinica implements Serializable  {//u
                 row[4] = atendidoPor;
                 
                 row[5] = rs.getBoolean("completada") ? "Sí" : "No";
+                
+                LocalDate fechaCreacion	= rs.getDate("fecha_cita_creacion").toLocalDate();
+                row[6] = fechaCreacion.format(fecha);
+                
                 model.addRow(row);
             }
         } catch (SQLException e) {
@@ -2721,7 +2801,6 @@ public class Clinica implements Serializable  {//u
                     Persona miDoctor = Clinica.getInstance().buscarPersonaByIdSQL(id_persona_doctor);
                     Persona miPersona = Clinica.getInstance().buscarPersonaByIdSQL(id_persona);
 
-
                     cita = new Cita(codigo, miPersona, ((Doctor) miDoctor), fechaCita, horaCita);
                     cita.setFechacreacion(fechaCreacion);
                     cita.setRealizada(realizada);
@@ -2736,55 +2815,15 @@ public class Clinica implements Serializable  {//u
 
         return cita;
     }
-/*
-    public void modificarDatosCitaSQL(Cita cita) {
-        
-        String queryDoctor = "SELECT id_doctor " + 
-        					 "FROM DOCTOR " + 
-        					 "WHERE id_persona = ?";
-        
-        String queryUpdate = "UPDATE CITA SET fecha_cita = ?, hora_cita = ?, id_doctor = ?, id_persona = ? " +
-                             "WHERE id_cita = ?";
-        int filas = 0;
-        
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmtDoctor = conn.prepareStatement(queryDoctor);
-             PreparedStatement stmtUpdate = conn.prepareStatement(queryUpdate)) {
 
-            stmtDoctor.setInt(1, Integer.parseInt(cita.getMiDoctor().getCodigo()));
-            
-            ResultSet rs = stmtDoctor.executeQuery();
-
-            if (rs.next()) {
-                
-            	int id_doctor = rs.getInt("id_doctor");
-
-                stmtUpdate.setDate(1, new java.sql.Date(cita.getFechaCita().getTime()));
-                stmtUpdate.setTime(2, cita.getHoraCita());
-                stmtUpdate.setInt(4, id_doctor);
-                stmtUpdate.setInt(5, Integer.parseInt(cita.getMiPersona().getCodigo()));
-                stmtUpdate.setInt(6, Integer.parseInt(cita.getCodigo())); 
-
-                filas += stmtUpdate.executeUpdate();
-                System.out.println("Citas actualizadas: " + filas);
-                
-            } else {
-                System.out.println("Error: El id_persona proporcionado no está asociado con ningún doctor.");
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-*/
-    
     public void modificarDatosCitaSQL(Cita cita) {
         
     	String queryDoctor = "SELECT id_doctor " + 
         					  "FROM DOCTOR " + 
         					  "WHERE id_persona = ?";
     	
-        String queryUpdate = "UPDATE CITA SET fecha_cita = ?, hora_cita = ?, id_doctor = ?, id_persona = ? WHERE id_cita = ?";
+        String queryUpdate = "UPDATE CITA SET fecha_cita = ?, hora_cita = ?, id_doctor = ?, id_persona = ?, completada = ? " +
+        					 "WHERE id_cita = ? ";
 
         int filas = 0;
 
@@ -2803,7 +2842,8 @@ public class Clinica implements Serializable  {//u
                 stmtUpdate.setTime(2, cita.getHoraCita());
                 stmtUpdate.setInt(3, id_doctor);
                 stmtUpdate.setInt(4, Integer.parseInt(cita.getMiPersona().getCodigo()));
-                stmtUpdate.setInt(5, Integer.parseInt(cita.getCodigo()));
+                stmtUpdate.setInt(5, cita.isRealizada() ? 1 : 0);
+                stmtUpdate.setInt(6, Integer.parseInt(cita.getCodigo()));
 
                 filas = stmtUpdate.executeUpdate();
                 System.out.println("Citas actualizadas: " + filas);
@@ -2816,7 +2856,7 @@ public class Clinica implements Serializable  {//u
             e.printStackTrace();
         }
     }
-    
+/*   
     public void eliminarDatosCitaSQL(String id_cita) {
         
     	try (Connection conn = DatabaseConnection.getConnection()) {
@@ -2848,7 +2888,727 @@ public class Clinica implements Serializable  {//u
             e.printStackTrace();
         }
     }
+*/
+    
+    public void eliminarDatosCitaSQL(String id_cita) {
+        Connection conn = null;
+        try {
+            conn = DatabaseConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            // Eliminación en cadena para evitar errores con las claves foráneas
+
+            String queryConsultaVacuna = "DELETE FROM CONSULTA_VACUNA WHERE id_consulta IN " +
+                                         "(SELECT id_consulta FROM CONSULTA WHERE id_cita_solicitada = ?)";
+            try (PreparedStatement stmtConsultaVacuna = conn.prepareStatement(queryConsultaVacuna)) {
+                stmtConsultaVacuna.setString(1, id_cita);
+                stmtConsultaVacuna.executeUpdate();
+            }
+
+            String queryEnfermedadConsulta = "DELETE FROM ENFERMEDAD_CONSULTA WHERE id_consulta IN " +
+                                             "(SELECT id_consulta FROM CONSULTA WHERE id_cita_solicitada = ?)";
+            try (PreparedStatement stmtEnfermedadConsulta = conn.prepareStatement(queryEnfermedadConsulta)) {
+                stmtEnfermedadConsulta.setString(1, id_cita);
+                stmtEnfermedadConsulta.executeUpdate();
+            }
+
+            String queryConsulta = "DELETE FROM CONSULTA " + 
+            					   "WHERE id_cita_solicitada = ?";
+            try (PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta)) {
+                stmtConsulta.setString(1, id_cita);
+                stmtConsulta.executeUpdate();
+            }
+
+            String queryCita = "DELETE FROM CITA " + 
+            				   "WHERE id_cita = ?";
+            try (PreparedStatement stmtCita = conn.prepareStatement(queryCita)) {
+                stmtCita.setString(1, id_cita);
+                stmtCita.executeUpdate();
+            }
+
+            conn.commit();
+            System.out.println("Datos de la cita con código " + id_cita + " eliminados.");
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    System.err.println("Transaction is being rolled back");
+                    conn.rollback();
+                } catch (SQLException excep) {
+                    excep.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    
+    
+    //CONSULTAS SQL:
+    
+    
+    /*
+     *     public void cargarDatosConsultaSQL() {
+    	
+    	Clinica.getInstance().getMisConsultas().clear();
+        
+        String queryConsulta = "SELECT c.id_consulta, c.fecha_consulta, c.id_historial_clinico, c.id_doctor, c.diagnostico, " +
+                               "c.id_cita_solicitada, d.id_persona AS id_doctor_persona " +
+                               "FROM CONSULTA AS c " +
+                               "INNER JOIN DOCTOR AS d ON c.id_doctor = d.id_doctor " +
+                               "INNER JOIN PERSONA AS p ON p.id_persona = d.id_persona ";
+        
+        String queryEnfermedad = "SELECT ec.id_enfermedad " +
+                                 "FROM ENFERMEDAD_CONSULTA AS ec " +
+                                 "WHERE ec.id_consulta = ?"; // "?", Es un parametro
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta);
+             PreparedStatement stmtEnfermedades = conn.prepareStatement(queryEnfermedad);
+             ResultSet rsConsulta = stmtConsulta.executeQuery()) {
+            
+            while (rsConsulta.next()) {
+                
+                String codigo = rsConsulta.getString("id_consulta");
+                Date fechaConsulta = rsConsulta.getDate("fecha_consulta");
+                String id_historial_clinico = rsConsulta.getString("id_historial_clinico");
+                String id_doctor = rsConsulta.getString("id_doctor_persona");
+                String id_cita_solicitada = rsConsulta.getString("id_cita_solicitada");
+                String diagnostico = rsConsulta.getString("diagnostico") != null ? rsConsulta.getString("diagnostico") : "No tiene";
+
+                Doctor doctor = (Doctor) Clinica.getInstance().buscarPersonaById(id_doctor);
+                Cita cita = Clinica.getInstance().buscarCitaById(id_cita_solicitada);
+                
+                Consulta consulta = new Consulta(codigo, cita);
+                consulta.setDiagnostico(diagnostico);
+                consulta.setFechaConsulta(fechaConsulta);
+
+                stmtEnfermedades.setString(1, codigo); // "?" cambia el parametro, segun el codigo
+                
+                try (ResultSet rsEnfermedades = stmtEnfermedades.executeQuery()) {
+                    while (rsEnfermedades.next()) {
+                        String id_enfermedad = rsEnfermedades.getString("id_enfermedad");
+                        Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(id_enfermedad);
+                        if (enfermedad != null) {
+                            consulta.insertarEnfermedad(enfermedad);
+                        }
+                    }
+                }
+                
+                HistoriaClinica historiaClinica = Clinica.getInstance().buscarHistorialClinicaById(id_historial_clinico);
+                
+                if (historiaClinica != null) {
+                    consulta.setMiHistoriaClinica(historiaClinica);
+                    historiaClinica.getMisConsultas().add(consulta);
+                }
+
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+     * 
+     * */
+    
+    public DefaultTableModel cargarDatosConsultasSQL() {
+        DateTimeFormatter fechaFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        String query = "SELECT c.id_consulta, c.fecha_consulta, p.nombre AS nombre_doctor, p.apellido AS apellido_doctor, c.diagnostico " +
+                       "FROM CONSULTA AS c " +
+                       "INNER JOIN DOCTOR AS d ON c.id_doctor = d.id_doctor " +
+                       "INNER JOIN PERSONA AS p ON d.id_persona = p.id_persona";
+
+        DefaultTableModel model = new DefaultTableModel();
+        model.setColumnIdentifiers(new String[]{"Codigo", "Fecha Consulta", "Consultado por", "Diagnostico"});
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                
+            	Object[] row = new Object[4];
+                
+                row[0] = rs.getString("id_consulta");
+                LocalDate fechaConsulta = rs.getDate("fecha_consulta").toLocalDate();
+                row[1] = fechaConsulta.format(fechaFormatter);
+                row[2] = rs.getString("nombre_doctor") + " " + rs.getString("apellido_doctor");
+                row[3] = rs.getString("diagnostico") != null ? rs.getString("diagnostico") : "No tiene";
+                model.addRow(row);
+            }
+            
+        } catch (SQLException e) {
+        	
+            e.printStackTrace();
+        }
+
+        return model;
+    }
 
     
-      
+    public DefaultTableModel cargarDatosCitasPorDoctorSQL(String id_persona_doctor) {
+        
+    	DateTimeFormatter fecha = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter hora = DateTimeFormatter.ofPattern("hh:mm a");
+
+        String query = "SELECT c.id_cita, c.fecha_cita, c.hora_cita, c.fecha_cita_creacion, p.nombre AS nombre_paciente, p.apellido AS apellido_paciente " +
+                       "FROM CITA AS c " +
+                       "INNER JOIN PERSONA AS p ON c.id_persona = p.id_persona " +
+                       "WHERE c.id_doctor = (SELECT id_doctor FROM DOCTOR WHERE id_persona = ?) AND c.completada = 0";
+
+        DefaultTableModel model = new DefaultTableModel();
+        model.setColumnIdentifiers(new String[]{"Codigo", "Fecha", "Hora", "Creacion", "Solicitante"});
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
+            stmt.setString(1, id_persona_doctor);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                
+            	while (rs.next()) {
+                    
+            		Object[] row = new Object[5];
+                    row[0] = rs.getString("id_cita");
+ 
+                    LocalDate fechaCita = rs.getDate("fecha_cita").toLocalDate();
+                    LocalTime horaCita = rs.getTime("hora_cita").toLocalTime();
+                    row[1] = fechaCita.format(fecha);
+                    row[2] = horaCita.format(hora);
+
+                    LocalDate fechaCreacion = rs.getDate("fecha_cita_creacion").toLocalDate();
+                    row[3] = fechaCreacion.format(fecha);
+
+                    row[4] = rs.getString("nombre_paciente") + " " + rs.getString("apellido_paciente");
+
+                    model.addRow(row);
+                }
+            }
+            
+        } catch (SQLException e) {
+        	
+            e.printStackTrace();
+        }
+
+        return model;
+    }
+    
+    
+    public boolean esUnPacienteSQL(String id_persona) {
+        
+    	String query = "SELECT COUNT(*) " + 
+    				   "FROM PACIENTE " + 
+    				   "WHERE id_persona = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
+            stmt.setString(1, id_persona);
+            try (ResultSet rs = stmt.executeQuery()) {
+                
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+            
+        } catch (SQLException e) {
+        	
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+
+    public void insertarNuevaPersonaEnPacienteSQL(String id_persona, String tipoSangre, int id_vivienda) {
+
+        String insertarPacienteQuery = "INSERT INTO PACIENTE (id_paciente, id_persona, tipoSangre, id_vivienda) " +
+                                       "VALUES (?, ?, ?, ?)";
+
+        String actualizarCredencialQuery = "UPDATE CREDENCIAL " +
+                                           "SET id_rango_persona = 4" +
+                                           "WHERE id_persona = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtInsertarPaciente = conn.prepareStatement(insertarPacienteQuery);
+             PreparedStatement stmtActualizarCredencial = conn.prepareStatement(actualizarCredencialQuery)) {
+
+            stmtInsertarPaciente.setInt(1, Clinica.getInstance().obtenerMaximoIdPaciente());
+            stmtInsertarPaciente.setInt(2, Integer.parseInt(id_persona));
+            stmtInsertarPaciente.setString(3, tipoSangre);
+            stmtInsertarPaciente.setObject(4, id_vivienda != 0 ? id_vivienda : null);
+
+            int filaInsertada = stmtInsertarPaciente.executeUpdate();
+            System.out.println("Pacientes agregados: " + filaInsertada);
+            System.out.println("Paciente sangre: " + tipoSangre);
+
+            stmtActualizarCredencial.setInt(1, Integer.parseInt(id_persona));
+
+            int filaActualizada = stmtActualizarCredencial.executeUpdate();
+            System.out.println("Credenciales actualizadas: " + filaActualizada);
+
+        } catch (SQLException e) {
+        	
+            e.printStackTrace();
+        }
+    }
+    
+    public void insertarDatosConsultasSQL(Consulta miConsulta, ArrayList<String> vacunasAplicadas) {
+        
+    	String queryDoctor = "SELECT id_doctor " +
+                             "FROM DOCTOR " +
+                             "WHERE id_persona = ?";
+
+        String queryInsertConsulta = "INSERT INTO CONSULTA (id_consulta, fecha_consulta, diagnostico, id_doctor, id_cita_solicitada) " +
+                                     "VALUES (?, ?, ?, ?, ?)";
+        
+        String queryInsertEnfermedadConsulta = "INSERT INTO ENFERMEDAD_CONSULTA (id_enfermedad, id_consulta) " +
+                                               "VALUES (?, ?)";
+        
+        String queryInsertConsultaVacuna = "INSERT INTO CONSULTA_VACUNA (id_consulta, id_vacuna_aplicada) " + 
+        								   "VALUES (?, ?)";
+
+        
+        int filasConsulta = 0;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtDoctor = conn.prepareStatement(queryDoctor);
+             PreparedStatement stmtInsertConsulta = conn.prepareStatement(queryInsertConsulta);
+             PreparedStatement stmtInsertEnfermedadConsulta = conn.prepareStatement(queryInsertEnfermedadConsulta);
+        	 PreparedStatement stmtInsertConsultaVacuna = conn.prepareStatement(queryInsertConsultaVacuna)) {
+
+        	
+            stmtDoctor.setInt(1, Integer.parseInt(miConsulta.getMiCita().getMiDoctor().getCodigo()));
+            ResultSet rsDoctor = stmtDoctor.executeQuery();
+
+            int id_doctor = 0;
+            if (rsDoctor.next()) {
+                id_doctor = rsDoctor.getInt("id_doctor");
+            }
+
+            int id_consulta = Clinica.getInstance().obtenerMaximoIdConsulta();
+            
+            stmtInsertConsulta.setInt(1, id_consulta);
+            stmtInsertConsulta.setDate(2, new java.sql.Date(miConsulta.getFechaConsulta().getTime()));
+            stmtInsertConsulta.setString(3, miConsulta.getDiagnostico());
+            stmtInsertConsulta.setInt(4, id_doctor);
+            stmtInsertConsulta.setInt(5, Integer.parseInt(miConsulta.getMiCita().getCodigo()));
+
+            filasConsulta = stmtInsertConsulta.executeUpdate();
+
+            if (filasConsulta > 0) {
+            	
+                System.out.println("Consulta insertada exitosamente.");
+
+                for (Enfermedad enfermedad : miConsulta.getMisEnfermedades()) {
+                    stmtInsertEnfermedadConsulta.setInt(1, Integer.parseInt(enfermedad.getCodigo()));
+                    stmtInsertEnfermedadConsulta.setInt(2, id_consulta);
+                    stmtInsertEnfermedadConsulta.executeUpdate();
+                }
+                
+                
+                System.out.println("Relaciones de enfermedades insertadas correctamente.");
+
+                for (String id_vacuna : vacunasAplicadas) {
+                	
+                	String codigo = id_vacuna.split(" ")[0].substring(2);
+                    stmtInsertConsultaVacuna.setInt(1, id_consulta);
+                    stmtInsertConsultaVacuna.setInt(2, Integer.parseInt(codigo));
+                    stmtInsertConsultaVacuna.executeUpdate();
+                }
+
+                System.out.println("Relaciones de enfermedades insertadas correctamente.");
+                
+            } else {
+                System.out.println("Error al insertar la consulta.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*
+    public Consulta obtenerConsultaByIdSQL(String id_consulta) {
+        
+    	Consulta consulta = null;
+
+        String queryConsulta = "SELECT c.id_consulta, c.fecha_consulta, c.diagnostico, c.id_doctor, c.id_cita_solicitada " +
+                               "FROM CONSULTA AS c " +
+                               "WHERE c.id_consulta = ?";
+                               
+        String queryEnfermedades = "SELECT e.id_enfermedad, e.nombre, e.sintomas, e.tratamiento, e.id_gravedad_enfermedad " +
+                                   "FROM ENFERMEDAD AS e " +
+                                   "INNER JOIN ENFERMEDAD_CONSULTA AS ec ON e.id_enfermedad = ec.id_enfermedad " +
+                                   "WHERE ec.id_consulta = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta);
+             PreparedStatement stmtEnfermedades = conn.prepareStatement(queryEnfermedades)) {
+
+            stmtConsulta.setString(1, id_consulta);
+
+            try (ResultSet rsConsulta = stmtConsulta.executeQuery()) {
+               
+            	if (rsConsulta.next()) {
+            		
+                    String codigo_consulta = rsConsulta.getString("id_consulta");
+                    Date fechaConsulta = rsConsulta.getDate("fecha_consulta");
+                    String diagnostico = rsConsulta.getString("diagnostico");
+                    String idCitaSolicitada = rsConsulta.getString("id_cita_solicitada");
+                    
+                    Cita miCita = Clinica.getInstance().obtenerCitaByIdSQL(codigo_consulta);
+                    
+                    consulta = new Consulta(codigo_consulta, miCita);
+                    consulta.setFechaConsulta(fechaConsulta);
+                    consulta.setDiagnostico(diagnostico);
+
+                    stmtEnfermedades.setString(1, id_consulta);
+                    
+                    try (ResultSet rsEnfermedades = stmtEnfermedades.executeQuery()) {
+                        while (rsEnfermedades.next()) {
+
+                        	String codigo_enfermedad = rsEnfermedades.getString("id_enfermedad");
+                            String nombre = rsEnfermedades.getString("nombre");
+                            String sintomas = rsEnfermedades.getString("sintomas");
+                            String tratamiento = rsEnfermedades.getString("tratamiento");
+                            String gravedad = rsEnfermedades.getString("id_gravedad_enfermedad");
+
+                            Enfermedad enfermedad = new Enfermedad(codigo_enfermedad, nombre, sintomas, tratamiento, obtenerValorGravedadByNombre(gravedad));
+                            consulta.insertarEnfermedad(enfermedad);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return consulta;
+    }
+*/
+    public ArrayList<Object> obtenerConsultaByIdSQL(String id_consulta) {
+        ArrayList<Object> result = new ArrayList<>();
+        Consulta consulta = null;
+        ArrayList<String> vacunasAplicadas = new ArrayList<>();
+
+        String queryConsulta = "SELECT c.id_consulta, c.fecha_consulta, c.diagnostico, c.id_doctor, c.id_cita_solicitada " +
+                               "FROM CONSULTA AS c " +
+                               "WHERE c.id_consulta = ?";
+                               
+        String queryEnfermedades = "SELECT e.id_enfermedad, e.nombre, e.sintomas, e.tratamiento, e.id_gravedad_enfermedad " +
+                                   "FROM ENFERMEDAD AS e " +
+                                   "INNER JOIN ENFERMEDAD_CONSULTA AS ec ON e.id_enfermedad = ec.id_enfermedad " +
+                                   "WHERE ec.id_consulta = ?";
+                                   
+        String queryVacunas = "SELECT v.id_vacuna, v.nombre " +
+                              "FROM VACUNA AS v " +
+                              "INNER JOIN CONSULTA_VACUNA AS cv ON v.id_vacuna = cv.id_vacuna_aplicada " +
+                              "WHERE cv.id_consulta = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta);
+             PreparedStatement stmtEnfermedades = conn.prepareStatement(queryEnfermedades);
+             PreparedStatement stmtVacunas = conn.prepareStatement(queryVacunas)) {
+
+            stmtConsulta.setString(1, id_consulta);
+
+            try (ResultSet rsConsulta = stmtConsulta.executeQuery()) {
+                if (rsConsulta.next()) {
+                    String codigo_consulta = rsConsulta.getString("id_consulta");
+                    Date fechaConsulta = rsConsulta.getDate("fecha_consulta");
+                    String diagnostico = rsConsulta.getString("diagnostico");
+                    String idCitaSolicitada = rsConsulta.getString("id_cita_solicitada");
+                    
+                    Cita miCita = Clinica.getInstance().obtenerCitaByIdSQL(idCitaSolicitada);
+                    
+                    consulta = new Consulta(codigo_consulta, miCita);
+                    consulta.setFechaConsulta(fechaConsulta);
+                    consulta.setDiagnostico(diagnostico);
+
+                    stmtEnfermedades.setString(1, id_consulta);
+                    
+                    try (ResultSet rsEnfermedades = stmtEnfermedades.executeQuery()) {
+                        while (rsEnfermedades.next()) {
+                            String codigo_enfermedad = rsEnfermedades.getString("id_enfermedad");
+                            String nombre = rsEnfermedades.getString("nombre");
+                            String sintomas = rsEnfermedades.getString("sintomas");
+                            String tratamiento = rsEnfermedades.getString("tratamiento");
+                            String gravedad = rsEnfermedades.getString("id_gravedad_enfermedad");
+
+                            Enfermedad enfermedad = new Enfermedad(codigo_enfermedad, nombre, sintomas, tratamiento, obtenerValorGravedadByNombre(gravedad));
+                            consulta.insertarEnfermedad(enfermedad);
+                        }
+                    }
+
+                    // Obtener vacunas
+                    stmtVacunas.setString(1, id_consulta);
+                    
+                    try (ResultSet rsVacunas = stmtVacunas.executeQuery()) {
+                        while (rsVacunas.next()) {
+                            String codigoVacuna = rsVacunas.getString("id_vacuna");
+                            String nombreVacuna = rsVacunas.getString("nombre");
+                            vacunasAplicadas.add("V-" + codigoVacuna + " " + nombreVacuna);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Agregar consulta y lista de vacunas al ArrayList
+        result.add(consulta);
+        result.add(vacunasAplicadas);
+
+        return result;
+    }
+
+    private int obtenerValorGravedadByNombre(String gravedad) {
+    	
+    	String gravedadLowerCase = gravedad.toLowerCase();
+
+        switch (gravedadLowerCase) {
+            case "leve":
+                return 1;
+            case "moderada":
+                return 2;
+            default: //Es grave
+                return 3;
+        }
+        
+    } 
+    
+    public void modificarDatosConsultaSQL(Consulta consulta, ArrayList<String> vacunasAplicadas) {
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            
+            // Eliminación en cadena para evitar errores con las claves foráneas
+            
+            String queryEliminarEnfermedades = "DELETE FROM ENFERMEDAD_CONSULTA " + 
+            						           "WHERE id_consulta = ?";
+            try (PreparedStatement stmtEliminarEnfermedades = conn.prepareStatement(queryEliminarEnfermedades)) {
+                stmtEliminarEnfermedades.setInt(1, Integer.parseInt(consulta.getCodigo()));
+                stmtEliminarEnfermedades.executeUpdate();
+            }
+
+            String queryEliminarVacunas = "DELETE FROM CONSULTA_VACUNA " + 
+            							  "WHERE id_consulta = ?";
+            try (PreparedStatement stmtEliminarVacunas = conn.prepareStatement(queryEliminarVacunas)) {
+                stmtEliminarVacunas.setInt(1, Integer.parseInt(consulta.getCodigo()));
+                stmtEliminarVacunas.executeUpdate();
+            }
+
+            String queryInsertarEnfermedades = "INSERT INTO ENFERMEDAD_CONSULTA (id_enfermedad, id_consulta) " +
+            		 						   "VALUES (?, ?)";
+            try (PreparedStatement stmtInsertarEnfermedades = conn.prepareStatement(queryInsertarEnfermedades)) {
+                for (Enfermedad enfermedad : consulta.getMisEnfermedades()) {
+                    stmtInsertarEnfermedades.setInt(1, Integer.parseInt(enfermedad.getCodigo()));
+                    stmtInsertarEnfermedades.setInt(2, Integer.parseInt(consulta.getCodigo()));
+                    stmtInsertarEnfermedades.executeUpdate();
+                }
+            }
+
+            String queryInsertarVacunas = "INSERT INTO CONSULTA_VACUNA (id_consulta, id_vacuna_aplicada) " +
+            							  "VALUES (?, ?)";
+            try (PreparedStatement stmtInsertarVacunas = conn.prepareStatement(queryInsertarVacunas)) {
+                for (String vacuna : vacunasAplicadas) {
+                    String codigo = vacuna.split(" ")[0].substring(2);
+                    stmtInsertarVacunas.setInt(1, Integer.parseInt(consulta.getCodigo()));
+                    stmtInsertarVacunas.setInt(2, Integer.parseInt(codigo));
+                    stmtInsertarVacunas.executeUpdate();
+                }
+            }
+
+            String queryModificarDiagnostico = "UPDATE CONSULTA SET diagnostico = ? " +
+            								   "WHERE id_consulta = ?";
+            try (PreparedStatement stmtModificarDiagnostico = conn.prepareStatement(queryModificarDiagnostico)) {
+                stmtModificarDiagnostico.setString(1, consulta.getDiagnostico());
+                stmtModificarDiagnostico.setInt(2, Integer.parseInt(consulta.getCodigo()));
+                stmtModificarDiagnostico.executeUpdate();
+            }
+
+            System.out.println("Consulta modificada correctamente con código " + consulta.getCodigo());
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }  
+    
+    public void eliminarDatosConsultaSQL(String id_consulta) {
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            
+        	//Eliminacion en cadena para evitar errores con las claves foraneas            
+        	
+            String queryEliminarEnfermedades = "DELETE FROM ENFERMEDAD_CONSULTA " + 
+					   					       "WHERE id_consulta = ?";
+            try (PreparedStatement stmtEliminarEnfermedades = conn.prepareStatement(queryEliminarEnfermedades)) {
+                stmtEliminarEnfermedades.setString(1, id_consulta);
+                int filasEliminadasEnfermedades = stmtEliminarEnfermedades.executeUpdate();
+                System.out.println("Relaciones de consulas eliminadas: " + filasEliminadasEnfermedades);
+            }
+            
+            String queryEliminarVacunas = "DELETE FROM CONSULTA_VACUNA " + 
+            							  "WHERE id_consulta = ?";
+			try (PreparedStatement stmtEliminarVacunas = conn.prepareStatement(queryEliminarVacunas)) {
+				stmtEliminarVacunas.setInt(1, Integer.parseInt(id_consulta));
+				stmtEliminarVacunas.executeUpdate();
+				int filasEliminadasVacunas = stmtEliminarVacunas.executeUpdate();
+	            System.out.println("Relaciones de vacunas eliminadas: " + filasEliminadasVacunas);
+			}
+            
+            String queryEliminarConsulta = "DELETE FROM CONSULTA " + 
+					                       "WHERE id_consulta = ?";
+            try (PreparedStatement stmtEliminarConsulta = conn.prepareStatement(queryEliminarConsulta)) {
+                stmtEliminarConsulta.setString(1, id_consulta);
+                int filasEliminadasConsulta = stmtEliminarConsulta.executeUpdate();
+                System.out.println("Consulta eliminada: " + filasEliminadasConsulta);
+            }
+            
+        } catch (SQLException e) {
+        	
+            e.printStackTrace();
+        }
+    }
+    
+    public Vivienda buscarViviendaByIdPersonaSQL(int id_persona) {
+        
+        String query = "SELECT v.id_vivienda, v.direccion " +
+                       "FROM VIVIENDA v " +
+                       "JOIN PACIENTE p ON v.id_vivienda = p.id_vivienda " +
+                       "WHERE p.id_persona = ?";
+        
+        Vivienda vivienda = null;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, id_persona);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                
+                if (rs.next()) {
+                    String codigo_vivienda = rs.getString("id_vivienda");
+                    String direccion = rs.getString("direccion");
+
+                    vivienda = new Vivienda(codigo_vivienda, direccion);
+                }
+                
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return vivienda;
+    }
+
+    public String buscarTipoSangrePorIdPersonaSQL(int id_persona) {
+        
+    	String tipoSangre = null;
+        
+        String query = "SELECT tipoSangre " + 
+        			   "FROM PACIENTE " + 
+        			   "WHERE id_persona = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, id_persona);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    tipoSangre = rs.getString("tipoSangre");
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return tipoSangre;
+    }
+
+    public DefaultTableModel cargarCantidadConsultasPacienteSQL(String id_persona_paciente) {
+    	
+    	String query = "SELECT COUNT(*) AS Total_Consultas " +
+    				   "FROM CITA AS c " +
+    			       "WHERE c.completada = 1 AND c.id_persona = ? ";
+
+		DefaultTableModel model = new DefaultTableModel();
+        model.setColumnIdentifiers(new String[]{"Cantidad de Consultas"});
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
+            stmt.setString(1, id_persona_paciente);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                
+            	while (rs.next()) {
+                    
+            		Object[] row = new Object[1];
+                    row[0] = rs.getString("Total_Consultas");
+                    model.addRow(row);
+                }
+            }
+            
+        } catch (SQLException e) {
+        	
+            e.printStackTrace();
+        }
+
+        return model; 
+    }
+    
+    public DefaultTableModel cargarDatosConsultaPacienteSQL(String id_persona_paciente) {
+        
+        String query = "SELECT p.nombre AS nombre_doctor, p.apellido AS apellido_doctor, " +
+                       "cta.fecha_cita, CONVERT(VARCHAR(12), cta.hora_cita, 108) AS hora_cita, " +
+                       "cst.diagnostico " +
+                       "FROM CONSULTA AS cst " +
+                       "INNER JOIN CITA AS cta ON cst.id_cita_solicitada = cta.id_cita " +
+                       "INNER JOIN DOCTOR AS d ON cta.id_doctor = d.id_doctor " +
+                       "INNER JOIN PERSONA AS p ON d.id_persona = p.id_persona " +
+                       "INNER JOIN PACIENTE AS pa ON cta.id_persona = pa.id_persona " +
+                       "INNER JOIN PERSONA AS p_pac ON pa.id_persona = p_pac.id_persona " +
+                       "WHERE p_pac.id_persona = ?";
+
+        DefaultTableModel model = new DefaultTableModel();
+        model.setColumnIdentifiers(new String[]{"Nombre Doctor", "Apellido Doctor", "Fecha Cita", "Hora Cita", "Diagnóstico"});
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, id_persona_paciente);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+
+                while (rs.next()) {
+                    Object[] row = new Object[5];
+                    row[0] = rs.getString("nombre_doctor");
+                    row[1] = rs.getString("apellido_doctor");
+                    row[2] = rs.getDate("fecha_cita");
+                    row[3] = rs.getString("hora_cita");
+                    row[4] = rs.getString("diagnostico");
+                    model.addRow(row);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return model; 
+    }
+    
+    
 } 

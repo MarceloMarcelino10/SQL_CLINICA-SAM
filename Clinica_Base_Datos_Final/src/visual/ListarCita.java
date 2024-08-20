@@ -2,6 +2,7 @@ package visual;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -40,16 +41,17 @@ public class ListarCita extends JDialog {
 			dialog.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
+		} 
 	}
 
 	/**
 	 * Create the dialog.
 	 */
 	public ListarCita() {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(PrincipalVisual.class.getResource("/imagenes/fotoTituloDeVentana.png")));
 		setTitle("Listar citas");
 		setResizable(false);
-		setBounds(100, 100, 950, 400);
+		setBounds(100, 100, 1100, 400);
         setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -166,6 +168,6 @@ public class ListarCita extends JDialog {
             }
             
         }
-	}
+	} 
 	
 }

@@ -2,6 +2,8 @@ package visual;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
+
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -15,6 +17,8 @@ import logico.Consulta;
 import logico.Doctor;
 import logico.Enfermedad;
 import logico.Paciente;
+import logico.Persona;
+import logico.Vacuna;
 import logico.Vivienda;
 
 import javax.swing.UIManager;
@@ -43,22 +47,22 @@ public class RegistrarConsulta extends JDialog {
 	private final JPanel contentPanel = new JPanel();
 	private JTable citas_pendientes_table;
 	private Cita selected = null;
-	private static int index = -1;
 	private JButton btnRegistrar;
 	private static DefaultTableModel model;
-	private static Object[] row;
 	private JTextField txtCodigo;
 	private JTextField txtFecha;
 	private JTextField txtDoctorLoggeado;
 	private JTextArea txtAreaDiagnostico;
-	private JComboBox cbxEnfermedades;
+	private JComboBox<String> cbxEnfermedades;
 	private ArrayList<Enfermedad> enfermedadesLista = new ArrayList<>();
 	private JTextArea txtAreaEnfermedadesConsultadas;
 	private JPanel panel;
-	private JComboBox cbxVivienda;
-	private JComboBox cbxtipoSangre;
+	private JComboBox<String> cbxVivienda;
+	private JComboBox<?> cbxTipoSangre;
 	private JButton btnAgregarEnfermedad;
 	private JButton btnQuitarEnfermedad;
+	private ArrayList<String> misVacunas = new ArrayList<>();
+	private Paciente paciente = null;
 	/**
 	 * Launch the application.
 	 */
@@ -76,7 +80,7 @@ public class RegistrarConsulta extends JDialog {
 	 * Create the dialog.
 	 */
 	public RegistrarConsulta() {
-
+		setIconImage(Toolkit.getDefaultToolkit().getImage(PrincipalVisual.class.getResource("/imagenes/fotoTituloDeVentana.png")));
 		setTitle("Registrar Consulta");
 		setResizable(false);
 		setBounds(100, 100, 878, 685);
@@ -117,14 +121,39 @@ public class RegistrarConsulta extends JDialog {
 	        citas_pendientes_table.addMouseListener(new MouseAdapter() {
 	        	@Override
 	        	public void mouseClicked(MouseEvent e) {
-					int indice = -1;
-					indice = citas_pendientes_table.getSelectedRow();
-					if(indice >= 0) {
+					
+	        		int indice = -1;
+					
+	        		indice = citas_pendientes_table.getSelectedRow(); 
+					
+	        		if(indice >= 0) {
 						btnRegistrar.setEnabled(true);
+						
 						String codigoCita = citas_pendientes_table.getValueAt(indice, 0).toString();
-			            selected = Clinica.getInstance().buscarCitaById(codigoCita);
+						selected = Clinica.getInstance().obtenerCitaByIdSQL(codigoCita);
+						
+						Persona persona = selected.getMiPersona();
+						
+						int codigo = Integer.parseInt(persona.getCodigo());
+			            Vivienda vivienda = Clinica.getInstance().buscarViviendaByIdPersonaSQL(codigo);
+			            String tipo_sangre = Clinica.getInstance().buscarTipoSangrePorIdPersonaSQL(codigo);
+ 
+			            paciente = copiarDePersona(persona); 
+			            paciente.setMiVivienda(vivienda);
+			            paciente.setTipoSangre(tipo_sangre);
+			            
+			          //  System.out.println(codigo + " " + vivienda + " " + tipo_sangre);
+			            
+			            if (paciente == null) {
+			            	
+			            	paciente = (Paciente) selected.getMiPersona();
+			            }
+			            
+			           // System.out.println(paciente.getNombre() + " " + paciente.getMiVivienda());
+
 			            loadCampos();
 					}
+	        		
 	        	}
 	        });
 	        citas_pendientes_table.setModel(model);
@@ -179,8 +208,8 @@ public class RegistrarConsulta extends JDialog {
 			lblDiagnostico.setBounds(12, 122, 73, 14);
 			panel.add(lblDiagnostico);
 			
-			cbxEnfermedades = new JComboBox();
-			cbxEnfermedades.setModel(new DefaultComboBoxModel(new String[] {"<Seleccione>"}));
+			cbxEnfermedades = new JComboBox<String>();
+			cbxEnfermedades.setModel(new DefaultComboBoxModel<String>(new String[] {"<Seleccione>"}));
 			cbxEnfermedades.setBounds(487, 399, 305, 20);
 			panel.add(cbxEnfermedades);
 			
@@ -230,10 +259,10 @@ public class RegistrarConsulta extends JDialog {
 			lblNewLabel_4.setBounds(386, 498, 90, 18);
 			panel.add(lblNewLabel_4);
 			
-			cbxtipoSangre = new JComboBox();
-			cbxtipoSangre.setModel(new DefaultComboBoxModel(new String[] {"<Seleccione>", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"}));
-			cbxtipoSangre.setBounds(466, 496, 110, 22);
-			panel.add(cbxtipoSangre);
+			cbxTipoSangre = new JComboBox();
+			cbxTipoSangre.setModel(new DefaultComboBoxModel(new String[] {"<Seleccione>", "+A", "+B", "+AB", "-A", "-B", "-AB", "-O", "+O"}));
+			cbxTipoSangre.setBounds(466, 496, 110, 22);
+			panel.add(cbxTipoSangre);
 			
 			JLabel lblNewLabel_5 = new JLabel("Vivienda:");
 			lblNewLabel_5.setBounds(595, 500, 60, 14);
@@ -243,6 +272,21 @@ public class RegistrarConsulta extends JDialog {
 			cbxVivienda.setModel(new DefaultComboBoxModel(new String[] {"<Seleccione>"}));
 			cbxVivienda.setBounds(651, 496, 180, 22);
 			panel.add(cbxVivienda);
+			
+			JLabel lblNewLabel_6 = new JLabel("Medicar:");
+			lblNewLabel_6.setBounds(386, 561, 73, 14);
+			panel.add(lblNewLabel_6);
+			
+			JButton btnNewButton = new JButton("Seleccionar Vacunas");
+			btnNewButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					
+					seleccionarVacunas();
+					
+				}
+			});
+			btnNewButton.setBounds(466, 557, 165, 23);
+			panel.add(btnNewButton);
 		}
 		{
 			JPanel buttonPane = new JPanel();
@@ -278,206 +322,263 @@ public class RegistrarConsulta extends JDialog {
 
 	}
 	
-	
 	private void registrarConsulta() {
-		
-        Doctor doctorLogged = (Doctor) Clinica.getInstance().getLoggedUser();
-        if (selected != null) {
-            String codigoConsulta = txtCodigo.getText().trim();
-            String fechaConsultaStr = txtFecha.getText().trim();
-            String diagnostico = txtAreaDiagnostico.getText().trim();
-            String tipoSangre = (String) cbxtipoSangre.getSelectedItem();
-            String codigo = cbxVivienda.getSelectedItem().toString().split(" ")[0].substring(2);
-            Vivienda selectedVivienda = Clinica.getInstance().buscarViviendaById(codigo);
 
-            if (!codigoConsulta.isEmpty() && !fechaConsultaStr.isEmpty() && !diagnostico.isEmpty()) {
-                if (cbxEnfermedades.getSelectedItem() != null && !cbxEnfermedades.getSelectedItem().equals("")) {
-                    if (tipoSangre != null && !tipoSangre.equals("")) {
-                        if (selectedVivienda != null && !cbxVivienda.getSelectedItem().equals("")) {
-                            if (!enfermedadesLista.isEmpty()) {
-                                try {
-                                    Consulta nuevaConsulta = new Consulta(codigoConsulta, selected);
-                                    nuevaConsulta.setMisEnfermedades(enfermedadesLista);
-                                    nuevaConsulta.setDiagnostico(diagnostico);
+	    Doctor doctorLogged = (Doctor) Clinica.getInstance().getLoggedUser();
+	    
+	    if (selected == null) {
+	        JOptionPane.showMessageDialog(null, "Por favor, seleccione una cita.", "Error", JOptionPane.ERROR_MESSAGE);
+	        return;
+	    }
 
-                                    // Verificar si la persona ya es un paciente
-                                    if (selected.getMiPersona() instanceof Paciente) {
-                                        // Actualizar el paciente existente
-                                        Paciente pacienteExistente = (Paciente) selected.getMiPersona();
-                                        pacienteExistente.setTipoSangre(tipoSangre);
-                                        pacienteExistente.setMiVivienda(selectedVivienda);
-                                    } else {
-                                        // Crear un nuevo paciente
-                                        Paciente nuevoPaciente = new Paciente(
-                                            selected.getMiPersona().getCodigo(),
-                                            selected.getMiPersona().getCedula(),
-                                            selected.getMiPersona().getNombre(),
-                                            selected.getMiPersona().getApellidos(),
-                                            selected.getMiPersona().getFechaNacimiento(),
-                                            selected.getMiPersona().getGenero(),
-                                            selected.getMiPersona().getUser(),
-                                            selected.getMiPersona().getPassword(),
-                                            selected.getMiPersona().getRangoUser(),
-                                            selectedVivienda,
-                                            tipoSangre
-                                        );
+	    String codigoConsulta = txtCodigo.getText().trim();
+	    String fechaConsultaStr = txtFecha.getText().trim();
+	    String diagnostico = txtAreaDiagnostico.getText().trim();
+	    String tipoSangre = (String) cbxTipoSangre.getSelectedItem();
+	    String viviendaSeleccionada = (String) cbxVivienda.getSelectedItem();
+	    
+	    if (codigoConsulta.isEmpty() || fechaConsultaStr.isEmpty() || diagnostico.isEmpty()) {
+	        JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
+	        return;
+	    }
 
-                                        // Eliminar registro de la tabla Persona
-                                        Clinica.getInstance().eliminarPersona(selected.getMiPersona());
-                                        // Insertar registro en la tabla Paciente
-                                        Clinica.getInstance().insertarPaciente(nuevoPaciente);
-                                    }
+	    if (enfermedadesLista.isEmpty()) {
+	        JOptionPane.showMessageDialog(null, "Debe agregar al menos una enfermedad a la consulta.", "Error", JOptionPane.ERROR_MESSAGE);
+	        return;
+	    }
 
-                                    selected.setRealizada(true); // Marcar la cita como realizada
-                                    Clinica.getInstance().insertarConsulta(nuevaConsulta);
-                                    loadCita();
-                                    clear();
-                                    JOptionPane.showMessageDialog(null, "Consulta registrada con Ã©xito.", "Ã‰xito", JOptionPane.INFORMATION_MESSAGE);
-                                } catch (Exception ex) {
-                                    JOptionPane.showMessageDialog(null, "Error al registrar la consulta: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                                }
-                            } else {
-                                JOptionPane.showMessageDialog(null, "Debe agregar al menos una enfermedad a la consulta.", "Error", JOptionPane.ERROR_MESSAGE);
-                            }
-                        } else {
-                            JOptionPane.showMessageDialog(null, "Por favor, seleccione una vivienda.", "Error", JOptionPane.ERROR_MESSAGE);
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Por favor, seleccione un tipo de sangre.", "Error", JOptionPane.ERROR_MESSAGE);
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(null, "Debe seleccionar al menos una enfermedad.", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            } else {
-                JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } else {
-            JOptionPane.showMessageDialog(null, "Por favor, seleccione una cita.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-		
+	    if (tipoSangre == null || tipoSangre.equals("<Seleccione>")) {
+	        JOptionPane.showMessageDialog(null, "Por favor, seleccione un tipo de sangre.", "Error", JOptionPane.ERROR_MESSAGE);
+	        return;
+	    }
+
+	    if (viviendaSeleccionada == null || viviendaSeleccionada.equals("<Seleccione>")) {
+	        JOptionPane.showMessageDialog(null, "Por favor, seleccione una vivienda.", "Error", JOptionPane.ERROR_MESSAGE);
+	        return;
+	    }
+	    
+	    if (misVacunas.isEmpty()) {
+	        JOptionPane.showMessageDialog(null, "Por favor, seleccione al menos una vacuna.", "Error", JOptionPane.ERROR_MESSAGE);
+	        return;
+	    }
+	    
+	    try {
+
+	        String id_vivienda = viviendaSeleccionada.split(" ")[0].substring(2);
+	        Vivienda miVivienda = Clinica.getInstance().buscarViviendaByIdSQL(id_vivienda);
+	        
+	        String id_persona = selected.getMiPersona().getCodigo();
+	        Persona miPersona = Clinica.getInstance().buscarPersonaByIdSQL(id_persona);
+	        
+	        if (!Clinica.getInstance().esUnPacienteSQL(id_persona) && miPersona != null) { //Si no es un paciente:
+	            
+	        	//System.out.println(miVivienda.getCodigo());
+	        	
+	        	Clinica.getInstance().insertarNuevaPersonaEnPacienteSQL(id_persona, tipoSangre, Integer.parseInt(miVivienda.getCodigo()));
+	            
+	        } else {
+	        	
+	        	paciente.setMiVivienda(miVivienda);
+	        	Clinica.getInstance().modificarDatosPacienteSQL(paciente);
+	        	
+	        }
+	        
+	        Consulta consulta = new Consulta(codigoConsulta, selected);
+	        consulta.setMisEnfermedades(enfermedadesLista);
+	        consulta.setDiagnostico(diagnostico);
+	        
+	        Clinica.getInstance().insertarDatosConsultasSQL(consulta, misVacunas);
+
+	        selected.setRealizada(true);
+		    Clinica.getInstance().modificarDatosCitaSQL(selected);
+	        
+	        JOptionPane.showMessageDialog(null, "Consulta registrada con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+	        
+	        loadCita();
+	        
+	        clear();
+
+	    } catch (Exception ex) {
+	        ex.printStackTrace();
+	        JOptionPane.showMessageDialog(null, "Ha ocurrido un error al registrar la consulta.", "Error", JOptionPane.ERROR_MESSAGE);
+	    }
 	}
 	
-	// DEBEMOS LLENAR EL TXT AREA CON LAS ENFERMEDADES QUE TIENE miConsulta
-	// Luego de eso debemos asegurarnos de insetar la enfermedades seleccionadas o borradas dentro de mi consulta
-
 	private void loadCita() {
-		if (Clinica.getInstance() != null && Clinica.getInstance().loggedUser != null) {
-			model.setRowCount(0);
-			row = new Object[model.getColumnCount()];
-			for(Cita cita : Clinica.getInstance().getMisCitas()) {
-				Doctor doctor = (Doctor) Clinica.getInstance().getLoggedUser();
-				SimpleDateFormat sdf = new SimpleDateFormat("hh:mm aa");
-				if (!cita.isRealizada() && cita.getMiDoctor().equals(doctor)) {
-					row[0] = cita.getCodigo();
-					row[1] = cita.getFechacreacion();
-					row[2] = sdf.format(cita.getHoraCita());
-					row[3] = cita.getMiPersona().getNombre() + " " + cita.getMiPersona().getApellidos();
-					model.addRow(row);
-		        }
-			}
-			txtCodigo.setText(String.valueOf(Clinica.getInstance().getCodConsulta()));
-			txtDoctorLoggeado.setText(Clinica.getInstance().loggedUser.getNombre() + " " + Clinica.getInstance().loggedUser.getApellidos());		
+		
+		Persona doc = Clinica.getInstance().getLoggedUser();
+		
+		if (doc != null) {
+			
+			model = Clinica.getInstance().cargarDatosCitasPorDoctorSQL(doc.getCodigo());
+			citas_pendientes_table.setModel(model);
+			
+			txtCodigo.setText(String.valueOf(Clinica.getInstance().obtenerMaximoIdConsulta()));
+			txtDoctorLoggeado.setText(doc.getNombre() + " " + doc.getApellidos());
 		}
 	}
-
+	
 	private void loadCampos() {
-	    if (Clinica.getInstance() != null && selected != null) {
-	        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+	    
+		if (Clinica.getInstance() != null && selected != null) {
+	        
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 	        SimpleDateFormat shf = new SimpleDateFormat("hh:mm aa");
 	        
-	        txtCodigo.setText(String.valueOf(Clinica.getInstance().getCodConsulta()));
+	        txtCodigo.setText("" + Clinica.getInstance().obtenerMaximoIdConsulta());
 	        txtFecha.setText(sdf.format(selected.getFechaCita()) + " " + shf.format(selected.getHoraCita()));
-	        txtDoctorLoggeado.setText(Clinica.getInstance().loggedUser.getNombre() + " " + Clinica.getInstance().loggedUser.getApellidos());
+	        txtDoctorLoggeado.setText(Clinica.getInstance().loggedUser.getNombre() + " " + Clinica.getInstance().loggedUser.getApellidos());        
 	        
-	        // Caso en el que `miConsulta` es null (nueva consulta)
-            if (selected.getMiPersona() instanceof Paciente) {
-                Paciente paciente = (Paciente) selected.getMiPersona();
-                cbxtipoSangre.setSelectedItem(paciente.getTipoSangre());
-                cbxVivienda.setSelectedItem("V-" + paciente.getMiVivienda().getCodigo() + " " + paciente.getMiVivienda().getDireccion());
+	        if (selected.getMiPersona().getRangoUser() == 4) { // Es un paciente
+	        	
+	            //Paciente paciente = (Paciente) selected.getMiPersona();
+	            
+	            if (paciente.getMiVivienda() != null) {// Paciente con vivienda
+	                
+	                cbxTipoSangre.setSelectedItem(paciente.getTipoSangre());
 
-                cbxtipoSangre.setEnabled(false);
-                cbxVivienda.setEnabled(false);
-            } else {
-                cbxtipoSangre.setSelectedIndex(0);
-                cbxVivienda.setSelectedIndex(0);
+	                String codigo = paciente.getMiVivienda().getCodigo();
+	                String direccion = paciente.getMiVivienda().getDireccion();
 
-                cbxtipoSangre.setEnabled(true);
-                cbxVivienda.setEnabled(true);
+	                String seleccionVivienda = "V-" + codigo + " " + direccion;
+	                System.out.println(seleccionVivienda);
+	                
+	                cbxVivienda.setSelectedItem(seleccionVivienda);
+
+	                cbxTipoSangre.setEnabled(false);
+	                cbxVivienda.setEnabled(false);
+
+	            } else { // Paciente sin vivienda
+	                
+	                cbxTipoSangre.setSelectedItem(paciente.getTipoSangre());
+	                cbxTipoSangre.setEnabled(false);
+
+	                cbxVivienda.setSelectedIndex(0);
+	                cbxVivienda.setEnabled(true);
+	            }
+
+	        } else { // No es un paciente
+	            
+	            cbxTipoSangre.setSelectedIndex(0);
+	            cbxTipoSangre.setEnabled(true);
+
+	            cbxVivienda.setSelectedIndex(0);
+	            cbxVivienda.setEnabled(true);
+	        } 
+	    }
+	}
+
+	
+    private void loadEnfermedades() {
+        
+    	DefaultTableModel model = Clinica.getInstance().cargarDatosEnfermedadSQL();
+
+        cbxEnfermedades.removeAllItems();
+        cbxEnfermedades.addItem("<Seleccione>");
+        
+        for (int i = 0; i < model.getRowCount(); i++) {
+            String codigo = model.getValueAt(i, 0).toString();
+            String nombre = model.getValueAt(i, 1).toString();
+            cbxEnfermedades.addItem("E-" + codigo + " " + nombre);
+        }
+    }
+    
+    private void loadViviendas() {
+        DefaultTableModel model = Clinica.getInstance().cargarDatosViviendaSQL();
+        
+        cbxVivienda.removeAllItems();
+        cbxVivienda.addItem("<Seleccione>");
+        
+        for (int i = 0; i < model.getRowCount(); i++) {
+            String codigo = model.getValueAt(i, 0).toString();
+            String direccion = model.getValueAt(i, 1).toString();
+
+            cbxVivienda.addItem("V-" + codigo + " " + direccion);
+        }
+    }
+
+
+    private void agregarEnfermedad() {
+        String enfermedadSeleccionada = (String) cbxEnfermedades.getSelectedItem();
+        if (enfermedadSeleccionada != null && !enfermedadSeleccionada.equals("<Seleccione>")) {
+            String codigo = enfermedadSeleccionada.split(" ")[0].substring(2);
+            Enfermedad enfermedad = Clinica.getInstance().obtenerEnfermedadByIdSQL(codigo);
+            
+            if (enfermedad != null) {
+                if (gestionarEnfermedadSeleccionada(enfermedad, true)) {
+                	actualizarEnfermedadesConsultadas();
+                    JOptionPane.showMessageDialog(this, "Enfermedad agregada con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "La enfermedad ya está en la lista.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                }
             }
-	        
-	    }
-	}
 
-
-
-	private void loadEnfermedades() {
-		cbxEnfermedades.removeAllItems();
-		cbxEnfermedades.addItem("<Seleccione>");
-		for (Enfermedad enfermedad : Clinica.getInstance().getMisEnfermedades()) {
-        	cbxEnfermedades.addItem("E-" + enfermedad.getCodigo() + " " + enfermedad.getNombre() );
+        } else {
+            JOptionPane.showMessageDialog(this, "Seleccione una enfermedad.", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
-	}
-	
+    }
 
-	private void loadViviendas() {
-		cbxVivienda.removeAllItems();
-		cbxVivienda.addItem("<Seleccione>");
-        for (Vivienda vivienda : Clinica.getInstance().getMisViviendas()) {
-        	cbxVivienda.addItem("V-" + vivienda.getCodigo() + " " + vivienda.getDireccion());
+    private void quitarEnfermedad() {
+        String enfermedadSeleccionada = (String) cbxEnfermedades.getSelectedItem();
+        if (enfermedadSeleccionada != null && !enfermedadSeleccionada.equals("<Seleccione>")) {
+            String codigo = enfermedadSeleccionada.split(" ")[0].substring(2);
+            Enfermedad enfermedad = Clinica.getInstance().obtenerEnfermedadByIdSQL(codigo);
+            
+            if (enfermedad != null) {
+                if (gestionarEnfermedadSeleccionada(enfermedad, false)) {
+                	actualizarEnfermedadesConsultadas();
+                    JOptionPane.showMessageDialog(this, "Enfermedad removida con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "La enfermedad no está en la lista.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+            
+        } else {
+            JOptionPane.showMessageDialog(this, "Seleccione una enfermedad.", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
-	}
+    }
+    
+    private boolean gestionarEnfermedadSeleccionada(Enfermedad enfermedad, boolean agregar) {
+        
+    	if (enfermedad == null) {
+            return false;
+        }
 
-	private void agregarEnfermedad() {
-	    String enfermedadSeleccionada = (String) cbxEnfermedades.getSelectedItem();
-	    if (enfermedadSeleccionada != null) {
-	        if (enfermedadSeleccionada.equals("<Seleccione>")) {
-	            JOptionPane.showMessageDialog(null, "Seleccione una enfermedad.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-	        } else {
-	            String codigo = enfermedadSeleccionada.split(" ")[0].substring(2); // Solo el codigo
-	            Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(codigo);
-	            if (enfermedad != null) {
-	                if (!enfermedadesLista.contains(enfermedad)) {
-	                    enfermedadesLista.add(enfermedad);
-	                    actualizarEnfermedadesConsultadas();
-	                } else {
-	                    JOptionPane.showMessageDialog(null, "La enfermedad ya estaÂ¡ en la lista.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-	                }
-	            }
-	        }
-	    } else {
-	        JOptionPane.showMessageDialog(null, "Seleccione una enfermedad.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-	    }
-	}
-	
-	private void quitarEnfermedad() {
-	    String enfermedadSeleccionada = (String) cbxEnfermedades.getSelectedItem();
-	    if (enfermedadSeleccionada != null) {
-	        if (enfermedadSeleccionada.equals("<Seleccione>")) {
-	            JOptionPane.showMessageDialog(null, "Seleccione una enfermedad.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-	        } else {
-	            String codigo = enfermedadSeleccionada.split(" ")[0].substring(2); // Solo el codigo
-	            Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(codigo);
-	            if (enfermedad != null) {
-	                if (enfermedadesLista.contains(enfermedad)) {
-	                    enfermedadesLista.remove(enfermedad);
-	                    actualizarEnfermedadesConsultadas();
-	                } else {
-	                    JOptionPane.showMessageDialog(null, "La enfermedad no estÃƒÂ¡ en la lista.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-	                }
-	            }
-	        }
-	    } else {
-	        JOptionPane.showMessageDialog(null, "Seleccione una enfermedad.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-	    }
-	}
+        if (agregar) {
+            
+            for (Enfermedad e : enfermedadesLista) {
+                if (e.getCodigo().equals(enfermedad.getCodigo())) {
+                    return false; // Ya esta en la lista?
+                }
+            }
+            
+            enfermedadesLista.add(enfermedad);
+            
+        } else {
+        	
+            for (Enfermedad e : enfermedadesLista) {
+                if (e.getCodigo().equals(enfermedad.getCodigo())) {
+                	enfermedadesLista.remove(e);
+                    return true; //Eliminar si ya esta
+                }
+            }
+            
+            return false;
+        }
+
+        actualizarEnfermedadesConsultadas(); 
+        return true;
+    }
  
     private void actualizarEnfermedadesConsultadas() {
+    	
     	StringBuilder enfermedadesText = new StringBuilder();
     	
     	for (Enfermedad enf : enfermedadesLista) {
     		enfermedadesText.append("E-" + enf.getCodigo() + " " + enf.getNombre()).append("\n");
     	}
         txtAreaEnfermedadesConsultadas.setText(enfermedadesText.toString());
+        cbxEnfermedades.setSelectedIndex(0);
     }
     
     private void clear() {
@@ -486,13 +587,46 @@ public class RegistrarConsulta extends JDialog {
         txtAreaDiagnostico.setText("");
         cbxEnfermedades.setSelectedIndex(0);
         cbxVivienda.setSelectedIndex(0);
-        cbxtipoSangre.setSelectedIndex(0);
+        cbxTipoSangre.setSelectedIndex(0);
         txtAreaEnfermedadesConsultadas.setText("");
         enfermedadesLista.clear();
         btnRegistrar.setEnabled(false);
-        txtCodigo.setText(String.valueOf(Clinica.getInstance().getCodConsulta()));
+        txtCodigo.setText(""+Clinica.getInstance().obtenerMaximoIdConsulta());
     	txtDoctorLoggeado.setText(Clinica.getInstance().loggedUser.getNombre() + " " + Clinica.getInstance().loggedUser.getApellidos());
     }
-   
+    
+    private void seleccionarVacunas() {
+    	
+    	if (misVacunas.isEmpty()) {
+    		
+        	SeleccionarVacunasAplicar seleccion = new SeleccionarVacunasAplicar();
+        	seleccion.setModal(true);
+        	seleccion.setVisible(true);
+        	
+        	misVacunas = seleccion.getVacunasSeleccionadas();
+    		
+    	} else {
+    		
+        	SeleccionarVacunasAplicar seleccion = new SeleccionarVacunasAplicar();
+        	
+        	seleccion.cargarVacunasPrevias(misVacunas);
+        	
+        	seleccion.setModal(true);
+        	seleccion.setVisible(true);
+        	
+        	misVacunas = seleccion.getVacunasSeleccionadas();
+    		
+    	}
+    	
+    }
+    
+    public Paciente copiarDePersona(Persona persona) {
+
+        return new Paciente(persona.getCodigo(), persona.getCedula(), persona.getNombre(), persona.getApellidos(), persona.getFechaNacimiento(), persona.getGenero(), 
+        					persona.getUser(), persona.getPassword(), persona.getRangoUser(), null, null);
+    }
+
+
+
     
 }

@@ -13,8 +13,8 @@ public class DatabaseConnection {
 	private static final String SERVER = "serversamsql.database.windows.net";
 	//private static final String SERVER = "192.168.100.118";
     private static final String DATABASE = "CLINICA_SAM";
-    private static final String USER = "m.marcelino";
-    private static final String PASSWORD = "M@rcelo200312";
+    private static final String USER = "adminsam";
+    private static final String PASSWORD = "P@ssword";
 
     private static final String URL = String.format(
             "jdbc:sqlserver://%s:1433;databaseName=%s;user=%s;password=%s;encrypt=true;trustServerCertificate=true;loginTimeout=30;",
@@ -29,4 +29,3 @@ public class DatabaseConnection {
     	System.out.println("Conectado exitosamente");
     }
 }
-

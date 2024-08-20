@@ -2,6 +2,7 @@ package visual;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -9,6 +10,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
 
 import logico.Clinica;
 import logico.Consulta;
@@ -36,13 +38,13 @@ public class ModificarConsulta extends JDialog {
 	private JTextArea txtAreaDiagnostico;
 	private JTextArea txtAreaEnfermedades;
 	private ArrayList<Enfermedad> enfermedadesLista = new ArrayList<>();
-
+	private ArrayList<String> misVacunas = new ArrayList<>();
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
 		try {
-			ModificarConsulta dialog = new ModificarConsulta(null);
+			ModificarConsulta dialog = new ModificarConsulta(null,null);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {  
@@ -53,8 +55,17 @@ public class ModificarConsulta extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public ModificarConsulta(Consulta modConsulta) {
+	public ModificarConsulta(Consulta modConsulta, ArrayList<String> misVacunasAplicadas) {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(PrincipalVisual.class.getResource("/imagenes/fotoTituloDeVentana.png")));
 		miConsulta = modConsulta;
+		
+		if( misVacunasAplicadas.isEmpty() || misVacunasAplicadas == null) {
+			misVacunasAplicadas = new ArrayList<>();
+			misVacunas = misVacunasAplicadas;
+		} else {
+			misVacunas = misVacunasAplicadas;
+		}
+		
 		setTitle("Modificar Diagnostico");
 		setResizable(false);
 		setBounds(100, 100, 695, 495);
@@ -85,7 +96,7 @@ public class ModificarConsulta extends JDialog {
 						agregarEnfermedad();
 					}
 				});
-				btnAgregarEnfermedad.setBounds(429, 342, 89, 23);
+				btnAgregarEnfermedad.setBounds(429, 322, 89, 23);
 				panel.add(btnAgregarEnfermedad);
 			}
 			{
@@ -95,7 +106,7 @@ public class ModificarConsulta extends JDialog {
 						quitarEnfermedad();
 					}
 				});
-				btnQuitarEnferemdad.setBounds(537, 342, 89, 23);
+				btnQuitarEnferemdad.setBounds(537, 322, 89, 23);
 				panel.add(btnQuitarEnferemdad);
 			}
 			{
@@ -138,6 +149,21 @@ public class ModificarConsulta extends JDialog {
 					scrollPane_1.setViewportView(txtAreaDiagnostico);
 				}
 			}
+			
+			JLabel label = new JLabel("Medicar:");
+			label.setBounds(349, 374, 73, 14);
+			panel.add(label);
+			
+			JButton btnVacunas = new JButton("Seleccionar Vacunas");
+			btnVacunas.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					
+					seleccionarVacunas();
+
+				}
+			});
+			btnVacunas.setBounds(429, 370, 165, 23);
+			panel.add(btnVacunas);
 		}
 		{
 			JPanel buttonPane = new JPanel();
@@ -153,10 +179,7 @@ public class ModificarConsulta extends JDialog {
 					        JOptionPane.showMessageDialog(null, "Debe haber al menos una enfermedad en la consulta.", "Error", JOptionPane.ERROR_MESSAGE);
 					    } else {
 					    	
-					    	modificarConsulta(); //en el metodo lo de sql y vaina llamado desde clinica
-					        // Aquí puedes realizar las operaciones adicionales que necesites, como guardar la consulta en la base de datos.
-					        
-					        
+					    	modificarConsulta(); 		      
 					        dispose();
 					    }
 						
@@ -183,77 +206,159 @@ public class ModificarConsulta extends JDialog {
 	}
 	
 	private void loadCampos() {
-        if (miConsulta != null) {
-            txtAreaDiagnostico.setText(miConsulta.getDiagnostico());
+		
+		if (miConsulta != null) {
+            
+			txtAreaDiagnostico.setText(miConsulta.getDiagnostico());
             enfermedadesLista = new ArrayList<>(miConsulta.getMisEnfermedades());
             actualizarEnfermedadesConsultadas();
-        }
+        
+		}
     }
 	
-	private void loadEnfermedades() {
-		ArrayList<Enfermedad> todasEnfermedades = Clinica.getInstance().getMisEnfermedades();
+    private void loadEnfermedades() {
+        
+    	DefaultTableModel model = Clinica.getInstance().cargarDatosEnfermedadSQL();
+
         cbxEnfermedades.removeAllItems();
         cbxEnfermedades.addItem("<Seleccione>");
-        for (Enfermedad enf : todasEnfermedades) {
-            cbxEnfermedades.addItem("E-" + enf.getCodigo() + " " + enf.getNombre());
+        
+        for (int i = 0; i < model.getRowCount(); i++) {
+            String codigo = model.getValueAt(i, 0).toString();
+            String nombre = model.getValueAt(i, 1).toString();
+            cbxEnfermedades.addItem("E-" + codigo + " " + nombre);
         }
     }
 	
-	 private void agregarEnfermedad() {
-        String enfermedadSeleccionada = (String) cbxEnfermedades.getSelectedItem();
-        if (enfermedadSeleccionada != null && !enfermedadSeleccionada.equals("<Seleccione>")) {
-            String codigo = enfermedadSeleccionada.split(" ")[0].substring(2); 
-            Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(codigo);
-            if (enfermedad != null && !enfermedadesLista.contains(enfermedad)) {
-                enfermedadesLista.add(enfermedad);
-                actualizarEnfermedadesConsultadas();
-            } else if (enfermedadesLista.contains(enfermedad)) {
-                JOptionPane.showMessageDialog(null, "La enfermedad ya está en la lista.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-            }
-        } else {
-            JOptionPane.showMessageDialog(null, "Seleccione una enfermedad válida.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-        }
-    }
-	
-	 private void quitarEnfermedad() {
+    private void agregarEnfermedad() {
         String enfermedadSeleccionada = (String) cbxEnfermedades.getSelectedItem();
         if (enfermedadSeleccionada != null && !enfermedadSeleccionada.equals("<Seleccione>")) {
             String codigo = enfermedadSeleccionada.split(" ")[0].substring(2);
-            Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(codigo);
-            if (enfermedad != null && enfermedadesLista.remove(enfermedad)) {
-                actualizarEnfermedadesConsultadas();
-            } else {
-                JOptionPane.showMessageDialog(null, "La enfermedad no está en la lista.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            Enfermedad enfermedad = Clinica.getInstance().obtenerEnfermedadByIdSQL(codigo);
+            
+            if (enfermedad != null) {
+                if (gestionarEnfermedadSeleccionada(enfermedad, true)) {
+                	actualizarEnfermedadesConsultadas();
+                    JOptionPane.showMessageDialog(this, "Enfermedad agregada con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "La enfermedad ya está en la lista.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                }
             }
+
         } else {
-            JOptionPane.showMessageDialog(null, "Seleccione una enfermedad válida.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Seleccione una enfermedad.", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
     }
-	 
-	 private void actualizarEnfermedadesConsultadas() {
-        StringBuilder enfermedadesText = new StringBuilder();
-        for (Enfermedad enf : enfermedadesLista) {
-            enfermedadesText.append("E-").append(enf.getCodigo()).append(" ").append(enf.getNombre()).append("\n");
+
+    private void quitarEnfermedad() {
+        String enfermedadSeleccionada = (String) cbxEnfermedades.getSelectedItem();
+        if (enfermedadSeleccionada != null && !enfermedadSeleccionada.equals("<Seleccione>")) {
+            String codigo = enfermedadSeleccionada.split(" ")[0].substring(2);
+            Enfermedad enfermedad = Clinica.getInstance().obtenerEnfermedadByIdSQL(codigo);
+            
+            if (enfermedad != null) {
+                if (gestionarEnfermedadSeleccionada(enfermedad, false)) {
+                	actualizarEnfermedadesConsultadas();
+                    JOptionPane.showMessageDialog(this, "Enfermedad removida con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "La enfermedad no está en la lista.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+            
+        } else {
+            JOptionPane.showMessageDialog(this, "Seleccione una enfermedad.", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
+    }
+    
+    private boolean gestionarEnfermedadSeleccionada(Enfermedad enfermedad, boolean agregar) {
+        
+    	if (enfermedad == null) {
+            return false;
+        }
+
+        if (agregar) {
+            
+            for (Enfermedad e : enfermedadesLista) {
+                if (e.getCodigo().equals(enfermedad.getCodigo())) {
+                    return false; // Ya esta en la lista?
+                }
+            }
+            
+            enfermedadesLista.add(enfermedad);
+            
+        } else {
+        	
+            for (Enfermedad e : enfermedadesLista) {
+                if (e.getCodigo().equals(enfermedad.getCodigo())) {
+                	enfermedadesLista.remove(e);
+                    return true; //Eliminar si ya esta
+                }
+            }
+            
+            return false;
+        }
+
+        actualizarEnfermedadesConsultadas(); 
+        return true;
+    }
+ 
+    private void actualizarEnfermedadesConsultadas() {
+    	StringBuilder enfermedadesText = new StringBuilder();
+    	
+    	for (Enfermedad enf : enfermedadesLista) {
+    		enfermedadesText.append("E-" + enf.getCodigo() + " " + enf.getNombre()).append("\n");
+    	}
         txtAreaEnfermedades.setText(enfermedadesText.toString());
+        cbxEnfermedades.setSelectedIndex(0);
     }
 	 
 	 private void modificarConsulta() {
-		if (miConsulta != null) {
-			 if (enfermedadesLista.isEmpty()) {
+		
+		 if (miConsulta != null) {
+			 
+			if (enfermedadesLista.isEmpty()) {
 				 JOptionPane.showMessageDialog(null, "Debe haber al menos una enfermedad en la consulta.", "Error", JOptionPane.ERROR_MESSAGE);
 				 return;
 			 }
+			
+		    if (misVacunas.isEmpty()) {
+		        JOptionPane.showMessageDialog(null, "Por favor, seleccione al menos una vacuna.", "Error", JOptionPane.ERROR_MESSAGE);
+		        return;
+		    }
 
-		miConsulta.setDiagnostico(txtAreaDiagnostico.getText());
-        miConsulta.setMisEnfermedades(new ArrayList<>(enfermedadesLista));
-
-        //Imprementar db
-        Clinica.getInstance().actualizarConsulta(miConsulta);
-
-        JOptionPane.showMessageDialog(null, "Consulta modificada correctamente.");
-        dispose();
-    }
-}
+			miConsulta.setDiagnostico(txtAreaDiagnostico.getText());
+	        miConsulta.setMisEnfermedades(new ArrayList<>(enfermedadesLista));
+	
+	        Clinica.getInstance().modificarDatosConsultaSQL(miConsulta, misVacunas);
+	        
+        	JOptionPane.showMessageDialog(null, "Consulta modificada correctamente.");
+        	dispose();
+		 } 
+	 }
 	 
+	 private void seleccionarVacunas() {
+		 
+    	if (misVacunas.isEmpty()) {
+    		
+        	SeleccionarVacunasAplicar seleccion = new SeleccionarVacunasAplicar();
+        	seleccion.setModal(true);
+        	seleccion.setVisible(true);
+        	
+        	misVacunas = seleccion.getVacunasSeleccionadas();
+    		
+    	} else {
+    		
+        	SeleccionarVacunasAplicar seleccion = new SeleccionarVacunasAplicar();
+        	
+        	seleccion.cargarVacunasPrevias(misVacunas);
+        	
+        	seleccion.setModal(true);
+        	seleccion.setVisible(true);
+        	
+        	misVacunas = seleccion.getVacunasSeleccionadas();
+    		
+    	}
+    	
+	 }
+
 }

@@ -332,7 +332,7 @@ public class RegistrarVacuna extends JDialog {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    } 
 
     public RegistrarVacuna(Vacuna modVacuna) {
         miVacuna = modVacuna;

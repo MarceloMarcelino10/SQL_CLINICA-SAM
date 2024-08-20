@@ -2,6 +2,7 @@ package visual;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -13,19 +14,26 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
 import logico.Clinica;
+import logico.Paciente;
 import logico.Persona;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.ListSelectionModel;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.JTextField;
+import javax.swing.JLabel;
 
 public class VerHistorialClinico extends JDialog {
 
 	private final JPanel contentPanel = new JPanel();
 	private JTable table;
     private DefaultTableModel model;
-    private Object[] row;
+    private JButton btnVerMas;
+    private Paciente selected = null;
+    private JTextField txtCantidadConsulta;
 
 	/**
 	 * Launch the application.
@@ -44,9 +52,11 @@ public class VerHistorialClinico extends JDialog {
 	 * Create the dialog.
 	 */
 	public VerHistorialClinico() {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(PrincipalVisual.class.getResource("/imagenes/fotoTituloDeVentana.png")));
 		setResizable(false);
 		setTitle("Historial Clinico");
 		setBounds(100, 100, 770, 520);
+		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -57,43 +67,130 @@ public class VerHistorialClinico extends JDialog {
 			contentPanel.add(scrollPane, BorderLayout.CENTER);
 			{
 				table = new JTable();
+				table.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						
+						actualizarDatos();
+						
+					}
+				});
 				table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 				scrollPane.setViewportView(table);
 			}
 		}
 		{
 			JPanel buttonPane = new JPanel();
+			buttonPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				JButton okButton = new JButton("OK");
-				okButton.addActionListener(new ActionListener() {
+				btnVerMas = new JButton("Ver Mas");
+				btnVerMas.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
+						
+						verMas();
+						
 					}
 				});
-				okButton.setActionCommand("OK"); 
-				buttonPane.add(okButton);
-				getRootPane().setDefaultButton(okButton);
+				{
+					JLabel lblNewLabel = new JLabel("Cantidad de Consultas:");
+					buttonPane.add(lblNewLabel);
+				}
+				{
+					txtCantidadConsulta = new JTextField();
+					txtCantidadConsulta.setText("0");
+					buttonPane.add(txtCantidadConsulta);
+					txtCantidadConsulta.setColumns(10);
+				}
+				btnVerMas.setActionCommand("OK"); 
+				buttonPane.add(btnVerMas);
+				getRootPane().setDefaultButton(btnVerMas);
 			}
 			{
 				JButton btnCancelar = new JButton("Cancelar");
+				btnCancelar.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						dispose();
+					}
+				});
 				btnCancelar.setActionCommand("Cancel");
 				buttonPane.add(btnCancelar);
 			}
 		}
 		
-		cargarHeaders();
+		loadHistorialClinico();
 	}
 	
-	private void cargarHeaders() {
+	private void loadHistorialClinico() {
 		
-		Persona user = Clinica.getInstance().getLoggedUser();
+		Persona conectado = Clinica.getInstance().getLoggedUser();
 		
-		// EN EL PROGRMA DE JAVA: 4 ADMIN, 3 SECRETARIO, 2 DOCTOR, 1 PACIENTE, 0 PERSONA
-		//ss
-		//if (user.getRangoUser() == )
+		if (conectado == null ) { 
+			
+			System.out.println("Hay problemas");
+			return;
+			
+		}
 		
+		if (conectado.getRangoUser() == 4 || conectado instanceof Paciente) { //Paciente
+			
+			if (conectado != null) {
+				
+				selected = (Paciente) conectado;
+				
+				VerHistorialPaciente verHistorial = new VerHistorialPaciente(selected);
+				verHistorial.setModal(true);
+				verHistorial.setVisible(true);
+				
+			}
+			
+			btnVerMas.setEnabled(false);
+			
+		} else { //Doctor
+			
+			model = Clinica.getInstance().cargarDatosPacienteSQL();
+			table.setModel(model);
+			btnVerMas.setEnabled(true);
+		}
+	} 
+	
+	
+	private void actualizarDatos() {
 		
+		int index = -1;
+		
+		index = table.getSelectedRow();
+		
+		if (index >= 0) {
+			
+			String id_persona = table.getValueAt(index, 0).toString();
+			selected = (Paciente) Clinica.getInstance().buscarPersonaByIdSQL(id_persona);
+			
+			if (selected != null) {
+				
+				DefaultTableModel model_consultas = new DefaultTableModel();
+				model_consultas = Clinica.getInstance().cargarCantidadConsultasPacienteSQL(selected.getCodigo());
+				String cantidad = (String) model_consultas.getValueAt(0, 0);
+				txtCantidadConsulta.setText(cantidad);
+			}
+			
+			
+		} else {
+			
+			txtCantidadConsulta.setText("0");
+		}
+		
+	}
+	
+	private void verMas() {
+		
+		if (selected != null) {
+			
+			VerHistorialPaciente verHistorial = new VerHistorialPaciente(selected);
+			verHistorial.setModal(true);
+			verHistorial.setVisible(true);
+		}
 		
 	}
 
