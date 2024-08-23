@@ -1,5 +1,6 @@
 package logico;
 
+import java.awt.Color;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -12,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -25,6 +27,19 @@ import java.util.Date;
 
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
 
 import seguridad.GestorUsuario;
 import sql.DatabaseConnection;
@@ -67,7 +82,6 @@ public class Clinica implements Serializable  {//u
 		this.misVacunas =  new ArrayList<Vacuna>();
 		this.misConsultas =  new ArrayList<Consulta>();
 		this.misHistoriasClinicas = new ArrayList<HistoriaClinica>();
-		//cargarLastIdUsed();
 	}
 	
 	public static Clinica getInstance() {
@@ -3611,4 +3625,268 @@ public class Clinica implements Serializable  {//u
     }
     
     
+    //REPORTE GENERAL CLINICO SQL:
+    
+    public ChartPanel crearGraficoViviendasPobladas() {
+      
+    	DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+    	
+        String query = "SELECT TOP 3 v.direccion, COUNT(p.id_paciente) AS num_personas " +
+                       "FROM VIVIENDA AS v " +
+                       "INNER JOIN PACIENTE AS p ON v.id_vivienda = p.id_vivienda " +
+                       "GROUP BY v.direccion " +
+                       "ORDER BY num_personas DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            while (rs.next()) {
+                dataset.addValue(rs.getInt("num_personas"), "Personas", rs.getString("direccion"));
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        JFreeChart chart = ChartFactory.createBarChart(
+                "VIVIENDA MAS POBLADA",
+                "DIRECCION",
+                "NUMERO DE PERSONAS",
+                dataset,
+                PlotOrientation.VERTICAL,
+                true, true, false
+        );
+        return new ChartPanel(chart);
+    }
+
+    public ChartPanel crearGraficoEdadPromedioPaciente() {
+        
+    	DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        
+        String query = "SELECT AVG(DATEDIFF(YEAR, p.fecha_nacimiento, GETDATE())) AS promedio_edad " +
+                       "FROM PERSONA AS p " +
+                       "INNER JOIN PACIENTE AS pa ON p.id_persona = pa.id_persona";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                dataset.addValue(rs.getDouble("promedio_edad"), "Edad promedio", "Pacientes");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        JFreeChart chart = ChartFactory.createBarChart(
+                "EDAD PROMEDIO PACIENTES",
+                "CATEGORIA",
+                "EDAD",
+                dataset
+        );
+
+        return new ChartPanel(chart);
+    }
+
+    public ChartPanel crearGraficoDistribucionSexoPaciente() {
+        
+    	DefaultPieDataset dataset = new DefaultPieDataset();
+        
+        String query = "SELECT " +
+                       "SUM(CASE WHEN p.sexo = 'M' THEN 1 ELSE 0 END) AS masculino, " +
+                       "SUM(CASE WHEN p.sexo = 'F' THEN 1 ELSE 0 END) AS femenino " +
+                       "FROM PERSONA AS p " + 
+                       "INNER JOIN PACIENTE AS pa ON p.id_persona = pa.id_persona";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                dataset.setValue("Masculino", rs.getInt("masculino"));
+                dataset.setValue("Femenino", rs.getInt("femenino"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        JFreeChart chart = ChartFactory.createPieChart(
+                "DISTRIBUCION POR SEXO",
+                dataset,
+                true,
+                true,
+                false
+        );
+        
+        return new ChartPanel(chart);
+    }
+    
+    public ChartPanel crearGraficoEnfermedadesRecurrentes() {
+        
+    	DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        
+    	String query = "SELECT TOP 3 e.nombre, COUNT(*) AS frecuencia " +
+                       "FROM ENFERMEDAD AS e " +
+                       "INNER JOIN ENFERMEDAD_CONSULTA AS ec ON e.id_enfermedad = ec.id_enfermedad " +
+                       "GROUP BY e.nombre ORDER BY frecuencia DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            while (rs.next()) {
+                dataset.addValue(rs.getInt("frecuencia"), "Frecuencia", rs.getString("nombre"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        JFreeChart chart = ChartFactory.createBarChart(
+                "ENFERMEDADES MAS RECURRENTES",
+                "ENFERMEDAD",
+                "FRECUENCIA",
+                dataset,
+                PlotOrientation.VERTICAL,
+                true, true, false
+        );
+
+        return new ChartPanel(chart);
+    }
+
+    public ChartPanel crearGraficoEnfermedadesMasGraves() {
+        
+    	DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        
+        String query = "SELECT TOP 3 e.nombre, ge.gravedad " +
+                       "FROM ENFERMEDAD AS e " +
+                       "INNER JOIN GRAVEDAD_ENFERMEDAD AS ge ON e.id_gravedad_enfermedad = ge.id_gravedad_enfermedad " +
+                       "WHERE ge.gravedad = 'Grave' " +
+                       "ORDER BY ge.gravedad DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            while (rs.next()) {
+                dataset.addValue(rs.getInt("gravedad"), "Gravedad", rs.getString("nombre"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        JFreeChart chart = ChartFactory.createBarChart(
+                "ENFERMEDADES GRAVES CONSULTADAS",
+                "ENFERMEDAD",
+                "GRAVEDAD",
+                dataset,
+                PlotOrientation.VERTICAL,
+                true, true, false
+        );
+
+        return new ChartPanel(chart);
+    }
+
+    public ChartPanel crearGraficoDoctoresConMasCitas() {
+        
+    	DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        
+    	String query = "SELECT TOP 3 p.nombre, p.apellido, COUNT(c.id_cita) AS num_citas " +
+                       "FROM DOCTOR AS d " +
+                       "INNER JOIN PERSONA AS p ON d.id_persona = p.id_persona " +
+                       "INNER JOIN CITA c ON d.id_doctor = c.id_doctor " +
+                       "GROUP BY p.nombre, p.apellido " +
+                       "ORDER BY num_citas DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            while (rs.next()) {
+                String nombreCompleto = rs.getString("nombre") + " " + rs.getString("apellido");
+                dataset.addValue(rs.getInt("num_citas"), "Citas", nombreCompleto);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        JFreeChart chart = ChartFactory.createBarChart(
+                "DOCTORES CON MAS CITAS",
+                "DOCTOR",
+                "NUMERO DE CITAS",
+                dataset,
+                PlotOrientation.VERTICAL,
+                true, true, false
+        );
+
+        return new ChartPanel(chart);
+    }
+    
+    public ChartPanel crearGraficoDistribucionSexoDoctor() {
+        
+    	DefaultPieDataset dataset = new DefaultPieDataset();
+        
+        String query = "SELECT " +
+                       "SUM(CASE WHEN p.sexo = 'M' THEN 1 ELSE 0 END) AS masculino, " +
+                       "SUM(CASE WHEN p.sexo = 'F' THEN 1 ELSE 0 END) AS femenino " +
+                       "FROM PERSONA AS p " + 
+                       "INNER JOIN DOCTOR AS d ON p.id_persona = d.id_persona";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                dataset.setValue("Masculino", rs.getInt("masculino"));
+                dataset.setValue("Femenino", rs.getInt("femenino"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        JFreeChart chart = ChartFactory.createPieChart(
+                "DISTRIBUCION POR SEXO",
+                dataset,
+                true,
+                true,
+                false
+        );
+        
+        return new ChartPanel(chart);
+    }
+    
+    public ChartPanel crearGraficoVacunaMasCurativa() {
+        
+    	DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        
+        String query = "SELECT TOP 3 v.nombre, COUNT(e.id_enfermedad) AS num_enfermedades " +
+                       "FROM VACUNA v " +
+                       "INNER JOIN ENFERMEDAD_VACUNA AS ev ON v.id_vacuna = ev.id_vacuna " +
+                       "INNER JOIN ENFERMEDAD AS e ON ev.id_enfermedad = e.id_enfermedad " +
+                       "GROUP BY v.nombre " +
+                       "ORDER BY num_enfermedades DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            while (rs.next()) {
+                dataset.addValue(rs.getInt("num_enfermedades"), "Número de enfermedades", rs.getString("nombre"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        JFreeChart chart = ChartFactory.createBarChart(
+                "VACUNAS MAS CURATIVAS",
+                "VACUNA",
+                "NUMERO DE ENFERMEDADES",
+                dataset,
+                PlotOrientation.VERTICAL,
+                true, true, false
+        );
+
+        return new ChartPanel(chart);
+    }
+ 
 } 

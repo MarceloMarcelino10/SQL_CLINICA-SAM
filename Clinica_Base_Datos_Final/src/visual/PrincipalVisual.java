@@ -388,7 +388,7 @@ public class PrincipalVisual extends JFrame {
 		btnGenerarReporte = new JButton("Generar");
 		btnGenerarReporte.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				VerReporte reporte = new VerReporte();
+				DatosGenerales reporte = new DatosGenerales();
 				reporte.setModal(true);
 				reporte.setVisible(true);
 			}
@@ -398,7 +398,7 @@ public class PrincipalVisual extends JFrame {
 		
 		lblNewLabel_7 = new JLabel("DATOS GENERALES");
 		lblNewLabel_7.setFont(new Font("Georgia", Font.PLAIN, 20));
-		lblNewLabel_7.setBounds(34, 11, 222, 53);
+		lblNewLabel_7.setBounds(45, 11, 222, 53);
 		panel_Reporte.add(lblNewLabel_7);
 		
 		JLabel lblNewLabel = new JLabel("Clinica SAM");

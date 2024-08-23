@@ -143,9 +143,11 @@ public class VerHistorialPaciente extends JDialog {
             JButton btnVolver = new JButton("Volver");
             btnVolver.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    dialog.dispose();
+                    
+                	dispose();
                 }
             });
+            
             buttonPanel.add(btnVolver);
 
             dialog.getContentPane().add(buttonPanel, BorderLayout.SOUTH);

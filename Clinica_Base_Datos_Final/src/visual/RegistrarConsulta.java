@@ -593,6 +593,7 @@ public class RegistrarConsulta extends JDialog {
         btnRegistrar.setEnabled(false);
         txtCodigo.setText(""+Clinica.getInstance().obtenerMaximoIdConsulta());
     	txtDoctorLoggeado.setText(Clinica.getInstance().loggedUser.getNombre() + " " + Clinica.getInstance().loggedUser.getApellidos());
+    	misVacunas.clear();
     }
     
     private void seleccionarVacunas() {

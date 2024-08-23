@@ -23,6 +23,9 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.ListSelectionModel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 
@@ -141,8 +144,14 @@ public class VerHistorialClinico extends JDialog {
 				
 				VerHistorialPaciente verHistorial = new VerHistorialPaciente(selected);
 				verHistorial.setModal(true);
-				verHistorial.setVisible(true);
 				
+				verHistorial.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        dispose();
+                    }
+                });
+				verHistorial.setVisible(true);
 			}
 			
 			btnVerMas.setEnabled(false);
