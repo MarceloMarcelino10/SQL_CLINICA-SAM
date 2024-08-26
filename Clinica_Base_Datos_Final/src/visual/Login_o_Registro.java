@@ -41,74 +41,17 @@ public class Login_o_Registro extends JFrame {
 	/**
 	 * Launch the application.
 	 */
-/*
-	public static void main(String[] args) {
-	    EventQueue.invokeLater(new Runnable() {
-	        public void run() {
-	            FileInputStream clinica;
-	            FileOutputStream tempClinica;
-	            ObjectInputStream clinicaRead;
-	            ObjectOutputStream clinicaWrite;
-	            
-	            try {
-	                clinica = new FileInputStream("clinica.dat");
-	                clinicaRead = new ObjectInputStream(clinica);
-	                Clinica temp = (Clinica) clinicaRead.readObject();
-	                Clinica.setClinica(temp);
-	                clinica.close();
-	                clinicaRead.close();
-	                Clinica.getInstance().cargarValoresEstaticos();
-	                System.out.println(Clinica.getInstance().getMisCitas().size());
-	            } catch (FileNotFoundException e) {
-	            	try {
-	            		tempClinica = new FileOutputStream("clinica.dat");
-	            		clinicaWrite =  new ObjectOutputStream(tempClinica);
-	            		Persona aux = new Persona("Admin","Admin","Admin","",null,"","Admin","Admin",4);
-	            		Clinica.getInstance().insertarPersona(aux);
-	            		clinicaWrite.writeObject(Clinica.getInstance());
-	            		tempClinica.close();
-	            		clinicaWrite.close();
-	            	} catch (FileNotFoundException e1) {
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-					}
-	            } catch (IOException e) {
-					
-					
-				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-	            try {
-	                Login_o_Registro frame = new Login_o_Registro();
-	                frame.setVisible(true);
-	            } catch (Exception e) {
-	                e.printStackTrace();
-	            }
-	        }
-	    });
-	}
-*/
 	
 	public static void main(String[] args) {
 	    EventQueue.invokeLater(new Runnable() {
 	        public void run() {
 	            try {
-	                
-	            	// Inicializa la instancia de Clinica y carga los datos
-	                //Clinica.getInstance().cargarDatosDesdeSQL();
-	                //Clinica.getInstance().cargarDatosPersonaSQL();
-	                //Clinica.getInstance().cargarDatosPacienteSQL();
-	                //Clinica.getInstance().cargarDatosDoctorSQL();
-	                
-	                
 	                // Crea y muestra la ventana de login
 	                Login_o_Registro frame = new Login_o_Registro();
 	                frame.setVisible(true);
 	            } catch (Exception e) {
 	                e.printStackTrace();
-	                JOptionPane.showMessageDialog(null, "Error al iniciar la aplicaci�n: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+	                JOptionPane.showMessageDialog(null, "Error al iniciar la aplicacion: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 	            }
 	        }
 	    });
@@ -123,7 +66,6 @@ public class Login_o_Registro extends JFrame {
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				Clinica.getInstance().guardarDatos();
 				JOptionPane.showMessageDialog(null, "Informacion guardada correctamente\nGracias por preferirnos", "Hasta la Proxima!", JOptionPane.INFORMATION_MESSAGE);
 			}
 		});

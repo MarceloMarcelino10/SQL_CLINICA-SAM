@@ -1,7 +1,6 @@
 package visual;
 
-import java.awt.BorderLayout
-;
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
 

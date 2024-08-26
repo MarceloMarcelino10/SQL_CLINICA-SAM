@@ -44,12 +44,11 @@ import org.jfree.data.general.DefaultPieDataset;
 import seguridad.GestorUsuario;
 import sql.DatabaseConnection;
 
-public class Clinica implements Serializable  {//u
-	
+public class Clinica implements Serializable  {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -212293991973296857L;
+	private static final long serialVersionUID = 1L;
 	private ArrayList<Vivienda> misViviendas;
 	private ArrayList<Persona> misPersonas;
 	private ArrayList<Enfermedad> misEnfermedades;
@@ -146,280 +145,19 @@ public class Clinica implements Serializable  {//u
 	public void setMisHistoriasClinicas(ArrayList<HistoriaClinica> misHistoriasClinicas) {
 		this.misHistoriasClinicas = misHistoriasClinicas;
 	}
-
-	//METODOS PARA INSERTAR EN LAS LISTAS:
 	
-    public void insertarVivienda(Vivienda vivienda) {
-        //Clinica.getInstance().obtenerMaximoIdVivienda();
-    	misViviendas.add(vivienda);
-    	codVivienda++;
-    }
-
-    public void insertarPersona(Persona persona) {
-        //Clinica.getInstance().obtenerMaximoIdPersona();
-    	misPersonas.add(persona);
-    	codPersona++;
-    }
-
-    public void insertarEnfermedad(Enfermedad enfermedad) {
-    	//Clinica.getInstance().obtenerMaximoIdEnfermedad();
-    	misEnfermedades.add(enfermedad);
-    	codEnfermedad++;
-    }
-
-    public void insertarCita(Cita cita) {
-        //Clinica.getInstance().obtenerMaximoIdCita();
-    	misCitas.add(cita);
-    	codCita++;
-    }
-
-    public void insertarVacuna(Vacuna vacuna) {
-    	//Clinica.getInstance().obtenerMaximoIdVacuna();
-        misVacunas.add(vacuna);
-        codVacuna++;
-    }
-
-    public void insertarConsulta(Consulta consulta) {
-       // Clinica.getInstance().obtenerMaximoIdConsulta();
-    	misConsultas.add(consulta);
-    	codConsulta++;
-    }
-    
-    public void insertarHistoriaClinica(HistoriaClinica historiaClinica) {
-        //Clinica.getInstance().obtenerMaximoIdHistoriaClinica();
-    	misHistoriasClinicas.add(historiaClinica);
-    	codHistoriaClinica++;
-	}
-    
-    public static void setClinica(Clinica clinica) {
-		Clinica.clinica = clinica;
-	}
-    
-    //METODOS PARA ELIMINAR EN LAS LISTAS:
-    
-    public void eliminarVivienda(Vivienda vivienda) {
-        misViviendas.remove(vivienda);
-        guardarDatos();
-    }
-
-    public void eliminarPersona(Persona persona) {
-        misPersonas.remove(persona);
-        guardarDatos();
-    }
-
-    public void eliminarEnfermedad(Enfermedad enfermedad) {
-        misEnfermedades.remove(enfermedad);
-        guardarDatos();
-    }
-
-    public void eliminarCita(Cita cita) {
-        misCitas.remove(cita);
-        guardarDatos();
-    }
-
-    public void eliminarVacuna(Vacuna vacuna) {
-        misVacunas.remove(vacuna);
-        guardarDatos();
-    }
-
-    public void eliminarConsulta(Consulta consulta) {
-        misConsultas.remove(consulta);
-        guardarDatos();
-    }
-    
-    public void eliminarHistoriaClinica(HistoriaClinica HistoriaClinica) {
-        misHistoriasClinicas.remove(HistoriaClinica);
-        guardarDatos();
-    }
-    
-    
-    public void insertarPaciente(Paciente paciente) {
-        misPersonas.add(paciente);
-        guardarDatos();
-    }
-
-    public void insertarDoctor(Doctor doctor) {
-        misPersonas.add(doctor);
-        guardarDatos();
-    }
-    
-    //METODOS PARA ACTUALIZAR EL ELEMENTO DE UNA LISTA:
-	
-    public void actualizarVivienda(Vivienda vivienda) {
-    	int index = buscarViviendaByIndex(vivienda.getCodigo());
-    	misViviendas.set(index, vivienda);
-    	guardarDatos();
-    }
-	
-	private int buscarViviendaByIndex(String codigo) {
-		int index = -1;
-		boolean encontrado = false;
-		int i = 0;
-		while (!encontrado && i < misViviendas.size()) {
-			if (misViviendas.get(i).getCodigo().equalsIgnoreCase(codigo)) {
-				encontrado = true;
-				index = i;
-			}
-			i++;
-		}	
-		return index;
-	}
-	
-	public void actualizarPersona(Persona persona) {
-        int index = buscarPersonaByIndex(persona.getCodigo());
-        if (index >= 0) {
-        	misPersonas.set(index, persona);
-            guardarDatos();
-        }            
-    }
-	
-	 public void agregarEnfermedad(Enfermedad enfermedad) {
-	        misEnfermedades.add(enfermedad);
-	        // AquÃ­ se deberÃ­a aÃ±adir la lÃ³gica para registrar la enfermedad en la base de datos si es necesario
-	 }
-	 
-
-
-	
-
-    private int buscarPersonaByIndex(String codigo) {
-        int index = -1;
-        boolean encontrado = false;
-        int i = 0;
-        while (!encontrado && i < misPersonas.size()) {
-            if (misPersonas.get(i).getCodigo().equalsIgnoreCase(codigo)) {
-                encontrado = true;
-                index = i;
-            }
-            i++;
-        }    
-        return index;
-    }
-
-    public void actualizarEnfermedad(Enfermedad enfermedad) {
-        int index = buscarEnfermedadByIndex(enfermedad.getCodigo());
-            misEnfermedades.set(index, enfermedad);
-            guardarDatos();
-    }
-    
-
-
-    private int buscarEnfermedadByIndex(String codigo) {
-        int index = -1;
-        boolean encontrado = false;
-        int i = 0;
-        while (!encontrado && i < misEnfermedades.size()) {
-            if (misEnfermedades.get(i).getCodigo().equalsIgnoreCase(codigo)) {
-                encontrado = true;
-                index = i;
-            }
-            i++;
-        }    
-        return index;
-    }
-
-    public void actualizarCita(Cita cita) {
-        int index = buscarCitaByIndex(cita.getCodigo());
-            misCitas.set(index, cita);
-            guardarDatos();
-    }
-
-    private int buscarCitaByIndex(String codigo) {
-        int index = -1;
-        boolean encontrado = false;
-        int i = 0;
-        while (!encontrado && i < misCitas.size()) {
-            if (misCitas.get(i).getCodigo().equalsIgnoreCase(codigo)) {
-                encontrado = true;
-                index = i;
-            }
-            i++;
-        }    
-        return index;
-    }
-
-    public void actualizarVacuna(Vacuna vacuna) {
-        int index = buscarVacunaByIndex(vacuna.getCodigo());
-            misVacunas.set(index, vacuna);
-            guardarDatos();
-    }
-
-    private int buscarVacunaByIndex(String codigo) {
-        int index = -1;
-        boolean encontrado = false;
-        int i = 0;
-        while (!encontrado && i < misVacunas.size()) {
-            if (misVacunas.get(i).getCodigo().equalsIgnoreCase(codigo)) {
-                encontrado = true;
-                index = i;
-            }
-            i++;
-        }    
-        return index;
-    }
-
-    public void actualizarConsulta(Consulta consulta) {
-        int index = buscarConsultaByIndex(consulta.getCodigo());
-            misConsultas.set(index, consulta);
-            guardarDatos();
-    }
-
-    private int buscarConsultaByIndex(String codigo) {
-        int index = -1;
-        boolean encontrado = false;
-        int i = 0;
-        while (!encontrado && i < misConsultas.size()) {
-            if (misConsultas.get(i).getCodigo().equalsIgnoreCase(codigo)) {
-                encontrado = true;
-                index = i;
-            }
-            i++;
-        }    
-        return index;
-    }
-    
-    public void actualizarHistorialClinica(HistoriaClinica historialClinica) {
-    	int index = buscarHistorialClinica(historialClinica.getCodigo());
-    	misHistoriasClinicas.set(index,historialClinica);
-    	guardarDatos();
-    }
-    
-	private int buscarHistorialClinica(String codigo) {
-		int index = -1;
-        boolean encontrado = false;
-        int i = 0;
-        while (!encontrado && i < misHistoriasClinicas.size()) {
-            if (misHistoriasClinicas.get(i).getCodigo().equalsIgnoreCase(codigo)) {
-                encontrado = true;
-                index = i;
-            }
-            i++;
-        }    
-        return index;
-	}
-
-	//METODOS PARA EL LOGIN Y REGISTRO:
-
 	public static Persona getLoggedUser() {
 		return Clinica.loggedUser;
 	}
 	
-	public boolean confirmLogin (String userName, String password) {
-		boolean login = false;
-		for (Persona user : misPersonas) {
-			if(user.getUser().equals(userName) && user.getPassword().equals(password)) {
-				loggedUser = user;
-				login = true;
-			}
-		}
-		if (login) {
-		System.out.println(loggedUser.getRangoUser());			
-		}
-		return login;
-	}
+	/*** IMPLEMENTACIONES SQL ***/
 	
+	//METODOS PARA EL LOGIN Y REGISTRO SQL:
+
 	public boolean existUserNameSQL(String userName) {
-	    String query = "SELECT COUNT(*) FROM CREDENCIAL WHERE userName = ?";
+	    String query = "SELECT COUNT(*) " +
+	    			   "FROM CREDENCIAL " + 
+	    			   "WHERE userName = ? ";
 	    
 	    try (Connection conn = DatabaseConnection.getConnection();
 	         PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -437,638 +175,13 @@ public class Clinica implements Serializable  {//u
 	    
 	    return false;
 	}
-
 	
-	
-	//METODO PARA GUARDAR:
-	
-	public void guardarDatos() {
-		guardarValoresEstaticos();
-	    try (FileOutputStream tempClinica = new FileOutputStream("clinica.dat");
-	        ObjectOutputStream clinicaWrite = new ObjectOutputStream(tempClinica)) {
-	        clinicaWrite.writeObject(Clinica.getInstance());
-	        clinicaWrite.close();
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	    }
-	}
-	
-	private void guardarValoresEstaticos() {
-	    valoresEstaticos.add(getCodPersona());
-	    valoresEstaticos.add(getCodCita());
-	    valoresEstaticos.add(getCodVacuna());
-	    valoresEstaticos.add(getCodEnfermedad());
-	    valoresEstaticos.add(getCodConsulta());
-	    valoresEstaticos.add(getCodVivienda());
-	    valoresEstaticos.add(getCodHistoriaClinica());
-	}
-
-	public void cargarValoresEstaticos() {
-	    if (!valoresEstaticos.isEmpty() && valoresEstaticos.size() >= 7) {
-	        setCodPersona(valoresEstaticos.get(0));
-	        setCodCita(valoresEstaticos.get(1));
-	        setCodVacuna(valoresEstaticos.get(2));
-	        setCodEnfermedad(valoresEstaticos.get(3));
-	        setCodConsulta(valoresEstaticos.get(4));
-	        setCodVivienda(valoresEstaticos.get(5));
-	        setCodVivienda(valoresEstaticos.get(6));
-	    }
-	}
-	
-	//METODOS PARA BUCAR POR ID:
-	
-	public Vivienda buscarViviendaById(String codigo) {
-		Vivienda temp = null;
-		boolean encontrado = false;
-		int i = 0;
-		while(i < misViviendas.size() && !encontrado) {
-			if(misViviendas.get(i).getCodigo().equalsIgnoreCase(codigo)) {
-				temp = misViviendas.get(i);
-				encontrado = true;
-			}
-			i++;
-		}
-		return temp;
-	}
-
-	public Persona buscarPersonaById(String codigo) {
-	    Persona temp = null;
-	    boolean encontrado = false;
-	    int i = 0;
-	    while (i < misPersonas.size() && !encontrado) {
-	        if (misPersonas.get(i).getCodigo().equalsIgnoreCase(codigo)) {
-	            temp = misPersonas.get(i);
-	            encontrado = true;
-	        }
-	        i++;
-	    }
-	    return temp;
-	}
-	
-	public Vacuna buscarVacunaById(String codigo) {
-		Vacuna temp = null;
-	    boolean encontrado = false;
-	    int i = 0;
-	    while (i < misVacunas.size() && !encontrado) {
-	        if (misVacunas.get(i).getCodigo().equalsIgnoreCase(codigo)) {
-	            temp = misVacunas.get(i);
-	            encontrado = true;
-	        }
-	        i++;
-	    }
-	    return temp;
-	}
-	
-	private HistoriaClinica buscarHistorialClinicaById(String codigo) {
-		HistoriaClinica temp = null;
-	    boolean encontrado = false;
-	    int i = 0;
-	    while (i < misHistoriasClinicas.size() && !encontrado) {
-	        if (misHistoriasClinicas.get(i).getCodigo().equalsIgnoreCase(codigo)) {
-	            temp = misHistoriasClinicas.get(i);
-	            encontrado = true;
-	        }
-	        i++;
-	    }
-	    return temp;
-	}
-
-
-	//METODOS PARA BUSCAR VERIFICAR UNA PERSONA POR VIVIENDA:
-	
-	public boolean existePersonaEnVivienda(Persona persona) {
-		boolean existe = false;
-	    for (Vivienda vivienda : misViviendas) {
-	        if (vivienda.getMisPersonas().contains(persona)) {
-	            existe =  true;
-	        }
-	    }
-	    return existe;
-	}
-	
-	public void eliminarPersonaDeVivienda(Persona persona) {
-	    Vivienda viviendaActual = null;
-	    boolean encontrado = false;
-	    int i = 0;
-
-	    while (i < misViviendas.size() && !encontrado) {
-	        Vivienda vivienda = misViviendas.get(i);
-	        if (vivienda.getMisPersonas().contains(persona)) {
-	            viviendaActual = vivienda;
-	            encontrado = true;
-	        }
-	        i++;
-	    }
-
-	    if (encontrado) {
-	        viviendaActual.eliminarPersona(persona);
-	        if (persona instanceof Paciente) {
-	            ((Paciente) persona).setMiVivienda(null);
-	        }
-	        actualizarVivienda(viviendaActual);
-	        actualizarPersona(persona);
-	        JOptionPane.showMessageDialog(null, "Persona eliminada correctamente de la vivienda", "Eliminar Persona", JOptionPane.INFORMATION_MESSAGE);
-	        guardarDatos();
-	    } else {
-	        JOptionPane.showMessageDialog(null, "La persona no estï¿½ registrada en ninguna vivienda", "Error", JOptionPane.ERROR_MESSAGE);
-	    }
-	}
-	
-	public void desasociarVivienda (Vivienda vivienda) {
-	    ArrayList<Persona> personasEnVivienda = vivienda.getMisPersonas();
-	    for (Persona persona : personasEnVivienda) {
-	        if (persona instanceof Paciente) {
-	            ((Paciente) persona).setMiVivienda(null);
-	            actualizarPersona(persona);
-	        }
-	    }
-	    eliminarVivienda(vivienda);
-	}
-	
-	//METODOS PARA CONTAR ELEMNTOS DE LAS CLASES:
-	
-	public int getNumCitasPendientesPorDoctor(Doctor doctor) {
-	    
-		if (doctor == null || misCitas == null) {
-	        return 0;
-	    }
-
-	    int count = 0;
-	    
-	    for (Cita cita : misCitas) {
-	        if (cita.getMiDoctor() != null 
-	                && cita.getMiDoctor().equals(doctor) 
-	                && !cita.isRealizada()) { // No realizada
-	            count++;
-	        }
-	    }
-	    
-	    return count;
-	}
-
-	
-	public ArrayList<Cita> getCitasPendientesPorDoctor(Doctor doctor) {
-		ArrayList<Cita> citasPendientes = new ArrayList<>();
-	    for (Cita cita : misCitas) {
-	        if (cita.getMiDoctor().equals(doctor) && !cita.isRealizada()) {
-	            citasPendientes.add(cita);
-	        }
-	    }
-	    return citasPendientes;
-	}
-
-
-	//SETTERS AND GETTERS ESTATICOS (Probando guardar los valores esticaos)
-	
-	public static int getCodPersona() {
-		return codPersona;
-	}
-
-	public static void setCodPersona(int codPersona) {
-		Clinica.codPersona = codPersona;
-	}
-
-	public static int getCodCita() {
-		return codCita;
-	}
-
-	public static void setCodCita(int codCita) {
-		Clinica.codCita = codCita;
-	}
-
-	public static int getCodVacuna() {
-		return codVacuna;
-	}
-
-	public static void setCodVacuna(int codVacuna) {
-		Clinica.codVacuna = codVacuna;
-	}
-
-	public static int getCodEnfermedad() {
-		return codEnfermedad;
-	}
-
-	public static void setCodEnfermedad(int codEnfermedad) {
-		Clinica.codEnfermedad = codEnfermedad;
-	}
-
-	public static int getCodConsulta() {
-		return codConsulta;
-	}
-
-	public static void setCodConsulta(int codConsulta) {
-		Clinica.codConsulta = codConsulta;
-	}
-
-	public static int getCodVivienda() {
-		return codVivienda;
-	}
-
-	public static void setCodVivienda(int codVivienda) {
-		Clinica.codVivienda = codVivienda;
-	}
-	
-	public ArrayList<Enfermedad> getEnfermedadesRegistradas() {
-	    return misEnfermedades;
-	}
-	
-	public static int getCodHistoriaClinica() {
-		return codHistoriaClinica;
-	}
-
-	public static void setCodHistoriaClinica(int codHistoriaClinica) {
-		Clinica.codHistoriaClinica = codHistoriaClinica;
-	}
-	
-	//METODOS PARA GENERAR EL REPORTE CLINICO:
-	
-	public String obtenerViviendasMasPobladas() {
-		
-		if (misViviendas.isEmpty()) {
-	        return "Informaciï¿½n no disponible!\n";
-	    }
-		ArrayList<Vivienda> viviendasOrdenadas = new ArrayList<>(misViviendas);
-		
-        Collections.sort(viviendasOrdenadas, Comparator.comparingInt(vivienda -> vivienda.getMisPersonas().size()));
-        Collections.reverse(viviendasOrdenadas);
-        
-        int limite = Math.min(3, viviendasOrdenadas.size());
-        StringBuilder resultado = new StringBuilder("Las viviendas mï¿½s pobladas son:\n");
-
-        for (int i = 0; i < limite; i++) {
-            Vivienda vivienda = viviendasOrdenadas.get(i);
-            resultado.append(String.format("%d. %s: %s - Afiliados: %d personas\n", i + 1, vivienda.getCodigo(), vivienda.getDireccion(), vivienda.getMisPersonas().size()));
-        }
-        return resultado.toString();
-    }
-	
-    public String calcularPromedioEdadPersonas() {
-        if (misPersonas.isEmpty()) {
-        	return "Informaciï¿½n no disponible!\n";
-        }
-
-        Calendar calHoy = Calendar.getInstance();
-        int sumEdades = 0;
-
-        for (Persona persona : misPersonas) {
-        	
-        	if (persona instanceof Paciente) {
-        		
-        		Calendar calNacimiento = Calendar.getInstance();
-                calNacimiento.setTime(persona.getFechaNacimiento());
-
-                int edad = calHoy.get(Calendar.YEAR) - calNacimiento.get(Calendar.YEAR);
-                if (calHoy.get(Calendar.DAY_OF_YEAR) < calNacimiento.get(Calendar.DAY_OF_YEAR)) {
-                    edad--;
-                }
-
-                sumEdades += edad;
-            }
-        }
-        double promedioEdad = (double) sumEdades / misPersonas.size();
-        return String.format("El promedio de edad de las personas tratadas: %.2f aï¿½os.\n", promedioEdad);
-    }
-	
-    public String calcularPromedioSexoPersoanas() {
-        if (misPersonas.isEmpty()) {
-        	return "Informaciï¿½n no disponible!\n";
-        }
-
-        int countMasculino = 0;
-        int countFemenino = 0;
-        int cantPacientes = 0;
-
-        for (Persona persona : misPersonas) {
-        	if (persona instanceof Paciente) {
-        		if ("Masculino".equalsIgnoreCase(persona.getGenero())) {
-                    countMasculino++;
-                } else if ("Femenino".equalsIgnoreCase(persona.getGenero())) {
-                    countFemenino++;
-                }
-        		cantPacientes++;
-        	} 
-        }
-
-        double porcentajeMasculino = (double) countMasculino / cantPacientes * 100;
-        double porcentajeFemenino = (double) countFemenino / cantPacientes * 100;
-
-        return String.format("Promedio de Genero:\nMasculino: %.2f%%\nFemenino: %.2f%%\n", porcentajeMasculino, porcentajeFemenino);
-    }
-    
-    public String obtenerTotalPersonasAtendidas() {
-        if (misPersonas.isEmpty()) {
-        	return "Informaciï¿½n no disponible!\n";
-        }
-        int total = 0;
-        for (Persona persona : misPersonas) {
-        	if (persona instanceof Paciente) {
-        		total++;
-        	}
-        }
-        return String.format("El total de personas atendidas: %d.\n", total);
-    }
-    
-    public String obtenerEnfermedadesMasRecurrentes() {
-        if (misEnfermedades.isEmpty()) {
-        	return "Informaciï¿½n no disponible!\n";
-        }
-
-        String[] nombresEnfermedades = new String[misEnfermedades.size()];
-        int[] frecuenciasEnfermedades = new int[misEnfermedades.size()];
-
-        for (int i = 0; i < misEnfermedades.size(); i++) {
-            Enfermedad enfermedad = misEnfermedades.get(i);
-            String nombreEnfermedad = enfermedad.getNombre();
-
-            int indice = buscarEnfermedadPorNombre(nombresEnfermedades, nombreEnfermedad);
-
-            if (indice != -1) {
-                frecuenciasEnfermedades[indice]++;
-            } else {
-                nombresEnfermedades[i] = nombreEnfermedad;
-                frecuenciasEnfermedades[i] = 1;
-            }
-        }
-
-        ordenarPorFrecuenciaDescendente(nombresEnfermedades, frecuenciasEnfermedades);
-        
-        int limite = Math.min(3, misEnfermedades.size());
-        StringBuilder resultado = new StringBuilder("Las enfermedades mï¿½s recurrentes son:\n");
-
-        for (int i = 0; i < limite; i++) {
-            resultado.append(String.format("%d. %s: %d veces\n", i + 1, nombresEnfermedades[i], frecuenciasEnfermedades[i]));
-        }
-
-        return resultado.toString();
-    }
-
-    private int buscarEnfermedadPorNombre(String[] nombresEnfermedades, String nombreEnfermedad) {
-        for (int i = 0; i < nombresEnfermedades.length; i++) {
-            if (nombreEnfermedad != null && nombreEnfermedad.equals(nombresEnfermedades[i])) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private void ordenarPorFrecuenciaDescendente(String[] nombresEnfermedades, int[] frecuenciasEnfermedades) {
-        for (int i = 0; i < frecuenciasEnfermedades.length - 1; i++) {
-            for (int j = i + 1; j < frecuenciasEnfermedades.length; j++) {
-                if (frecuenciasEnfermedades[i] < frecuenciasEnfermedades[j]) {
-                	
-                    int tempFrecuencia = frecuenciasEnfermedades[i];
-                    frecuenciasEnfermedades[i] = frecuenciasEnfermedades[j];
-                    frecuenciasEnfermedades[j] = tempFrecuencia;
-
-                    String tempNombre = nombresEnfermedades[i];
-                    nombresEnfermedades[i] = nombresEnfermedades[j];
-                    nombresEnfermedades[j] = tempNombre;
-                }
-            }
-        }
-    }
-    
-    public String obtenerEnfermedadesMasGraves() {
-        if (misEnfermedades.isEmpty()) {
-            return "Informaciï¿½n no disponible!\n";
-        }
-
-        ArrayList<Enfermedad> enfermedadesGraves = new ArrayList<>();
-
-        for (Enfermedad enfermedad : misEnfermedades) {
-            if (enfermedad.getGravedad() == 5) {
-                enfermedadesGraves.add(enfermedad);
-            }
-        }
-
-        if (enfermedadesGraves.isEmpty()) {
-            return "No hay enfermedades graves registradas.\n";
-        }
-
-        enfermedadesGraves.sort(Comparator.comparing(Enfermedad::getNombre));
-        StringBuilder resultado = new StringBuilder("Enfermedades Graves Atendidas:\n");
-
-        for (Enfermedad enfermedad : enfermedadesGraves) {
-            resultado.append(String.format("- %s\n", enfermedad.getNombre()));
-        }
-
-        return resultado.toString();
-    }
-    
-    public String obtenerDoctorConMasCitas() {
-        if (misCitas.isEmpty()) {
-            return "Informaciï¿½n no disponible!\n";
-        }
-
-        Doctor doctorConMasCitas = null;
-        int maxCitas = 0;
-
-        for (Doctor doctor : obtenerTodosLosDoctores()) {
-            int citasDoctor = contarCitasPorDoctor(doctor);
-
-            if (citasDoctor > maxCitas) {
-                maxCitas = citasDoctor;
-                doctorConMasCitas = doctor;
-            }
-        }
-
-        if (doctorConMasCitas != null) {
-        	return String.format("El doctor con mï¿½s citas es: %s, con especialidad de %s, y tiene %d citas.\n", doctorConMasCitas.getNombre(), doctorConMasCitas.getEspecialidad(), maxCitas);
-        } else {
-            return "No hay doctores con citas registradas.\n";
-        }
-    }
-
-    private ArrayList<Doctor> obtenerTodosLosDoctores() {
-        ArrayList<Doctor> doctores = new ArrayList<>();
-
-        for (Cita cita : misCitas) {
-            Doctor doctor = cita.getMiDoctor();
-            if (!doctores.contains(doctor)) {
-                doctores.add(doctor);
-            }
-        }
-
-        return doctores;
-    }
-
-    private int contarCitasPorDoctor(Doctor doctor) {
-        int contador = 0;
-
-        for (Cita cita : misCitas) {
-            if (cita.getMiDoctor().equals(doctor)) {
-                contador++;
-            }
-        }
-
-        return contador;
-    }
-
-    public String obtenerTotalCitasRealizadas() {
-        if (misCitas.isEmpty()) {
-        	return "Informaciï¿½n no disponible!\n";
-        }
-        int totalCitasRealizadas = 0;
-        for (Cita cita : misCitas) {
-            if (cita.isRealizada()) {
-                totalCitasRealizadas++;
-            }
-        }
-        return String.format("El total de citas realizadas es: %d.\n", totalCitasRealizadas);
-    }
-
-    public String calcularPromedioSexoDoctores() {
-        if (misPersonas.isEmpty()) {
-        	return "Informaciï¿½n no disponible!\n";
-        }
-
-        int countMasculino = 0;
-        int countFemenino = 0;
-        int cantDoctores = 0;
-        
-        for (Persona persona : misPersonas) {
-            if (persona instanceof Doctor) {
-                if ("Masculino".equalsIgnoreCase(persona.getGenero())) {
-                    countMasculino++;
-                } else if ("Femenino".equalsIgnoreCase(persona.getGenero())) {
-                    countFemenino++;
-                }
-                cantDoctores++;
-            }
-        }
-
-        if (cantDoctores == 0) {
-            return "No hay doctores registrados.\n";
-        }
-
-        double porcentajeMasculino = (double) countMasculino / cantDoctores * 100;
-        double porcentajeFemenino = (double) countFemenino / cantDoctores * 100;
-
-        return String.format("Promedio de Gï¿½nero entre los doctores:\nMasculino: %.2f%%\nFemenino: %.2f%%\n", porcentajeMasculino, porcentajeFemenino);
-    }
-    
-    public String obtenerVacunaMasCurativa() {
-        if (misVacunas.isEmpty()) {
-        	return "Informaciï¿½n no disponible!\n";
-        }
-
-        Vacuna vacunaConMasEnfermedades = null;
-        int maxEnfermedades = 0;
-
-        for (Vacuna vacuna : misVacunas) {
-            int cantidadEnfermedades = vacuna.getMisEnfermedades().size();
-            if (cantidadEnfermedades > maxEnfermedades) {
-                maxEnfermedades = cantidadEnfermedades;
-                vacunaConMasEnfermedades = vacuna;
-            }
-        }
-
-        if (vacunaConMasEnfermedades == null) {
-            return "No hay vacunas con enfermedades asociadas.\n";
-        }
-
-        StringBuilder resultado = new StringBuilder("La vacuna que mï¿½s cura enfermedades es:\n");
-        resultado.append(String.format("- %s (Cï¿½digo: %s)\n", vacunaConMasEnfermedades.getNombre(), vacunaConMasEnfermedades.getCodigo()));
-        resultado.append("Enfermedades asociadas:\n");
-
-        for (Enfermedad enfermedad : vacunaConMasEnfermedades.getMisEnfermedades()) {
-            resultado.append(String.format("- %s\n", enfermedad.getNombre()));
-        }
-
-        return resultado.toString();
-    }
-
-	public Enfermedad buscarEnfermedadById(String idEnfermedad) {
-		Enfermedad enfermedad = null;
-		boolean encontrado = false;
-		int i = 0;
-		while(i<misEnfermedades.size()&&!encontrado) {
-			if(misEnfermedades.get(i).getCodigo().equalsIgnoreCase(idEnfermedad)){
-				enfermedad = misEnfermedades.get(i);
-				encontrado = true;
-			}
-			i++;
-		}
-		return enfermedad;
-	}
-	
-	public Consulta buscarConsultaById(String codigo) {
-		
-		Consulta consulta = null;
-		boolean encontrado = false;
-		int i = 0;
-		
-		while(i<misConsultas.size()&&!encontrado) {
-			if(misConsultas.get(i).getCodigo().equalsIgnoreCase(codigo)){
-				consulta = misConsultas.get(i);
-				encontrado = true;
-			}
-			i++;
-		}
-		return consulta;
-	}
-
-	public Cita buscarCitaById(String codCita) {
-		Cita cita = null;
-		boolean encontrado = false;
-		int i = 0;
-		
-		while(i<misCitas.size()&&!encontrado) {
-			if(!misCitas.get(i).isRealizada()) {
-				if(misCitas.get(i).getCodigo().equalsIgnoreCase(codCita)) {
-					cita = misCitas.get(i);
-					encontrado = true;
-				}
-			}
-			i++;
-		}
-			
-		return cita;
-	}
-	
-	/*** IMPLEMENTACIONES SQL ***/
-
-    //HISTORIAL CLINICA:
-    
-    public void cargarDatosHistoriaClinicaSQL() {
-    	
-    	Clinica.getInstance().getMisHistoriasClinicas().clear();
-        
-        String queryHistorial = "SELECT hc.id_historial_clinico, hc.id_paciente, p.id_persona AS id_paciente_persona " +
-                                "FROM HISTORIAL_CLINICO AS hc " +
-                                "INNER JOIN PACIENTE AS p ON hc.id_paciente = p.id_paciente ";
-        
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmtHistorial = conn.prepareStatement(queryHistorial);
-             ResultSet rsHistorial = stmtHistorial.executeQuery()) {
-            
-            while (rsHistorial.next()) {
-                
-                String codigo = rsHistorial.getString("id_historial_clinico");
-                String id_paciente = rsHistorial.getString("id_paciente_persona");
-                
-                Paciente paciente = (Paciente) Clinica.getInstance().buscarPersonaById(id_paciente);
-                
-                ArrayList<Consulta> consultas = new ArrayList<>();
-                ArrayList<Vacuna> vacunasAplicadas = new ArrayList<>();
-                
-                HistoriaClinica historiaClinica = new HistoriaClinica(codigo, paciente, consultas, vacunasAplicadas);
-                Clinica.getInstance().insertarHistoriaClinica(historiaClinica);
-
-                System.out.println("Historia Clï¿½nica ID: " + codigo);
-                System.out.println("Paciente ID: " + id_paciente);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    
     //MANEJO DE INDICES BASE DE DATOS:
     
     public int obtenerMaximoIdAdministrador() {
         
-    	String query = "SELECT MAX(id_administrador) AS max_administrador_id FROM ADMINISTRADOR";
+    	String query = "SELECT MAX(id_administrador) AS max_administrador_id " +
+    				   "FROM ADMINISTRADOR";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
@@ -1087,7 +200,8 @@ public class Clinica implements Serializable  {//u
     
     public int obtenerMaximoIdSecretario() {
         
-    	String query = "SELECT MAX(id_secretario) AS max_secretario_id FROM SECRETARIO";
+    	String query = "SELECT MAX(id_secretario) AS max_secretario_id " +
+    				   "FROM SECRETARIO";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
@@ -1106,7 +220,8 @@ public class Clinica implements Serializable  {//u
     
    public int obtenerMaximoIdDoctor() {
         
-    	String query = "SELECT MAX(id_doctor) AS max_doctor_id FROM DOCTOR";
+    	String query = "SELECT MAX(id_doctor) AS max_doctor_id " +
+    			       "FROM DOCTOR";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
@@ -1125,7 +240,8 @@ public class Clinica implements Serializable  {//u
     
     public int obtenerMaximoIdPaciente() {
         
-    	String query = "SELECT MAX(id_paciente) AS max_paciente_id FROM PACIENTE";
+    	String query = "SELECT MAX(id_paciente) AS max_paciente_id " +
+    				   "FROM PACIENTE";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
@@ -1144,7 +260,8 @@ public class Clinica implements Serializable  {//u
     
     public int obtenerMaximoIdPersona() {
         
-    	String query = "SELECT MAX(id_persona) AS max_persona_id FROM PERSONA";
+    	String query = "SELECT MAX(id_persona) AS max_persona_id " +
+    				   "FROM PERSONA";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
@@ -1164,7 +281,8 @@ public class Clinica implements Serializable  {//u
     
     public int obtenerMaximoIdEnfermedad() {
         
-    	String query = "SELECT MAX(id_enfermedad) AS max_enfermedad_id FROM ENFERMEDAD";
+    	String query = "SELECT MAX(id_enfermedad) AS max_enfermedad_id " + 
+    				   "FROM ENFERMEDAD";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
@@ -1181,7 +299,8 @@ public class Clinica implements Serializable  {//u
     }
     
     public int obtenerMaximoIdConsulta() {
-        String query = "SELECT MAX(id_consulta) AS max_consulta_id FROM CONSULTA";
+        String query = "SELECT MAX(id_consulta) AS max_consulta_id " +
+        			   "FROM CONSULTA";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
@@ -1198,7 +317,8 @@ public class Clinica implements Serializable  {//u
     }
     
     public int obtenerMaximoIdVivienda() {
-        String query = "SELECT MAX(id_vivienda) AS max_vivienda_id FROM VIVIENDA";
+        String query = "SELECT MAX(id_vivienda) AS max_vivienda_id " + 
+        			   "FROM VIVIENDA";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
@@ -1215,7 +335,8 @@ public class Clinica implements Serializable  {//u
     }
     
     public int obtenerMaximoIdHistoriaClinica() {
-        String query = "SELECT MAX(id_historial_clinico) AS max_historia_consulta_id FROM HISTORIAL_CLINICO";
+        String query = "SELECT MAX(id_historial_clinico) AS max_historia_consulta_id " + 
+        			   "FROM HISTORIAL_CLINICO";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
@@ -1232,7 +353,8 @@ public class Clinica implements Serializable  {//u
     }
 
     public int obtenerMaximoIdVacuna() {
-        String query = "SELECT MAX(id_vacuna) AS max_vacuna_id FROM VACUNA";
+        String query = "SELECT MAX(id_vacuna) AS max_vacuna_id " +
+        			   "FROM VACUNA";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
@@ -1249,7 +371,8 @@ public class Clinica implements Serializable  {//u
     }
     
     public int obtenerMaximoIdCita() {
-        String query = "SELECT MAX(id_cita) AS max_cita_id FROM CITA";
+        String query = "SELECT MAX(id_cita) AS max_cita_id " + 
+        			   "FROM CITA";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
@@ -1266,7 +389,8 @@ public class Clinica implements Serializable  {//u
     }
     
     public int obtenerMaximoIdCredencial() {
-        String query = "SELECT MAX(id_credencial) AS max_credencial_id FROM CREDENCIAL";
+        String query = "SELECT MAX(id_credencial) AS max_credencial_id " +
+        			   "FROM CREDENCIAL";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
@@ -1282,25 +406,6 @@ public class Clinica implements Serializable  {//u
         return codCredencial;
     }
 
-    
-    public void cargarLastIdUsed() {
-    	
-    	//Metodo para cargar los id de la base de datos, al progrma debido a lo mucho que cuesta cargar toda la info!
-
-    	
-    	obtenerMaximoIdAdministrador();
-    	obtenerMaximoIdSecretario();
-    	obtenerMaximoIdDoctor();
-    	obtenerMaximoIdPaciente();
-    	obtenerMaximoIdPersona();
-    	obtenerMaximoIdEnfermedad();
-    	obtenerMaximoIdConsulta();
-    	obtenerMaximoIdVivienda();
-    	obtenerMaximoIdHistoriaClinica();
-    	obtenerMaximoIdVacuna();
-    	obtenerMaximoIdCita();
-    }
-    
     //ENFERMEDADES SQL:
     
     public DefaultTableModel cargarDatosEnfermedadSQL() {
@@ -1931,92 +1036,7 @@ public class Clinica implements Serializable  {//u
 
         return persona;
     }
-/*
-    public void eliminarDatosPacienteSQL(String id_persona) {
-        
-    	try (Connection conn = DatabaseConnection.getConnection()) {
-    		
-    		//Eliminacion en cadena para evitar errores con las claves foraneas
-    		
-            String queryEnfermedadVacuna = "DELETE FROM ENFERMEDAD_VACUNA WHERE id_vacuna IN  "+
-            		 					   "(SELECT id_vacuna FROM VACUNA WHERE id_historial_clinico IN " +
-					            		   "(SELECT id_historial_clinico FROM HISTORIAL_CLINICO " +
-					            		   "WHERE id_paciente = (SELECT id_paciente FROM PACIENTE WHERE id_persona = ?)))";
-            try (PreparedStatement stmtEnfermedadVacuna = conn.prepareStatement(queryEnfermedadVacuna)) {
-                stmtEnfermedadVacuna.setString(1, id_persona);
-                stmtEnfermedadVacuna.executeUpdate();
-            }
 
-            String queryVacuna = "DELETE FROM VACUNA WHERE id_historial_clinico IN " +
-			            		 "(SELECT id_historial_clinico FROM HISTORIAL_CLINICO " +
-			            		 "WHERE id_paciente = (SELECT id_paciente FROM PACIENTE WHERE id_persona = ?))";
-            try (PreparedStatement stmtVacuna = conn.prepareStatement(queryVacuna)) {
-                stmtVacuna.setString(1, id_persona);
-                stmtVacuna.executeUpdate();
-            }
-
-            String queryEnfermedadConsulta = "DELETE FROM ENFERMEDAD_CONSULTA WHERE id_consulta IN " +
-            								 "(SELECT id_consulta FROM CONSULTA WHERE id_historial_clinico IN " +
-            								 "(SELECT id_historial_clinico FROM HISTORIAL_CLINICO " +
-            								 "WHERE id_paciente = (SELECT id_paciente FROM PACIENTE WHERE id_persona = ?)))";
-            try (PreparedStatement stmtEnfermedadConsulta = conn.prepareStatement(queryEnfermedadConsulta)) {
-                stmtEnfermedadConsulta.setString(1, id_persona);
-                stmtEnfermedadConsulta.executeUpdate();
-            }
-
-            String queryConsulta = "DELETE FROM CONSULTA WHERE id_historial_clinico IN " +
-            	  	               "(SELECT id_historial_clinico FROM HISTORIAL_CLINICO " +
-            	  	               "WHERE id_paciente = (SELECT id_paciente FROM PACIENTE WHERE id_persona = ?))";
-            try (PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta)) {
-                stmtConsulta.setString(1, id_persona);
-                stmtConsulta.executeUpdate();
-            }
-
-            String queryCita = "DELETE FROM CITA " +
-            				   "WHERE id_persona = ? OR id_creador_cita = ?";
-            try (PreparedStatement stmtCita = conn.prepareStatement(queryCita)) {
-                stmtCita.setString(1, id_persona);
-                stmtCita.setString(2, id_persona);
-                stmtCita.executeUpdate();
-            }
-
-            String queryHistorialClinico = "DELETE FROM HISTORIAL_CLINICO " +
-            		                       "WHERE id_paciente = (SELECT id_paciente FROM PACIENTE WHERE id_persona = ?)";
-            try (PreparedStatement stmtHistorialClinico = conn.prepareStatement(queryHistorialClinico)) {
-                stmtHistorialClinico.setString(1, id_persona);
-                stmtHistorialClinico.executeUpdate();
-            }
-            
-            String queryCredencial = "DELETE FROM CREDENCIAL " +
-					 				 "WHERE id_persona = ?";
-			try (PreparedStatement stmtCredencial = conn.prepareStatement(queryCredencial)) {
-				stmtCredencial.setString(1, id_persona);
-				stmtCredencial.executeUpdate();
-			}
-
-            
-            String queryPaciente = "DELETE FROM PACIENTE " + 
-            		               "WHERE id_persona = ?";
-            try (PreparedStatement stmtPaciente = conn.prepareStatement(queryPaciente)) {
-                stmtPaciente.setString(1, id_persona);
-                stmtPaciente.executeUpdate();
-            }
-            
-            String queryPersona = "DELETE FROM PERSONA " +
-					  			  "WHERE id_persona = ?";
-			try (PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
-				  stmtPersona.setString(1, id_persona);
-				  stmtPersona.executeUpdate();
-			}
-
-            System.out.println("Datos del paciente con c�digo " + id_persona + " eliminados.");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    */
-    
     public void eliminarDatosPacienteSQL(String id_persona) {
         Connection conn = null;
         try {
@@ -2111,65 +1131,6 @@ public class Clinica implements Serializable  {//u
         }
     }
     
-
-    /*
-    public void eliminarDatosDoctorSQL(String id_persona) {
-        
-    	try (Connection conn = DatabaseConnection.getConnection()) {
-        	
-    		//Eliminacion en cadena para evitar errores con las claves foraneas
-    		
-            String queryEnfermedadConsulta = "DELETE FROM ENFERMEDAD_CONSULTA WHERE id_consulta IN " +
-            								 "(SELECT id_consulta FROM CONSULTA " +
-            		                         "WHERE id_doctor IN (SELECT id_doctor FROM DOCTOR WHERE id_persona = ?))";
-            try (PreparedStatement stmtEnfermedadConsulta = conn.prepareStatement(queryEnfermedadConsulta)) {
-                stmtEnfermedadConsulta.setString(1, id_persona);
-                stmtEnfermedadConsulta.executeUpdate();
-            }
-            
-            String queryConsulta = "DELETE FROM CONSULTA " +
-        			   			   "WHERE id_doctor IN (SELECT id_doctor FROM DOCTOR WHERE id_persona = ?)";
-			try (PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta)) {
-				stmtConsulta.setString(1, id_persona);
-				stmtConsulta.executeUpdate();
-			}
-            
-            String queryCita = "DELETE FROM CITA " +
-            		 		   "WHERE id_doctor IN (SELECT id_doctor FROM DOCTOR WHERE id_persona = ?)";
-            try (PreparedStatement stmtCita = conn.prepareStatement(queryCita)) {
-                stmtCita.setString(1, id_persona);
-                stmtCita.executeUpdate();
-            }
-			
-            String queryCredencial = "DELETE FROM CREDENCIAL " +
-            						 "WHERE id_persona = ?";
-            try (PreparedStatement stmtCredencial = conn.prepareStatement(queryCredencial)) {
-            	stmtCredencial.setString(1, id_persona);
-            	stmtCredencial.executeUpdate();
-			}
-								
-            String queryDoctor = "DELETE FROM DOCTOR " +
-            		      		 "WHERE id_persona = ?";
-            try (PreparedStatement stmtDoctor = conn.prepareStatement(queryDoctor)) {
-                stmtDoctor.setString(1, id_persona);
-                stmtDoctor.executeUpdate();
-            }
-            
-            String queryPersona = "DELETE FROM PERSONA " +
-					  			  "WHERE id_persona = ?";
-			try (PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
-				  stmtPersona.setString(1, id_persona);
-				  stmtPersona.executeUpdate();
-			}
-
-
-            System.out.println("Datos del doctor con c�digo " + id_persona + " eliminados.");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-*/   
-    
     public void eliminarDatosDoctorSQL(String id_persona) {
 
         Connection conn = null;
@@ -2252,121 +1213,6 @@ public class Clinica implements Serializable  {//u
         }
     }
 
-/*
-    public void eliminarDatosPersonaSQL(String id_persona) {
-       
-    	try (Connection conn = DatabaseConnection.getConnection()) {
-            
-    		//Eliminacion en cadena para evitar errores con las claves foraneas
-    		
-            String queryCita = "DELETE FROM CITA " +
-            				  "WHERE id_persona = ? OR id_creador_cita = ?";
-            try (PreparedStatement stmtCita = conn.prepareStatement(queryCita)) {
-                stmtCita.setString(1, id_persona);
-                stmtCita.setString(2, id_persona);
-                stmtCita.executeUpdate();
-            }
-
-            String queryAdmin = "DELETE FROM ADMINISTRADOR " +
-            					"WHERE id_persona = ?";
-            try (PreparedStatement stmtAdmin = conn.prepareStatement(queryAdmin)) {
-                stmtAdmin.setString(1, id_persona);
-                stmtAdmin.executeUpdate();
-            }
-
-            String querySecretario = "DELETE FROM SECRETARIO " +
-            		                 "WHERE id_persona = ?";
-            try (PreparedStatement stmtSecretario = conn.prepareStatement(querySecretario)) {
-                stmtSecretario.setString(1, id_persona);
-                stmtSecretario.executeUpdate();
-            }
-            
-            String queryCredencial = "DELETE FROM CREDENCIAL " +
-					                 "WHERE id_persona = ?";
-			try (PreparedStatement stmtCredencial = conn.prepareStatement(queryCredencial)) {
-				stmtCredencial.setString(1, id_persona);
-				stmtCredencial.executeUpdate();
-			}
-            
-            String queryPersona = "DELETE FROM PERSONA " +
-            					  "WHERE id_persona = ?";
-            try (PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
-                stmtPersona.setString(1, id_persona);
-                stmtPersona.executeUpdate();
-            }
-
-            System.out.println("Datos de la persona con c�digo " + id_persona + " eliminados.");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-*/
-/*
-    public void eliminarDatosPersonaSQL(String id_persona) {
-        
-    	try (Connection conn = DatabaseConnection.getConnection()) {
-        	
-        	//Eliminacion en cadena para evitar errores con las claves foraneas
-
-        	String queryEnfermedadConsulta = "DELETE FROM ENFERMEDAD_CONSULTA " +
-                                             "WHERE id_consulta IN (SELECT id_consulta FROM CONSULTA WHERE id_cita_solicitada IN (SELECT id_cita FROM CITA WHERE id_persona = ? OR id_creador_cita = ?))";
-            try (PreparedStatement stmtEnfermedadConsulta = conn.prepareStatement(queryEnfermedadConsulta)) {
-                stmtEnfermedadConsulta.setString(1, id_persona);
-                stmtEnfermedadConsulta.setString(2, id_persona);
-                stmtEnfermedadConsulta.executeUpdate();
-            }
-
-            String queryConsulta = "DELETE FROM CONSULTA WHERE id_cita_solicitada IN (SELECT id_cita FROM CITA WHERE id_persona = ? OR id_creador_cita = ?)";
-            try (PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta)) {
-                stmtConsulta.setString(1, id_persona);
-                stmtConsulta.setString(2, id_persona);
-                stmtConsulta.executeUpdate();
-            }
-
-            String queryCita = "DELETE FROM CITA WHERE id_persona = ? OR id_creador_cita = ?";
-            try (PreparedStatement stmtCita = conn.prepareStatement(queryCita)) {
-                stmtCita.setString(1, id_persona);
-                stmtCita.setString(2, id_persona);
-                stmtCita.executeUpdate();
-            }
-
-            String queryAdmin = "DELETE FROM ADMINISTRADOR WHERE id_persona = ?";
-            try (PreparedStatement stmtAdmin = conn.prepareStatement(queryAdmin)) {
-                stmtAdmin.setString(1, id_persona);
-                stmtAdmin.executeUpdate();
-            }
-
-            String querySecretario = "DELETE FROM SECRETARIO WHERE id_persona = ?";
-            try (PreparedStatement stmtSecretario = conn.prepareStatement(querySecretario)) {
-                stmtSecretario.setString(1, id_persona);
-                stmtSecretario.executeUpdate();
-            }
-
-            String queryCredencial = "DELETE FROM CREDENCIAL WHERE id_persona = ?";
-            try (PreparedStatement stmtCredencial = conn.prepareStatement(queryCredencial)) {
-                stmtCredencial.setString(1, id_persona);
-                stmtCredencial.executeUpdate();
-            }
-            
-            if (esUnPacienteSQL(id_persona)) {
-            	
-            	eliminarDatosPacienteSQL(id_persona);
-            }
-
-            String queryPersona = "DELETE FROM PERSONA WHERE id_persona = ?";
-            try (PreparedStatement stmtPersona = conn.prepareStatement(queryPersona)) {
-                stmtPersona.setString(1, id_persona);
-                stmtPersona.executeUpdate();
-            }
-
-            System.out.println("Datos de la persona con c�digo " + id_persona + " eliminados.");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    */
-    
     public void eliminarDatosPersonaSQL(String id_persona) {
         
     	Connection conn = null;
@@ -2870,40 +1716,7 @@ public class Clinica implements Serializable  {//u
             e.printStackTrace();
         }
     }
-/*   
-    public void eliminarDatosCitaSQL(String id_cita) {
-        
-    	try (Connection conn = DatabaseConnection.getConnection()) {
-                        
-    		//Eliminacion en cadena para evitar errores con las claves foraneas
 
-        	String queryEnfermedadConsulta = "DELETE FROM ENFERMEDAD_CONSULTA WHERE id_consulta IN " +
-                                             "(SELECT id_consulta FROM CONSULTA WHERE id_cita_solicitada = ?)";
-            try (PreparedStatement stmtEnfermedadConsulta = conn.prepareStatement(queryEnfermedadConsulta)) {
-                stmtEnfermedadConsulta.setString(1, id_cita);
-                stmtEnfermedadConsulta.executeUpdate();
-            }
-            
-            String queryConsulta = "DELETE FROM CONSULTA WHERE id_cita_solicitada = ?";
-            try (PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta)) {
-                stmtConsulta.setString(1, id_cita);
-                stmtConsulta.executeUpdate();
-            }
-            
-            String queryCita = "DELETE FROM CITA WHERE id_cita = ?";
-            try (PreparedStatement stmtCita = conn.prepareStatement(queryCita)) {
-                stmtCita.setString(1, id_cita);
-                stmtCita.executeUpdate();
-            }
-
-            System.out.println("Datos de la cita con c�digo " + id_cita + " eliminados.");
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-*/
-    
     public void eliminarDatosCitaSQL(String id_cita) {
         Connection conn = null;
         try {
@@ -2966,73 +1779,7 @@ public class Clinica implements Serializable  {//u
     
     
     //CONSULTAS SQL:
-    
-    
-    /*
-     *     public void cargarDatosConsultaSQL() {
-    	
-    	Clinica.getInstance().getMisConsultas().clear();
-        
-        String queryConsulta = "SELECT c.id_consulta, c.fecha_consulta, c.id_historial_clinico, c.id_doctor, c.diagnostico, " +
-                               "c.id_cita_solicitada, d.id_persona AS id_doctor_persona " +
-                               "FROM CONSULTA AS c " +
-                               "INNER JOIN DOCTOR AS d ON c.id_doctor = d.id_doctor " +
-                               "INNER JOIN PERSONA AS p ON p.id_persona = d.id_persona ";
-        
-        String queryEnfermedad = "SELECT ec.id_enfermedad " +
-                                 "FROM ENFERMEDAD_CONSULTA AS ec " +
-                                 "WHERE ec.id_consulta = ?"; // "?", Es un parametro
-        
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta);
-             PreparedStatement stmtEnfermedades = conn.prepareStatement(queryEnfermedad);
-             ResultSet rsConsulta = stmtConsulta.executeQuery()) {
-            
-            while (rsConsulta.next()) {
-                
-                String codigo = rsConsulta.getString("id_consulta");
-                Date fechaConsulta = rsConsulta.getDate("fecha_consulta");
-                String id_historial_clinico = rsConsulta.getString("id_historial_clinico");
-                String id_doctor = rsConsulta.getString("id_doctor_persona");
-                String id_cita_solicitada = rsConsulta.getString("id_cita_solicitada");
-                String diagnostico = rsConsulta.getString("diagnostico") != null ? rsConsulta.getString("diagnostico") : "No tiene";
 
-                Doctor doctor = (Doctor) Clinica.getInstance().buscarPersonaById(id_doctor);
-                Cita cita = Clinica.getInstance().buscarCitaById(id_cita_solicitada);
-                
-                Consulta consulta = new Consulta(codigo, cita);
-                consulta.setDiagnostico(diagnostico);
-                consulta.setFechaConsulta(fechaConsulta);
-
-                stmtEnfermedades.setString(1, codigo); // "?" cambia el parametro, segun el codigo
-                
-                try (ResultSet rsEnfermedades = stmtEnfermedades.executeQuery()) {
-                    while (rsEnfermedades.next()) {
-                        String id_enfermedad = rsEnfermedades.getString("id_enfermedad");
-                        Enfermedad enfermedad = Clinica.getInstance().buscarEnfermedadById(id_enfermedad);
-                        if (enfermedad != null) {
-                            consulta.insertarEnfermedad(enfermedad);
-                        }
-                    }
-                }
-                
-                HistoriaClinica historiaClinica = Clinica.getInstance().buscarHistorialClinicaById(id_historial_clinico);
-                
-                if (historiaClinica != null) {
-                    consulta.setMiHistoriaClinica(historiaClinica);
-                    historiaClinica.getMisConsultas().add(consulta);
-                }
-
-            }
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-     * 
-     * */
-    
     public DefaultTableModel cargarDatosConsultasSQL() {
         DateTimeFormatter fechaFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -3250,65 +1997,6 @@ public class Clinica implements Serializable  {//u
         }
     }
 
-    /*
-    public Consulta obtenerConsultaByIdSQL(String id_consulta) {
-        
-    	Consulta consulta = null;
-
-        String queryConsulta = "SELECT c.id_consulta, c.fecha_consulta, c.diagnostico, c.id_doctor, c.id_cita_solicitada " +
-                               "FROM CONSULTA AS c " +
-                               "WHERE c.id_consulta = ?";
-                               
-        String queryEnfermedades = "SELECT e.id_enfermedad, e.nombre, e.sintomas, e.tratamiento, e.id_gravedad_enfermedad " +
-                                   "FROM ENFERMEDAD AS e " +
-                                   "INNER JOIN ENFERMEDAD_CONSULTA AS ec ON e.id_enfermedad = ec.id_enfermedad " +
-                                   "WHERE ec.id_consulta = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmtConsulta = conn.prepareStatement(queryConsulta);
-             PreparedStatement stmtEnfermedades = conn.prepareStatement(queryEnfermedades)) {
-
-            stmtConsulta.setString(1, id_consulta);
-
-            try (ResultSet rsConsulta = stmtConsulta.executeQuery()) {
-               
-            	if (rsConsulta.next()) {
-            		
-                    String codigo_consulta = rsConsulta.getString("id_consulta");
-                    Date fechaConsulta = rsConsulta.getDate("fecha_consulta");
-                    String diagnostico = rsConsulta.getString("diagnostico");
-                    String idCitaSolicitada = rsConsulta.getString("id_cita_solicitada");
-                    
-                    Cita miCita = Clinica.getInstance().obtenerCitaByIdSQL(codigo_consulta);
-                    
-                    consulta = new Consulta(codigo_consulta, miCita);
-                    consulta.setFechaConsulta(fechaConsulta);
-                    consulta.setDiagnostico(diagnostico);
-
-                    stmtEnfermedades.setString(1, id_consulta);
-                    
-                    try (ResultSet rsEnfermedades = stmtEnfermedades.executeQuery()) {
-                        while (rsEnfermedades.next()) {
-
-                        	String codigo_enfermedad = rsEnfermedades.getString("id_enfermedad");
-                            String nombre = rsEnfermedades.getString("nombre");
-                            String sintomas = rsEnfermedades.getString("sintomas");
-                            String tratamiento = rsEnfermedades.getString("tratamiento");
-                            String gravedad = rsEnfermedades.getString("id_gravedad_enfermedad");
-
-                            Enfermedad enfermedad = new Enfermedad(codigo_enfermedad, nombre, sintomas, tratamiento, obtenerValorGravedadByNombre(gravedad));
-                            consulta.insertarEnfermedad(enfermedad);
-                        }
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return consulta;
-    }
-*/
     public ArrayList<Object> obtenerConsultaByIdSQL(String id_consulta) {
         ArrayList<Object> result = new ArrayList<>();
         Consulta consulta = null;
