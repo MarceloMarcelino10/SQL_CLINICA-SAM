@@ -20,11 +20,11 @@ El sistema actual, desarrollado en Java y basado en almacenamiento de archivos, 
 
 Este proyecto aborda la necesidad de migrar y mejorar el sistema existente, proporcionando una solución más robusta y eficiente mediante la integración de Microsoft SQL Server. Los objetivos específicos incluyen:
 
--Migración de Datos: Transferir todos los datos desde el sistema de archivos a una base de datos SQL para mejorar la organización y accesibilidad.
+- Migración de Datos: Transferir todos los datos desde el sistema de archivos a una base de datos SQL para mejorar la organización y accesibilidad.
 
--Gestión Eficiente de la Información: Optimizar la gestión de la información en clínicas médicas, incluyendo el registro de viviendas asociadas y pacientes, la gestión de consultas médicas, control de enfermedades y vacunación.
+- Gestión Eficiente de la Información: Optimizar la gestión de la información en clínicas médicas, incluyendo el registro de viviendas asociadas y pacientes, la gestión de consultas médicas, control de enfermedades y vacunación.
 
--Generación Automática de Historias Clínicas y Reportes: Automatizar la creación de historias clínicas y reportes médicos, mejorando la precisión y reduciendo el tiempo de procesamiento.
+- Generación Automática de Historias Clínicas y Reportes: Automatizar la creación de historias clínicas y reportes médicos, mejorando la precisión y reduciendo el tiempo de procesamiento.
 
 # Solución Propuesta
 
